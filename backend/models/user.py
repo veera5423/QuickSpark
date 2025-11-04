@@ -1,19 +1,21 @@
 from werkzeug.security import generate_password_hash, check_password_hash
-from extensions.mongo import mongo
+from db.mongo_client import db
 
 class UserModel:
-    collection = mongo.db.users
-
     @staticmethod
     def find_by_email(email):
-        return UserModel.collection.find_one({"email": email})
+        return db.users.find_one({"email": email})
 
     @staticmethod
     def create_user(username, email, password):
         hashed_pw = generate_password_hash(password)
-        user_data = {"username": username, "email": email, "password": hashed_pw}
-        UserModel.collection.insert_one(user_data)
-        return user_data
+        new_user = {
+            "username": username,
+            "email": email,
+            "password": hashed_pw
+        }
+        db.users.insert_one(new_user)
+        return new_user
 
     @staticmethod
     def verify_password(user, password):
