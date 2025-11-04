@@ -20,3 +20,4 @@ class UserModel:
     @staticmethod
     def verify_password(user, password):
         return check_password_hash(user["password"], password)
+

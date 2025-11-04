@@ -17,5 +17,5 @@ class AuthService:
         if not user or not UserModel.verify_password(user, password):
             return {"message": "Invalid credentials"}, 401
 
-        token = create_access_token(identity=str(user["_id"]), expires_delta=timedelta(hours=2))
+        token = create_access_token(identity=str(user["_id"]), expires_delta=timedelta(hours=1))
         return {"access_token": token, "username": user["username"]}, 200
