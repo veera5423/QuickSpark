@@ -9,10 +9,14 @@ import DashboardLayout from './layouts/DashboardLayout';
 // Auth Pages
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
+import VerifyEmail from './pages/VerifyEmail';
 
 // Dashboard Pages
 import Home from './pages/Dashboard/Home';
 import Resources from './pages/Dashboard/Resources';
+import AISummarizer from './pages/Dashboard/AISummarizer';
 import MockTests from './pages/Dashboard/MockTests';
 import Skills from './pages/Dashboard/Skills';
 import Careers from './pages/Dashboard/Careers';
@@ -37,6 +41,21 @@ const AppRouter = () => {
                 <Register />
               </AuthLayout>
             } />
+            <Route path="/forgot-password" element={
+              <AuthLayout>
+                <ForgotPassword />
+              </AuthLayout>
+            } />
+            <Route path="/reset-password/:token" element={
+              <AuthLayout>
+                <ResetPassword />
+              </AuthLayout>
+            } />
+            <Route path="/verify-email/:token" element={
+              <AuthLayout>
+                <VerifyEmail />
+              </AuthLayout>
+            } />
 
             {/* Protected Dashboard Routes */}
             <Route path="/dashboard" element={
@@ -50,6 +69,13 @@ const AppRouter = () => {
               <ProtectedRoute>
                 <DashboardLayout>
                   <Resources />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/ai-summarizer" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <AISummarizer />
                 </DashboardLayout>
               </ProtectedRoute>
             } />

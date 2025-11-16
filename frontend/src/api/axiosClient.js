@@ -14,6 +14,12 @@ axiosClient.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // Handle FormData uploads by removing Content-Type header to allow automatic multipart setting
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
+    }
+
     return config;
   },
   (error) => Promise.reject(error)
@@ -25,7 +31,8 @@ axiosClient.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
-      window.location.href = '/login';
+      // Instead of redirecting, let the component handle the error
+      // The AuthContext will handle invalidating the session
     }
     return Promise.reject(error);
   }
