@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
+import QuizModal from '../../components/QuizModal';
 import { quizAPI } from '../../api/quizAPI';
 
 const MockTests = () => {
@@ -31,6 +33,8 @@ const MockTests = () => {
       console.error('Failed to load resources:', error);
     }
   };
+
+  const navigate = useNavigate();
 
   const loadAttempts = async () => {
     try {
@@ -77,11 +81,7 @@ const MockTests = () => {
     }
   };
 
-  const handleAnswerChange = (index, answer) => {
-    const newAnswers = [...answers];
-    newAnswers[index] = answer;
-    setAnswers(newAnswers);
-  };
+
 
   const resetQuiz = () => {
     setQuiz(null);
@@ -131,12 +131,12 @@ const MockTests = () => {
               <select
                 value={selectedResource}
                 onChange={(e) => setSelectedResource(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-800 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Choose a resource...</option>
                 {resources.map(resource => (
-                  <option key={resource._id} value={resource._id}>
-                    {resource.filename}
+                  <option  className="text-sm text-black"   key={resource._id} value={resource._id}>
+                    {resource.original_filename}
                   </option>
                 ))}
               </select>
@@ -188,42 +188,15 @@ const MockTests = () => {
 
       {/* Quiz Taking */}
       {quiz && !showResults && (
-        <Card>
-          <h2 className="text-xl font-semibold mb-4">Quiz: {quiz.difficulty} Level</h2>
-          <div className="space-y-4">
-            {quiz.questions.map((question, index) => (
-              <div key={index} className="border-b pb-4">
-                <h3 className="font-medium mb-2">{index + 1}. {question.question}</h3>
-                <div className="space-y-2">
-                  {question.options.map((option, optIndex) => {
-                    const letter = String.fromCharCode(65 + optIndex); // A, B, C, D
-                    return (
-                      <label key={optIndex} className="flex items-center">
-                        <input
-                          type="radio"
-                          name={`question-${index}`}
-                          value={letter}
-                          checked={answers[index] === letter}
-                          onChange={() => handleAnswerChange(index, letter)}
-                          className="mr-2"
-                        />
-                        <span>{letter}. {option}</span>
-                      </label>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="mt-6 flex gap-4">
-            <Button onClick={submitQuiz} disabled={loading || answers.includes('')}>
-              {loading ? 'Submitting...' : 'Submit Quiz'}
-            </Button>
-            <Button variant="secondary" onClick={resetQuiz}>
-              Cancel
-            </Button>
-          </div>
-        </Card>
+        <QuizModal
+          quizData={quiz}
+          answers={answers}
+          setAnswers={setAnswers}
+          onSubmit={submitQuiz}
+          onClose={resetQuiz}
+          loading={loading}
+          mode="all"
+        />
       )}
 
       {/* Results */}
@@ -265,7 +238,11 @@ const MockTests = () => {
                     {attempt.correct_count}/{attempt.total_questions} correct • {new Date(attempt.submitted_at).toLocaleDateString()}
                   </p>
                 </div>
-                <Button variant="secondary" size="sm">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => navigate(`/dashboard/quiz-details/${attempt._id}`)}
+                >
                   View Details
                 </Button>
               </div>
@@ -273,6 +250,7 @@ const MockTests = () => {
           </div>
         )}
       </Card>
+
     </div>
   );
 };

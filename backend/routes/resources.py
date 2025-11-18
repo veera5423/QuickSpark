@@ -25,6 +25,8 @@ def get_resources():
         for resource in resources:
             resource["_id"] = str(resource["_id"])
             resource["user_id"] = str(resource["user_id"])
+            if "resource_uuid" in resource:
+                resource["resource_uuid"] = resource["resource_uuid"]
     except Exception as e:
         return jsonify({"message": "Database error"}), 500
 

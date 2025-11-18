@@ -13,6 +13,7 @@ const Sidebar = () => {
           <li><Link to="/dashboard/mock-tests" className="block p-2 hover:bg-gray-700">Mock Tests</Link></li>
           <li><Link to="/dashboard/skills" className="block p-2 hover:bg-gray-700">Skills</Link></li>
           <li><Link to="/dashboard/careers" className="block p-2 hover:bg-gray-700">Careers</Link></li>
+          <li><Link to="/dashboard/career-explorer" className="block p-2 hover:bg-gray-700">Career Explorer</Link></li>
         </ul>
       </div>
     </div>

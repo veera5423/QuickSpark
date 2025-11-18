@@ -1,27 +1,56 @@
 import React, { useState, useEffect } from 'react';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
-import axiosClient from '../../api/axiosClient';
+import { quizAPI } from '../../api/quizAPI';
+import { careerAPI } from '../../api/careerAPI';
 
 const Skills = () => {
   const [attempts, setAttempts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [completedSkills, setCompletedSkills] = useState([]);
+  const [showAllAttempts, setShowAllAttempts] = useState(false);
 
   useEffect(() => {
     loadAttempts();
+    loadCompletedSkills();
   }, []);
 
   const loadAttempts = async () => {
     try {
       setLoading(true);
-      const response = await axiosClient.get('/api/quiz/get-attempts');
-      setAttempts(response.data.attempts || []);
+      const data = await quizAPI.getAttempts();
+      setAttempts(data.attempts || []);
     } catch (error) {
       console.error('Failed to load attempts:', error);
       setError('Failed to load skill progress');
     } finally {
       setLoading(false);
+    }
+  };
+console.log(completedSkills);
+
+  const loadCompletedSkills = async () => {
+    try {
+      const data = await quizAPI.getCompletedSkills();
+      const skillIds = data.completed_skill_ids || [];
+
+      // Fetch skill details for each completed skill
+      const skillDetails = await Promise.all(
+        skillIds.map(async (skillId) => {
+          try {
+            const skillData = await careerAPI.getSkillDetails(skillId);
+            return skillData;
+          } catch (error) {
+            console.error(`Failed to fetch skill ${skillId}:`, error);
+            return { _id: skillId, skill_name: 'Unknown Skill', category: 'Unknown' };
+          }
+        })
+      );
+// console.log(skillDetails)
+      setCompletedSkills(skillDetails);
+    } catch (error) {
+      console.error('Failed to load completed skills:', error);
     }
   };
 
@@ -89,7 +118,7 @@ const Skills = () => {
       ) : (
         <>
           {/* Overall Progress */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <Card className="text-center">
               <div className="text-3xl font-bold text-blue-600 mb-2">
                 {progress.averageScore}%
@@ -109,6 +138,13 @@ const Skills = () => {
                 {Object.keys(progress.difficultyStats).length}
               </div>
               <div className="text-gray-600">Difficulty Levels</div>
+            </Card>
+
+            <Card className="text-center">
+              <div className="text-3xl font-bold text-orange-600 mb-2">
+                {completedSkills.length}
+              </div>
+              <div className="text-gray-600">Completed Skills</div>
             </Card>
           </div>
 
@@ -140,12 +176,32 @@ const Skills = () => {
             </div>
           </Card>
 
+          {/* Completed Skills */}
+          {completedSkills.length > 0 && (
+            <Card>
+              <h2 className="text-2xl font-bold mb-4">Completed Skills</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {completedSkills.map((skill) => (
+                  <div key={skill._id} className="p-4 border rounded-lg bg-green-50 border-green-200">
+                    <div className="flex items-center">
+                      <div className="text-green-600 mr-2">✓</div>
+                      <div>
+                        <h4 className="font-medium text-green-800">{skill.skill_name}</h4>
+                        <p className="text-sm text-green-600">{skill.category}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
+
           {/* Recent Attempts */}
           <Card>
             <h2 className="text-2xl font-bold mb-4">Recent Quiz Attempts</h2>
             <div className="space-y-3">
-              {attempts.slice(0, 10).map((attempt, index) => (
-                <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
+              {(showAllAttempts ? attempts : attempts.slice(0, 3)).map((attempt, index) => (
+                <div key={attempt._id || index} className="flex items-center justify-between p-4 border rounded-lg">
                   <div>
                     <div className="font-medium">
                       Quiz Attempt #{attempts.length - index}
@@ -170,6 +226,17 @@ const Skills = () => {
                 </div>
               ))}
             </div>
+            {attempts.length > 3 && (
+              <div className="mt-4 text-center">
+                <Button
+                  onClick={() => setShowAllAttempts(!showAllAttempts)}
+                  variant={showAllAttempts ? "outline" : "default"}
+                  size="sm"
+                >
+                  {showAllAttempts ? 'Show Less' : 'View More'}
+                </Button>
+              </div>
+            )}
           </Card>
 
           {/* Improvement Tips */}

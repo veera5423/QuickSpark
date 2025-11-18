@@ -71,7 +71,7 @@ const Register = () => {
         email: formData.email,
         password: formData.password
       });
-      setMessage(response.data.message || 'Registration successful! Please check your email to verify your account.');
+      setMessage(response.data.message || 'Registration successful! Please check your email or spam to verify your account.');
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed');
     } finally {

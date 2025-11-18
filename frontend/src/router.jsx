@@ -16,6 +16,7 @@ import VerifyEmail from './pages/VerifyEmail';
 // Dashboard Pages
 import Home from './pages/Dashboard/Home';
 import Resources from './pages/Dashboard/Resources';
+import ResourceChat from './pages/Dashboard/ResourceChat';
 import AISummarizer from './pages/Dashboard/AISummarizer';
 import MockTests from './pages/Dashboard/MockTests';
 import Skills from './pages/Dashboard/Skills';
@@ -23,6 +24,11 @@ import Careers from './pages/Dashboard/Careers';
 
 // Other Pages
 import NotFound from './pages/NotFound';
+import CareerExplorer from './pages/Dashboard/CareerExplorer';
+import QuizDetails from './pages/Dashboard/QuizDetails';
+import About from './pages/About';
+import Contact from './pages/Contact';
+import Hero from './components/common/Hero';
 
 const AppRouter = () => {
   return (
@@ -72,6 +78,11 @@ const AppRouter = () => {
                 </DashboardLayout>
               </ProtectedRoute>
             } />
+            <Route path="/dashboard/resources/chat/:resourceId" element={
+              <ProtectedRoute>
+                <ResourceChat />
+              </ProtectedRoute>
+            } />
             <Route path="/dashboard/ai-summarizer" element={
               <ProtectedRoute>
                 <DashboardLayout>
@@ -100,9 +111,27 @@ const AppRouter = () => {
                 </DashboardLayout>
               </ProtectedRoute>
             } />
+            <Route path="/dashboard/career-explorer" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <CareerExplorer />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/quiz-details/:attemptId" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <QuizDetails />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+
+            {/* Public Routes */}
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
 
             {/* Default redirect */}
-            <Route path="/" element={<Login />} />
+            <Route path="/" element={<Hero/>} />
 
             {/* 404 */}
             <Route path="*" element={<NotFound />} />

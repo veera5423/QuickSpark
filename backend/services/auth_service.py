@@ -92,7 +92,7 @@ class AuthService:
         send_email_sendgrid(email, "Verify Your Email", html)        
         
 
-        return {"message": "Registered successfully. Check your email to verify your account."}, 201
+        return {"message": "Registered successfully. Check your email or spam to verify your account."}, 200
         
 
     @staticmethod

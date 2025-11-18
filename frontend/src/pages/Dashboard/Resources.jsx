@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
+import Chatbox from '../../components/ui/Chatbox';
 import axiosClient from '../../api/axiosClient';
 
 const Resources = () => {
@@ -9,8 +10,6 @@ const Resources = () => {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
   const [uploadError, setUploadError] = useState(null);
-  const [selectedResource, setSelectedResource] = useState(null);
-  const [showModal, setShowModal] = useState(false);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -150,8 +149,7 @@ const Resources = () => {
               key={resource._id}
               className="hover:shadow-lg transition-shadow cursor-pointer"
               onClick={() => {
-                setSelectedResource(resource);
-                setShowModal(true);
+                window.location.href = `/dashboard/resources/chat/${resource._id}`;
               }}
             >
               <div className="space-y-3">
@@ -203,68 +201,9 @@ const Resources = () => {
         </div>
       )}
 
-      {/* Resource Detail Modal */}
-      {showModal && selectedResource && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-bold">{selectedResource.filename}</h3>
-                <Button
-                  onClick={() => {
-                    setShowModal(false);
-                    setSelectedResource(null);
-                  }}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  ×
-                </Button>
-              </div>
-              <div className="space-y-4">
-                <div className="text-sm text-gray-600">
-                  <p><strong>Date:</strong> {new Date(selectedResource.created_at).toLocaleDateString()}</p>
-                  <p><strong>Pages:</strong> {selectedResource.metadata?.page_count || 0}</p>
-                  <p><strong>Size:</strong> {(selectedResource.metadata?.file_size_kb || 0).toFixed(1)} KB</p>
-                  {selectedResource.status === 'summarized' && (
-                    <p><strong>Status:</strong> Summarized</p>
-                  )}
-                </div>
-                {selectedResource.summary && (
-                  <div>
-                    <h4 className="font-semibold mb-2">Full AI Summary</h4>
-                    <div className="bg-gray-50 p-4 rounded-lg prose prose-sm max-w-none">
-                      <p className="whitespace-pre-wrap">{selectedResource.summary}</p>
-                    </div>
-                  </div>
-                )}
-                {selectedResource.tags && selectedResource.tags.length > 0 && (
-                  <div>
-                    <h4 className="font-semibold mb-2">Tags</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedResource.tags.map((tag, index) => (
-                        <span key={index} className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {selectedResource.linked_modules?.mock_test_id && (
-                  <Button
-                    onClick={() => {
-                      setShowModal(false);
-                      window.location.href = `/dashboard/mock-tests?resource=${selectedResource._id}`;
-                    }}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                  >
-                    Take Quiz
-                  </Button>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+
+
+
     </div>
   );
 };
