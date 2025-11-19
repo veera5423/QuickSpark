@@ -429,7 +429,7 @@ def chat_with_resource():
                     0.5,                # match_threshold (how similar)
                     5,                  # match_count (how many chunks)
                     current_user_id,    # p_user_id
-                    resource_uuid       # p_resource_id
+                    (resource_uuid   )    # p_resource_id
                 )
             )
             # Fetch all results from the function call

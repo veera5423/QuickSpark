@@ -1,23 +1,114 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { Home, FileText, Bot, Layers, TrendingUp, Briefcase, Zap, Menu, X } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { useEffect } from 'react';
+
+// Define the navigation items and their icons
+const navItems = [
+    { name: 'Dashboard', path: '/dashboard', icon: Home },
+    { name: 'My Resources', path: '/dashboard/resources', icon: FileText },
+    { name: 'AI Summarizer', path: '/dashboard/ai-summarizer', icon: Bot },
+    { name: 'Mock Tests', path: '/dashboard/mock-tests', icon: Zap },
+    { name: 'Skill Progress', path: '/dashboard/skills', icon: Layers },
+    { name: 'Career Insights', path: '/dashboard/careers', icon: TrendingUp },
+    { name: 'Career Explorer', path: '/dashboard/career-explorer', icon: Briefcase },
+];
 
 const Sidebar = () => {
-  return (
-    <div className="fixed top-0 left-0 w-80 h-screen bg-gray-800 text-white overflow-y-auto">
-      <div className="p-4">
-        <h2 className="text-xl font-bold">Menu</h2>
-        <ul className="mt-4 space-y-2">
-          <li><Link to="/dashboard" className="block p-2 hover:bg-gray-700">Home</Link></li>
-          <li><Link to="/dashboard/ai-summarizer" className="block p-2 hover:bg-gray-700">🤖 AI Summarizer</Link></li>
-          <li><Link to="/dashboard/resources" className="block p-2 hover:bg-gray-700">Resources</Link></li>
-          <li><Link to="/dashboard/mock-tests" className="block p-2 hover:bg-gray-700">Mock Tests</Link></li>
-          <li><Link to="/dashboard/skills" className="block p-2 hover:bg-gray-700">Skills</Link></li>
-          <li><Link to="/dashboard/careers" className="block p-2 hover:bg-gray-700">Careers</Link></li>
-          <li><Link to="/dashboard/career-explorer" className="block p-2 hover:bg-gray-700">Career Explorer</Link></li>
-        </ul>
-      </div>
-    </div>
-  );
+    const { pathname } = useLocation();
+    const [isExpanded, setIsExpanded] = useState(true);
+    const {user,getMe}=useAuth()
+    useEffect(() => {
+      getMe();
+    }, [user]);
+
+    const toggleSidebar = () => setIsExpanded(!isExpanded);
+    const UserName=user||"UserName"
+
+    return (
+        <>
+            {/* Mobile Header/Toggle Button */}
+            <div className="fixed top-0 left-0 z-40 w-full bg-gray-900 md:hidden p-3 shadow-lg flex justify-between items-center">
+                <Zap className="w-6 h-6 text-yellow-500" />
+                <span className="text-xl font-extrabold text-indigo-400">QuickSpark AI</span>
+                <button onClick={toggleSidebar} className="text-white p-1 rounded-md hover:bg-gray-700">
+                    {isExpanded ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                </button>
+            </div>
+
+            {/* Sidebar Desktop/Tablet */}
+            <div 
+                className={`fixed top-0 z-30 h-screen bg-gray-900 text-white transition-all duration-300 shadow-2xl overflow-y-auto ${
+                    isExpanded ? 'w-64' : 'w-20'
+                } ${isExpanded ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:top-0`}
+                style={{ paddingTop: '5rem' }} // Space for potential fixed top header
+            >
+                {/* Logo/Brand Area */}
+                <div className={`p-5 mb-6 border-b border-gray-700 ${isExpanded ? 'block' : 'hidden'} flex`}>
+                    <Zap className="w-6 h-6 text-yellow-500" />
+                    <span className="text-2xl font-extrabold text-indigo-400 tracking-wider">QuickSpark AI</span>
+                </div>
+                
+                {/* Desktop Toggle Button */}
+                <button 
+                    onClick={toggleSidebar}
+                    className="absolute top-4 right-4 hidden md:block text-gray-400 p-2 rounded-full hover:bg-gray-700 transition duration-150"
+                    title={isExpanded ? "Collapse Menu" : "Expand Menu"}
+                >
+                    {isExpanded ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                </button>
+                
+                <ul className="mt-2 space-y-1 px-3">
+                    {navItems.map((item) => {
+                        const isActive = pathname === item.path;
+                        const IconComponent = item.icon;
+
+                        return (
+                            <li key={item.name}>
+                                <Link
+                                    to={item.path}
+                                    className={`flex items-center p-3 rounded-xl transition-colors duration-150 group ${
+                                        isActive 
+                                            ? 'bg-indigo-600 text-white shadow-lg' 
+                                            : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                                    }`}
+                                >
+                                    <IconComponent className={`w-5 h-5 flex-shrink-0 ${isExpanded ? 'mr-3' : 'mx-auto'}`} />
+                                    <span 
+                                        className={`font-semibold overflow-hidden whitespace-nowrap transition-opacity duration-300 ${
+                                            isExpanded ? 'opacity-100' : 'opacity-0 absolute left-20'
+                                        }`}
+                                    >
+                                        {item.name}
+                                    </span>
+                                </Link>
+                            </li>
+                        );
+                    })}
+                </ul>
+                
+                {/* Placeholder for Profile/Footer info */}
+                <div className={`absolute bottom-0 p-4 border-t border-gray-700 w-full ${isExpanded ? 'block' : 'hidden'}`}>
+                    <div className="flex items-center text-sm text-gray-400">
+                        <div className="w-8 h-8 bg-indigo-500 rounded-full mr-3 flex items-center justify-center font-bold">U</div>
+                        <div>
+                            <p className="text-white font-semibold">{UserName}</p>
+                            <p>Premium</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            {/* Mobile Overlay (Darkens background when sidebar is open) */}
+            {isExpanded && (
+                <div 
+                    onClick={toggleSidebar} 
+                    className="fixed inset-0 z-20 bg-black opacity-50 md:hidden"
+                ></div>
+            )}
+        </>
+    );
 };
 
 export default Sidebar;

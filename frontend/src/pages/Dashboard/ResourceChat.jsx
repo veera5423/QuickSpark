@@ -2,118 +2,166 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
-import Chatbox from '../../components/ui/Chatbox';
+import Chatbox from '../../components/ui/Chatbox'; 
 import axiosClient from '../../api/axiosClient';
 
 const ResourceChat = () => {
-  const { resourceId } = useParams();
-  const navigate = useNavigate();
-  const [resource, setResource] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+    const { resourceId } = useParams(); // Gets the ID from the URL (can be MongoID or UUID)
+    const navigate = useNavigate();
+    const [resource, setResource] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const id=resourceId;
+    console.log(id);
+    
+    
 
-  useEffect(() => {
-    loadResource();
-  }, [resourceId]);
+    useEffect(() => {
+        // In ResourceChat.jsx
 
-  const loadResource = async () => {
+const fetchResource = async () => {
     try {
-      setLoading(true);
-      const response = await axiosClient.get('/api/resources/');
-      const foundResource = response.data.resources.find(r => r._id === resourceId || r.resource_uuid === resourceId);
-      if (foundResource) {
-        setResource(foundResource);
-      } else {
-        setError('Resource not found');
-      }
-    } catch (error) {
-      console.error('Failed to load resource:', error);
-      setError('Failed to load resource');
+        setLoading(true);
+        // Ensure that the URL parameter 'id' is defined
+        if (!id) {
+            setError("Missing resource identifier in URL.");
+            return;
+        }
+
+        // Fetch all resources
+        const response = await axiosClient.get('/api/resources/');
+        const resources = response.data.resources || [];
+        console.log(resource);
+        console.log("id=",id);
+        
+        
+        // 🚀 CRITICAL FIX: The ID in the URL (id) could be EITHER the Mongo _id OR the UUID.
+        // We look for a match in EITHER field.
+        const found = resources.find(r => 
+            // Check if the Mongo _id matches the URL ID
+            String(r._id )=== id || 
+            // Check if the Postgres UUID matches the URL ID
+           String( r.resource_uuid) === id
+        );
+        
+        if (found) {
+            setResource(found);
+        } else {
+            // This case handles old resources that might be missing the UUID field entirely.
+            setError("Resource not found or database fields are inconsistent.");
+        }
+    } catch (err) {
+        console.error("Error loading resource", err);
+        setError("Failed to load study session.");
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  };
+};
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="text-lg">Loading resource...</div>
-      </div>
-    );
-  }
 
-  if (error || !resource) {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen">
-        <div className="text-center text-red-600 mb-4">
-          <p>{error || 'Resource not found'}</p>
-        </div>
-        <Button onClick={() => navigate('/dashboard/resources')} className="bg-blue-600 hover:bg-blue-700 text-white">
-          Back to Resources
-        </Button>
-      </div>
-    );
-  }
+        fetchResource();
+    }, [id, navigate]); // Added navigate to dependency array
 
-  return (
-    <div className="h-screen flex">
-      {/* Left side: Resource details */}
-      <div className="w-1/2 p-6 border-r overflow-y-auto bg-gray-50">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold">{resource.filename}</h1>
-          <Button onClick={() => navigate('/dashboard/resources')} className="text-gray-500 hover:text-gray-700">
-            ← Back
-          </Button>
-        </div>
-        <div className="space-y-4">
-          <div className="text-sm text-gray-600">
-            <p><strong>Date:</strong> {new Date(resource.created_at).toLocaleDateString()}</p>
-            <p><strong>Pages:</strong> {resource.metadata?.page_count || 0}</p>
-            <p><strong>Size:</strong> {(resource.metadata?.file_size_kb || 0).toFixed(1)} KB</p>
-            {resource.status === 'summarized' && (
-              <p><strong>Status:</strong> Summarized</p>
-            )}
-          </div>
-          {resource.summary && (
-            <div>
-              <h4 className="font-semibold mb-2">Full AI Summary</h4>
-              <div className="bg-white p-4 rounded-lg prose prose-sm max-w-none shadow-sm">
-                <p className="whitespace-pre-wrap">{resource.summary}</p>
-              </div>
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center h-[calc(100vh-100px)]">
+                <div className="animate-pulse text-indigo-600 font-medium">Loading study session...</div>
             </div>
-          )}
-          {resource.tags && resource.tags.length > 0 && (
-            <div>
-              <h4 className="font-semibold mb-2">Tags</h4>
-              <div className="flex flex-wrap gap-2">
-                {resource.tags.map((tag, index) => (
-                  <span key={index} className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-          {resource.linked_modules?.mock_test_id && (
-            <Button
-              onClick={() => navigate(`/dashboard/mock-tests?resource=${resource._id}`)}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              Take Quiz
-            </Button>
-          )}
-        </div>
-      </div>
+        );
+    }
 
-      {/* Right side: Chatbox */}
-      <div className="w-1/2 p-6 flex flex-col bg-white">
-        <Chatbox
-          resourceId={resource.resource_uuid || resource._id}
-          onClose={() => navigate('/dashboard/resources')}
-        />
-      </div>
-    </div>
-  );
+    if (error || !resource) {
+        return (
+            <div className="flex flex-col items-center justify-center h-[calc(100vh-100px)] text-center">
+                <div className="text-6xl mb-4">⚠️</div>
+                <h3 className="text-xl font-bold text-gray-800 mb-2">Resource Not Found</h3>
+                <p className="text-gray-500 mb-6">We couldn't find the document you are looking for.</p>
+                <Button onClick={() => navigate('/dashboard/resources')} className="bg-indigo-600 text-white">
+                    Back to Library
+                </Button>
+            </div>
+        );
+    }
+
+    // Determine the ID to send to the backend chat endpoint
+    // It MUST be the UUID for Postgres, falling back to Mongo ID if UUID field is missing (last resort)
+    const chatResourceId = resource.resource_uuid || resource._id;
+
+    return (
+        <div className="h-[calc(100vh-100px)] flex flex-col space-y-4 p-4">
+            
+            {/* --- HEADER --- */}
+            <div className="flex items-center justify-between bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                <div className="flex items-center gap-4">
+                    <Button 
+                        onClick={() => navigate('/dashboard/resources')} 
+                        className="bg-gray-400 text-gray-600 hover:bg-gray-500 px-3 py-1 text-sm rounded-lg"
+                    >
+                        ← Back
+                    </Button>
+                    <div>
+                        <h1 className="text-xl font-bold text-gray-800 truncate max-w-md">
+                            {resource.original_filename || resource.filename}
+                        </h1>
+                        <p className="text-xs text-gray-500">
+                            {resource.metadata?.page_count || '?'} Pages • {(resource.metadata?.file_size_kb || 0).toFixed(0)} KB
+                        </p>
+                    </div>
+                </div>
+                
+                {/* Actions */}
+                <div className="flex gap-2">
+                     {resource.linked_modules?.mock_test_id && (
+                        <Button 
+                            onClick={() => navigate(`/dashboard/mock-tests?resource=${resource._id}`)}
+                            className="bg-green-50 text-green-700 hover:bg-green-100 border border-green-200 text-sm"
+                        >
+                            📝 Take Quiz
+                        </Button>
+                     )}
+                </div>
+            </div>
+
+            {/* --- SPLIT SCREEN CONTENT --- */}
+            <div className="flex-1 flex gap-6 overflow-hidden">
+                
+                {/* LEFT PANEL: AI SUMMARIZER */}
+                <Card className="w-1/2 flex flex-col overflow-hidden h-full p-0 border-0 shadow-md">
+                    <div className="p-4 border-b bg-indigo-50 flex justify-between items-center">
+                        <h3 className="font-bold text-indigo-900 flex items-center gap-2">
+                            <span>📄</span> AI Summary
+                        </h3>
+                        <span className="text-xs bg-white text-indigo-600 px-2 py-1 rounded-full border border-indigo-100">
+                            {resource.status === 'summarized' ? 'Ready' : 'Processing'}
+                        </span>
+                    </div>
+                    
+                    <div className="flex-1 overflow-y-auto p-6 bg-white">
+                        {resource.summary ? (
+                            <div className="prose prose-sm max-w-none text-gray-700 leading-relaxed whitespace-pre-wrap">
+                                {resource.summary}
+                            </div>
+                        ) : (
+                            <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                                <div className="animate-spin h-8 w-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full mb-4"></div>
+                                <p>Generating Summary...</p>
+                            </div>
+                        )}
+                    </div>
+                </Card>
+
+                {/* RIGHT PANEL: CHATBOX CONTAINER */}
+                <div className="w-1/2 h-full">
+                    {/* This is where your Chatbox component will live */}
+                    <Chatbox 
+                        resourceId={chatResourceId} // ◀️ CORRECT ID PASSED HERE
+                        onClose={() => navigate('/dashboard/resources')}
+                    />
+                </div>
+
+            </div>
+        </div>
+    );
 };
 
 export default ResourceChat;

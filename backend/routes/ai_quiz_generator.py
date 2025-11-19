@@ -264,6 +264,7 @@ def submit_quiz(quiz_id):
         "correct_count": correct_count,
         "incorrect_count": total_questions - correct_count,
         "passed": score >= 80,
+        "text_content": quiz.get("text_content", ""),
         "submitted_at": datetime.utcnow(),
     }
     

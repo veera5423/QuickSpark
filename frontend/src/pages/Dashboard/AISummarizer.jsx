@@ -1,13 +1,13 @@
 import React, { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom'; // ◀️ Import Navigate
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import axiosClient from '../../api/axiosClient';
 
 const AISummarizer = () => {
-  const [summary, setSummary] = useState('');
+  const navigate = useNavigate(); // ◀️ Initialize hook
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
-  const [fileName, setFileName] = useState('');
   const fileInputRef = useRef(null);
 
   const handleFileUpload = async (event) => {
@@ -29,39 +29,23 @@ const AISummarizer = () => {
     try {
       setUploading(true);
       setError(null);
-      setFileName(file.name);
-
-      const token = localStorage.getItem('token');
-      console.log('Token before upload:', token ? 'Present' : 'Missing');  // Debug log
 
       const formData = new FormData();
       formData.append('file', file);
 
-      console.log('Sending request to /api/summarizer/upload-and-summarize with FormData');  // Debug log
-
       const response = await axiosClient.post('/api/summarizer/upload-and-summarize', formData, {
-        withCredentials: true  // Ensure credentials are sent if needed
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      console.log('Upload response:', response.data);  // Debug log
-    
-  
-
-      setSummary(response.data.summary);
-
-      // Clear file input
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
+      // 🚀 SUCCESS! Redirect to the full Chat/Summary view
+      // The backend returns the new resource ID. We use it to navigate.
+      const newId = response.data.resource_id; // This is the UUID from your backend
+      navigate(`/dashboard/resources/chat/${newId}`);
 
     } catch (error) {
       console.error('Failed to upload file:', error);
-      console.error('Error response:', error.response);  // Debug log
-      console.error('Error status:', error.response?.status);  // Debug log
-      console.error('Error data:', error.response?.data);  // Debug log
       setError(error.response?.data?.message || 'Failed to upload and summarize PDF');
-    } finally {
-      setUploading(false);
+      setUploading(false); // Only stop loading if there's an error
     }
   };
 
@@ -69,24 +53,19 @@ const AISummarizer = () => {
     fileInputRef.current?.click();
   };
 
-  const clearSummary = () => {
-    setSummary('');
-    setFileName('');
-    setError(null);
-  };
-
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       <div className="text-center">
-        <h1 className="text-3xl font-bold mb-2">AI PDF Summarizer</h1>
-        <p className="text-gray-600">
-          Upload a PDF document and get an AI-powered summary instantly
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">AI Study Assistant</h1>
+        <p className="text-gray-600 max-w-xl mx-auto">
+          Upload a document to generate an AI summary, create quizzes, and chat with your study material.
         </p>
       </div>
 
-      <Card className="max-w-2xl mx-auto">
-        <div className="space-y-6">
-          {/* Upload Section */}
+      <Card className="max-w-2xl mx-auto border-2 border-dashed border-gray-300 shadow-none hover:border-indigo-300 transition-colors">
+        <div className="space-y-8 py-10">
+          
+          {/* Upload UI */}
           <div className="text-center">
             <input
               ref={fileInputRef}
@@ -95,75 +74,64 @@ const AISummarizer = () => {
               onChange={handleFileUpload}
               className="hidden"
             />
+            
             <div className="space-y-4">
-              <div className="text-6xl">📄</div>
+              <div className="flex justify-center">
+                <div className="h-20 w-20 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center text-4xl">
+                  {uploading ? (
+                    <span className="animate-spin">⚙️</span>
+                  ) : (
+                    <span>📄</span>
+                  )}
+                </div>
+              </div>
+              
               <div>
                 <Button
                   onClick={handleUploadClick}
                   disabled={uploading}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-full text-lg font-medium shadow-md transition-transform hover:scale-105"
                 >
-                  {uploading ? 'Processing...' : 'Choose PDF File'}
+                  {uploading ? 'Processing AI...' : 'Upload & Start Studying'}
                 </Button>
               </div>
-              <p className="text-sm text-gray-500">
-                Supports PDF files up to 10MB
+              
+              <p className="text-sm text-gray-400">
+                {uploading 
+                  ? "Reading document, generating summary, and creating embeddings..." 
+                  : "Supports PDF files up to 10MB"
+                }
               </p>
             </div>
           </div>
 
           {/* Error Display */}
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-              {error}
-            </div>
-          )}
-
-          {/* Summary Display */}
-          {summary && (
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <h3 className="text-xl font-semibold">Summary</h3>
-                <Button
-                  onClick={clearSummary}
-                  className="text-sm px-3 py-1 bg-gray-100 text-gray-700 hover:bg-gray-200"
-                >
-                  Clear
-                </Button>
-              </div>
-
-              {fileName && (
-                <p className="text-sm text-gray-600">
-                  <strong>File:</strong> {fileName}
-                </p>
-              )}
-
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <div className="prose prose-sm max-w-none">
-                  <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">
-                    {summary}
-                  </p>
-                </div>
-              </div>
-
-              <div className="text-center pt-4">
-                <p className="text-sm text-gray-500">
-                  Summary generated using AI. Results may vary.
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Empty State */}
-          {!summary && !uploading && !error && (
-            <div className="text-center py-8">
-              <p className="text-gray-500">
-                No summary yet. Upload a PDF to get started!
-              </p>
+            <div className="mx-8 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center justify-center gap-2">
+              <span>⚠️</span> {error}
             </div>
           )}
         </div>
       </Card>
+
+      {/* Features Grid (Visual Flair) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mt-12">
+        <div className="text-center p-4">
+          <div className="text-2xl mb-2">📝</div>
+          <h3 className="font-bold text-gray-800">Smart Summaries</h3>
+          <p className="text-sm text-gray-500">Get key concepts instantly.</p>
+        </div>
+        <div className="text-center p-4">
+          <div className="text-2xl mb-2">💬</div>
+          <h3 className="font-bold text-gray-800">AI Chat</h3>
+          <p className="text-sm text-gray-500">Ask specific questions.</p>
+        </div>
+        <div className="text-center p-4">
+          <div className="text-2xl mb-2">🧠</div>
+          <h3 className="font-bold text-gray-800">Auto-Quizzes</h3>
+          <p className="text-sm text-gray-500">Test your knowledge.</p>
+        </div>
+      </div>
     </div>
   );
 };

@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
+import { authAPI } from '../api/authAPI';
 
 export const AuthContext = createContext();
 
@@ -43,6 +44,17 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+const getMe= async (token) => {
+    try {
+      const response = await authAPI.getMe(token);
+      if (response.status === 200) {
+        setUser(response.data.username);
+      }
+    } catch (error) {
+      console.error('Failed to fetch user profile:', error);
+    }
+  };  
+
   const login = (token, userData) => {
     localStorage.setItem('token', token);
     setIsAuthenticated(true);
@@ -58,7 +70,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated,isLoading, user, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated,isLoading, user, login, logout,getMe }}>
       {children}
     </AuthContext.Provider>
   );

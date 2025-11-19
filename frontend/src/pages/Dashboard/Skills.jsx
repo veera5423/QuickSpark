@@ -11,6 +11,14 @@ const Skills = () => {
   const [completedSkills, setCompletedSkills] = useState([]);
   const [showAllAttempts, setShowAllAttempts] = useState(false);
 
+  // Helper to get color class based on score
+  const getScoreColor = (score) => {
+    if (score >= 80) return 'text-green-600 bg-green-50';
+    if (score >= 60) return 'text-blue-600 bg-blue-50';
+    if (score >= 40) return 'text-yellow-600 bg-yellow-50';
+    return 'text-red-600 bg-red-50';
+  };
+
   useEffect(() => {
     loadAttempts();
     loadCompletedSkills();
@@ -20,7 +28,8 @@ const Skills = () => {
     try {
       setLoading(true);
       const data = await quizAPI.getAttempts();
-      setAttempts(data.attempts || []);
+      // Sort attempts to ensure recent ones are at the top
+      setAttempts(data.attempts?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)) || []);
     } catch (error) {
       console.error('Failed to load attempts:', error);
       setError('Failed to load skill progress');
@@ -28,7 +37,6 @@ const Skills = () => {
       setLoading(false);
     }
   };
-console.log(completedSkills);
 
   const loadCompletedSkills = async () => {
     try {
@@ -47,7 +55,6 @@ console.log(completedSkills);
           }
         })
       );
-// console.log(skillDetails)
       setCompletedSkills(skillDetails);
     } catch (error) {
       console.error('Failed to load completed skills:', error);
@@ -61,7 +68,7 @@ console.log(completedSkills);
     const averageScore = totalScore / attempts.length;
 
     const difficultyStats = attempts.reduce((stats, attempt) => {
-      const difficulty = attempt.difficulty || 'unknown';
+      const difficulty = attempt.difficulty ? attempt.difficulty.toLowerCase() : 'unknown';
       if (!stats[difficulty]) {
         stats[difficulty] = { total: 0, count: 0 };
       }
@@ -82,93 +89,115 @@ console.log(completedSkills);
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="text-lg">Loading skill progress...</div>
+        <div className="text-xl font-semibold text-blue-600">Loading skill progress...</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="text-center text-red-600">
-        <p>{error}</p>
-        <Button onClick={loadAttempts} className="mt-4">
+      <div className="text-center p-8 bg-red-50 border border-red-300 rounded-lg">
+        <p className="text-xl text-red-600 mb-4">{error}</p>
+        <Button onClick={loadAttempts} className="mt-4 bg-red-500 hover:bg-red-700">
           Try Again
         </Button>
       </div>
     );
   }
 
+  const MetricCard = ({ icon, title, value, unit, colorClass }) => (
+    <Card className="text-center p-5 shadow-lg hover:shadow-xl transition duration-300 transform hover:-translate-y-0.5">
+      <div className="text-4xl mb-2">{icon}</div>
+      <div className={`text-4xl font-extrabold ${colorClass} mb-1`}>
+        {value}
+        <span className="text-xl font-medium ml-1">{unit}</span>
+      </div>
+      <div className="text-sm font-medium text-gray-500 uppercase tracking-wider">{title}</div>
+    </Card>
+  );
+
   return (
-    <div className="space-y-8">
-      <h1 className="text-3xl font-bold">Skills & Progress</h1>
+    <div className="space-y-10 max-w-7xl mx-auto p-4 sm:p-6">
+      <h1 className="text-4xl font-extrabold text-gray-800 border-b pb-3">
+        Skills & Progress 🧠
+      </h1>
 
       {attempts.length === 0 ? (
         <Card>
-          <div className="text-center py-12">
-            <div className="text-6xl mb-4">📊</div>
-            <h3 className="text-xl font-semibold mb-2">No Quiz Attempts Yet</h3>
-            <p className="text-gray-600 mb-6">
-              Start taking quizzes to track your learning progress and skill development.
+          <div className="text-center py-16 bg-gray-50 rounded-lg">
+            <div className="text-7xl mb-6">💡</div>
+            <h3 className="text-2xl font-bold mb-3 text-gray-800">No Learning Data Yet</h3>
+            <p className="text-gray-600 mb-8 max-w-md mx-auto">
+              Start taking quizzes to track your learning journey, skill gaps, and development progress.
             </p>
-            <Button onClick={() => window.location.href = '/dashboard/mock-tests'}>
+            <Button onClick={() => window.location.href = '/dashboard/mock-tests'} className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg">
               Take Your First Quiz
             </Button>
           </div>
         </Card>
       ) : (
         <>
-          {/* Overall Progress */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <Card className="text-center">
-              <div className="text-3xl font-bold text-blue-600 mb-2">
-                {progress.averageScore}%
-              </div>
-              <div className="text-gray-600">Average Score</div>
-            </Card>
+          {/* Overall Progress - Enhanced Metrics */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <MetricCard
+              icon="⭐"
+              title="Average Score"
+              value={progress.averageScore}
+              unit="%"
+              colorClass={getScoreColor(progress.averageScore).split(' ')[0]} // Use only text color
+            />
 
-            <Card className="text-center">
-              <div className="text-3xl font-bold text-green-600 mb-2">
-                {progress.totalAttempts}
-              </div>
-              <div className="text-gray-600">Total Attempts</div>
-            </Card>
+            <MetricCard
+              icon="📝"
+              title="Total Attempts"
+              value={progress.totalAttempts}
+              unit=""
+              colorClass="text-green-600"
+            />
 
-            <Card className="text-center">
-              <div className="text-3xl font-bold text-purple-600 mb-2">
-                {Object.keys(progress.difficultyStats).length}
-              </div>
-              <div className="text-gray-600">Difficulty Levels</div>
-            </Card>
+            <MetricCard
+              icon="🪜"
+              title="Difficulty Levels"
+              value={Object.keys(progress.difficultyStats).length}
+              unit=""
+              colorClass="text-purple-600"
+            />
 
-            <Card className="text-center">
-              <div className="text-3xl font-bold text-orange-600 mb-2">
-                {completedSkills.length}
-              </div>
-              <div className="text-gray-600">Completed Skills</div>
-            </Card>
+            <MetricCard
+              icon="✅"
+              title="Completed Skills"
+              value={completedSkills.length}
+              unit=""
+              colorClass="text-orange-600"
+            />
           </div>
 
-          {/* Difficulty Breakdown */}
+          {/* Difficulty Breakdown - Enhanced Progress Bars */}
           <Card>
-            <h2 className="text-2xl font-bold mb-4">Performance by Difficulty</h2>
-            <div className="space-y-4">
+            <h2 className="text-2xl font-bold mb-6 border-b pb-2 text-gray-700">Performance by Difficulty</h2>
+            <div className="space-y-6">
               {Object.entries(progress.difficultyStats).map(([difficulty, stats]) => {
                 const average = Math.round(stats.total / stats.count);
+                const barColor = difficulty === 'hard' ? 'bg-red-500' : difficulty === 'medium' ? 'bg-orange-500' : 'bg-green-500';
+
                 return (
-                  <div key={difficulty} className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="font-medium capitalize">{difficulty}</span>
-                        <span className="text-sm text-gray-600">
-                          {average}% ({stats.count} attempts)
-                        </span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div
-                          className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                          style={{ width: `${average}%` }}
-                        ></div>
-                      </div>
+                  <div key={difficulty}>
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-semibold capitalize text-lg text-gray-700">{difficulty}</span>
+                      <span className={`text-lg font-bold ${getScoreColor(average).split(' ')[0]}`}>
+                        {average}%
+                        <span className="text-sm font-normal text-gray-500 ml-2">({stats.count} attempts)</span>
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-3">
+                      <div
+                        className={`${barColor} h-3 rounded-full transition-all duration-500 ease-out`}
+                        style={{ width: `${average}%` }}
+                        role="progressbar"
+                        aria-valuenow={average}
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                      ></div>
                     </div>
                   </div>
                 );
@@ -176,19 +205,17 @@ console.log(completedSkills);
             </div>
           </Card>
 
-          {/* Completed Skills */}
+          {/* Completed Skills - Enhanced Card Layout */}
           {completedSkills.length > 0 && (
             <Card>
-              <h2 className="text-2xl font-bold mb-4">Completed Skills</h2>
+              <h2 className="text-2xl font-bold mb-6 border-b pb-2 text-gray-700">Completed Skills Certificates ({completedSkills.length})</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {completedSkills.map((skill) => (
-                  <div key={skill._id} className="p-4 border rounded-lg bg-green-50 border-green-200">
-                    <div className="flex items-center">
-                      <div className="text-green-600 mr-2">✓</div>
-                      <div>
-                        <h4 className="font-medium text-green-800">{skill.skill_name}</h4>
-                        <p className="text-sm text-green-600">{skill.category}</p>
-                      </div>
+                  <div key={skill._id} className="p-4 bg-white border border-green-300 rounded-xl shadow-md flex items-center space-x-3">
+                    <div className="text-2xl text-green-600">🏆</div>
+                    <div>
+                      <h4 className="font-bold text-green-800">{skill.skill_name}</h4>
+                      <p className="text-sm text-green-600">Category: {skill.category}</p>
                     </div>
                   </div>
                 ))}
@@ -196,77 +223,86 @@ console.log(completedSkills);
             </Card>
           )}
 
-          {/* Recent Attempts */}
+          {/* Recent Attempts - List View Improvement */}
           <Card>
-            <h2 className="text-2xl font-bold mb-4">Recent Quiz Attempts</h2>
+            <h2 className="text-2xl font-bold mb-6 border-b pb-2 text-gray-700">Recent Quiz Attempts</h2>
             <div className="space-y-3">
-              {(showAllAttempts ? attempts : attempts.slice(0, 3)).map((attempt, index) => (
-                <div key={attempt._id || index} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div>
-                    <div className="font-medium">
-                      Quiz Attempt #{attempts.length - index}
+              {(showAllAttempts ? attempts : attempts.slice(0, 3)).map((attempt, index) => {
+                const score = attempt.score || 0;
+                const scoreClass = getScoreColor(score);
+                const resultText = score >= 70 ? 'Excellent' : score >= 50 ? 'Good' : 'Review Needed';
+
+                return (
+                  <div key={attempt._id || index} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition duration-150">
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border ${scoreClass.replace('text-', 'border-').replace('bg-', 'bg-')}`}>
+                         {score}%
+                      </div>
+                      <div>
+                        <div className="font-semibold text-gray-800">
+                          Attempt #{attempts.length - index}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {new Date(attempt.submitted_at).toLocaleDateString()}
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-sm text-gray-600">
-                      {new Date(attempt.created_at).toLocaleDateString()} •
-                      Difficulty: {attempt.difficulty || 'Unknown'}
+                    <div className="text-right">
+                      <span className={`px-3 py-1 text-xs font-semibold rounded-full ${scoreClass}`}>
+                        {resultText}
+                      </span>
+                      <div className="text-sm text-gray-500 mt-1">
+                          Difficulty: <span className="capitalize">{attempt.difficulty || 'Unknown'}</span>
+                      </div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className={`text-lg font-bold ${
-                      (attempt.score || 0) >= 70 ? 'text-green-600' :
-                      (attempt.score || 0) >= 50 ? 'text-yellow-600' : 'text-red-600'
-                    }`}>
-                      {attempt.score || 0}%
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      {attempt.score >= 70 ? 'Excellent' :
-                       attempt.score >= 50 ? 'Good' : 'Needs Improvement'}
-                    </div>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
             {attempts.length > 3 && (
-              <div className="mt-4 text-center">
+              <div className="mt-6 text-center">
                 <Button
                   onClick={() => setShowAllAttempts(!showAllAttempts)}
-                  variant={showAllAttempts ? "outline" : "default"}
-                  size="sm"
+                  className={`bg-indigo-400 text-gray-700 hover:bg-indigo-700 border border-gray-300 cursor-pointer px-4 py-2 text-sm font-semibold transition-colors`}
                 >
-                  {showAllAttempts ? 'Show Less' : 'View More'}
+                  {showAllAttempts ? 'Show Less Attempts (3)' : `View All ${attempts.length} Attempts`}
                 </Button>
               </div>
             )}
           </Card>
 
-          {/* Improvement Tips */}
+          {/* Improvement Tips - Cleaner Blocks */}
           <Card>
-            <h2 className="text-2xl font-bold mb-4">Improvement Tips</h2>
-            <div className="space-y-3">
+            <h2 className="text-2xl font-bold mb-6 border-b pb-2 text-gray-700">Actionable Tips & Recommendations</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {progress.averageScore < 50 && (
-                <div className="p-4 bg-red-50 border-l-4 border-red-400">
-                  <p className="text-red-700">
-                    <strong>Focus on fundamentals:</strong> Consider reviewing basic concepts and taking easier quizzes to build confidence.
+                <div className="p-4 bg-red-100 border-l-4 border-red-500 rounded-r-md shadow-sm">
+                  <h4 className="font-bold text-red-800 flex items-center"><span className="text-xl mr-2">🚨</span> Fundamentals Focus</h4>
+                  <p className="text-sm text-red-700 mt-1">
+                    Review **basic concepts** thoroughly. Try taking easier quizzes to build a solid foundation before advancing.
                   </p>
                 </div>
               )}
               {progress.averageScore >= 50 && progress.averageScore < 70 && (
-                <div className="p-4 bg-yellow-50 border-l-4 border-yellow-400">
-                  <p className="text-yellow-700">
-                    <strong>Good progress:</strong> You're on the right track! Try medium difficulty quizzes to challenge yourself further.
+                <div className="p-4 bg-yellow-100 border-l-4 border-yellow-500 rounded-r-md shadow-sm">
+                  <h4 className="font-bold text-yellow-800 flex items-center"><span className="text-xl mr-2">💪</span> Challenge Yourself</h4>
+                  <p className="text-sm text-yellow-700 mt-1">
+                    You're making **good progress**. Start mixing in medium-to-hard quizzes to identify and fill knowledge gaps.
                   </p>
                 </div>
               )}
               {progress.averageScore >= 70 && (
-                <div className="p-4 bg-green-50 border-l-4 border-green-400">
-                  <p className="text-green-700">
-                    <strong>Excellent work:</strong> You're performing well! Try hard difficulty quizzes to continue advancing your skills.
+                <div className="p-4 bg-green-100 border-l-4 border-green-500 rounded-r-md shadow-sm">
+                  <h4 className="font-bold text-green-800 flex items-center"><span className="text-xl mr-2">🚀</span> Advanced Training</h4>
+                  <p className="text-sm text-green-700 mt-1">
+                    **Excellent work!** Focus on hard difficulty and specialized quizzes to master complex topics.
                   </p>
                 </div>
               )}
-              <div className="p-4 bg-blue-50 border-l-4 border-blue-400">
-                <p className="text-blue-700">
-                  <strong>Consistent practice:</strong> Regular quiz attempts help reinforce learning. Aim for at least 2-3 quizzes per week.
+              <div className="p-4 bg-blue-100 border-l-4 border-blue-500 rounded-r-md shadow-sm">
+                <h4 className="font-bold text-blue-800 flex items-center"><span className="text-xl mr-2">🗓️</span> Consistent Practice</h4>
+                <p className="text-sm text-blue-700 mt-1">
+                  Aim for **regular engagement** (2-3 quizzes per week) to ensure long-term knowledge retention and skill development.
                 </p>
               </div>
             </div>

@@ -1,6 +1,8 @@
 from flask import Blueprint, request, jsonify, redirect
 from services.auth_service import AuthService
 from config import Config
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from models.user import UserModel
 
 
 auth_bp = Blueprint("auth", __name__)
@@ -85,8 +87,21 @@ def reset_password(token):
 @auth_bp.route("/forgot_password", methods=["POST"])
 def forgot_password():
     data = request.get_json()
-    email = data.get("email")   
+    email = data.get("email")
 
     response, status = AuthService.forgot_password(email)
     return jsonify(response), status
+
+@auth_bp.route("/me", methods=["GET"])
+@jwt_required()
+def get_current_user():
+    user_id = get_jwt_identity()
+    user = UserModel.find_by_id(user_id)
+    if not user:
+        return jsonify({"message": "User not found"}), 404
+    return jsonify({
+        "id": str(user["_id"]),
+        "username": user["username"],
+        "email": user["email"]
+    }), 200
     

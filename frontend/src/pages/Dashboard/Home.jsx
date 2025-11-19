@@ -152,7 +152,7 @@ import { useAuth } from '../../context/AuthContext';
 import { quizAPI } from '../../api/quizAPI';
 
 const Home = () => {
-  const { user } = useAuth();
+  const { user ,getMe} = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   
@@ -167,6 +167,7 @@ const Home = () => {
 
   useEffect(() => {
     loadDashboardData();
+    getMe();
   }, []);
 
   const loadDashboardData = async () => {
@@ -233,7 +234,7 @@ const Home = () => {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
-            Welcome back, <span className="text-indigo-600">{user?.name || 'Student'}</span>! 👋
+            Welcome back, <span className="text-indigo-600">{user || 'Student'}</span>! 👋
           </h1>
           <p className="mt-1 text-gray-500">Here is what's happening with your learning journey today.</p>
         </div>
@@ -323,7 +324,7 @@ const Home = () => {
         
         {/* Action 1: Career Explorer */}
         <div 
-          onClick={() => navigate('/career')}
+          onClick={() => navigate('/dashboard/careers')}
           className="group relative bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-6 shadow-lg cursor-pointer transform transition hover:scale-105"
         >
           <h3 className="text-xl font-bold text-white mb-2">🚀 Career Explorer</h3>
@@ -364,7 +365,7 @@ const Home = () => {
         <ul className="divide-y divide-gray-200">
           {recentActivity.length === 0 ? (
             <li className="px-4 py-8 text-center text-gray-500">
-              No quizzes taken yet. <button onClick={() => navigate('/career')} className="text-indigo-600 hover:underline">Start a career path!</button>
+              No quizzes taken yet. <button onClick={() => navigate('/dashboard/careers')} className="text-indigo-600 hover:underline">Start a career path!</button>
             </li>
           ) : (
             recentActivity.map((attempt) => (

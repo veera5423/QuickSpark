@@ -9,4 +9,9 @@ export const authAPI = {
   verifyResetToken: (token) => axiosClient.get(`/auth/reset_password/${token}`),
   resetPassword: (token, data) => axiosClient.post(`/auth/reset_password/${token}`, data),
   verifyEmail: (token) => axiosClient.get(`/auth/verify-email/${token}`),
+  getMe: (token) => axiosClient.get('/auth/me', {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  }),
 };

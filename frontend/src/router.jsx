@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import AuthLayout from './layouts/AuthLayout';
@@ -31,6 +31,8 @@ import Contact from './pages/Contact';
 import Hero from './components/common/Hero';
 
 const AppRouter = () => {
+  
+ 
   return (
     <ThemeProvider>
       <AuthProvider>

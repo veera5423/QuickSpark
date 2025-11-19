@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom'; // ◀️ Import for SPA navigation
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
-import Chatbox from '../../components/ui/Chatbox';
 import axiosClient from '../../api/axiosClient';
 
 const Resources = () => {
+  const navigate = useNavigate(); // ◀️ Hook for navigation
   const [resources, setResources] = useState([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -19,7 +20,8 @@ const Resources = () => {
   const loadResources = async () => {
     try {
       setLoading(true);
-      const response = await axiosClient.get('/api/resources/');
+      // Ensure this endpoint matches your backend route for fetching list
+      const response = await axiosClient.get('/api/resources/'); 
       setResources(response.data.resources || []);
     } catch (error) {
       console.error('Failed to load resources:', error);
@@ -52,13 +54,14 @@ const Resources = () => {
       const formData = new FormData();
       formData.append('file', file);
 
+      // Call your combined endpoint (Upload + Summarize + Embed)
       await axiosClient.post('/api/summarizer/upload-and-summarize', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
 
-      // Reload resources to show the new one
+      // Reload resources to show the new one immediately
       await loadResources();
 
       // Clear file input
@@ -81,26 +84,19 @@ const Resources = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="text-lg">Loading resources...</div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="text-center text-red-600">
-        <p>{error}</p>
-        <Button onClick={loadResources} className="mt-4">
-          Try Again
-        </Button>
+        <div className="animate-pulse text-indigo-600 font-medium">Loading library...</div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Resources</h1>
+    <div className="space-y-6 p-6">
+      {/* --- HEADER & UPLOAD BUTTON --- */}
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">My Library</h1>
+          <p className="text-gray-500 mt-1">Manage your documents and study materials.</p>
+        </div>
         <div>
           <input
             ref={fileInputRef}
@@ -112,98 +108,113 @@ const Resources = () => {
           <Button
             onClick={handleUploadClick}
             disabled={uploading}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
+            className={`flex items-center gap-2 ${uploading ? 'opacity-70 cursor-not-allowed' : 'hover:shadow-lg'}`}
           >
-            {uploading ? 'Uploading...' : '📄 Upload PDF'}
+            {uploading ? (
+              <>
+                <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
+                <span>Processing AI...</span>
+              </>
+            ) : (
+              <>
+                <span>📄</span> Upload PDF
+              </>
+            )}
           </Button>
         </div>
       </div>
 
-      {uploadError && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-          {uploadError}
+      {/* --- ERROR MESSAGE --- */}
+      {(uploadError || error) && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center gap-2">
+          <span>⚠️</span>
+          {uploadError || error}
         </div>
       )}
 
+      {/* --- EMPTY STATE --- */}
       {resources.length === 0 ? (
-        <Card>
-          <div className="text-center py-12">
-            <div className="text-6xl mb-4">📚</div>
-            <h3 className="text-xl font-semibold mb-2">No resources yet</h3>
-            <p className="text-gray-500 mb-6">
-              Upload your first PDF to get AI-powered summarization and quiz generation.
-            </p>
-            <Button
-              onClick={handleUploadClick}
-              disabled={uploading}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              {uploading ? 'Uploading...' : 'Upload PDF'}
-            </Button>
-          </div>
-        </Card>
+        <div className="bg-white border-2 border-dashed border-gray-300 rounded-xl p-12 text-center">
+          <div className="text-6xl mb-4">📚</div>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">No resources yet</h3>
+          <p className="text-gray-500 mb-6 max-w-md mx-auto">
+            Upload your first PDF lecture note or textbook chapter to get an AI-powered summary and start chatting with it.
+          </p>
+          <Button
+            onClick={handleUploadClick}
+            disabled={uploading}
+            className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200"
+          >
+            Select a File
+          </Button>
+        </div>
       ) : (
+        /* --- RESOURCE GRID --- */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {resources.map(resource => (
             <Card
               key={resource._id}
-              className="hover:shadow-lg transition-shadow cursor-pointer"
+              className="group hover:shadow-xl transition-all duration-200 cursor-pointer border border-gray-100 hover:border-indigo-200"
+              // onClick={() => {
+              //   // ◀️ Uses React Router navigation instead of full page reload
+              //   navigate(`/dashboard/resources/chat/${resource.resource_uuid || resource._id}`);
+              // }}
               onClick={() => {
-                window.location.href = `/dashboard/resources/chat/${resource._id}`;
-              }}
+    const idToUse = resource.resource_uuid || resource._id;
+    console.log("Navigating to ID:", idToUse, " (UUID is correct if 36 chars)");
+    navigate(`/dashboard/resources/chat/${idToUse}`);
+}}
             >
-              <div className="space-y-3">
+              <div className="flex flex-col h-full space-y-4 p-2">
+                
+                {/* Card Header */}
+                <div className="flex items-start justify-between">
+                  <div className="p-2 bg-indigo-50 rounded-lg text-2xl">
+                    📄
+                  </div>
+                  {resource.status === 'summarized' && (
+                    <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-medium">
+                      Ready
+                    </span>
+                  )}
+                </div>
+
+                {/* Title & Date */}
                 <div>
-                  <h3 className="font-semibold text-lg truncate" title={resource.filename}>
-                    {resource.filename}
+                  <h3 className="font-bold text-gray-900 truncate text-lg" title={resource.original_filename}>
+                    {resource.original_filename || resource.filename}
                   </h3>
-                  <p className="text-sm text-gray-600">
-                    {new Date(resource.created_at).toLocaleDateString()}
+                  <p className="text-xs text-gray-500 mt-1">
+                    Uploaded: {new Date(resource.created_at).toLocaleDateString()}
                   </p>
                 </div>
 
-                {resource.summary && (
-                  <div>
-                    <h4 className="font-medium text-sm mb-1">AI Summary:</h4>
-                    <p className="text-sm text-gray-700 line-clamp-4">
-                      {resource.summary.substring(0, 200)}...
+                {/* Summary Preview */}
+                <div className="flex-1">
+                   {resource.summary ? (
+                    <p className="text-sm text-gray-600 line-clamp-3 leading-relaxed">
+                      {resource.summary}
                     </p>
-                  </div>
-                )}
-
-                <div className="flex justify-between items-center text-sm text-gray-600">
-                  <span>{resource.metadata?.page_count || 0} pages</span>
-                  <span>{(resource.metadata?.file_size_kb || 0).toFixed(1)} KB</span>
+                  ) : (
+                    <p className="text-sm text-gray-400 italic">Summary processing...</p>
+                  )}
                 </div>
 
-                <div className="flex items-center justify-between pt-2 border-t">
-                  {resource.status === 'summarized' && (
-                    <span className="text-green-600 text-sm font-medium flex items-center">
-                      ✓ Summarized
-                    </span>
-                  )}
+                {/* Footer Metadata */}
+                <div className="pt-3 border-t border-gray-100 flex justify-between items-center text-xs text-gray-400">
+                  <span>{resource.metadata?.page_count || '?'} Pages</span>
+                  <span>{(resource.metadata?.file_size_kb || 0).toFixed(0)} KB</span>
+                </div>
 
-                  {resource.linked_modules?.mock_test_id && (
-                    <Button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        window.location.href = `/dashboard/mock-tests?resource=${resource._id}`;
-                      }}
-                      className="text-xs px-3 py-1 bg-blue-100 text-blue-700 hover:bg-blue-200"
-                    >
-                      Take Quiz
-                    </Button>
-                  )}
+                {/* Hover Action Hint */}
+                <div className="text-indigo-600 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity text-right">
+                  Open Study Chat →
                 </div>
               </div>
             </Card>
           ))}
         </div>
       )}
-
-
-
-
     </div>
   );
 };
