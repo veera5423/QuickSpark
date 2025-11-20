@@ -7,8 +7,10 @@ from routes.ai_summarizer import ai_summarizer_bp
 from routes.ai_quiz_generator import ai_quiz_bp
 from routes.resources import resources_bp
 from routes.career_explorer import career_explorer_bp
+from routes.public_resources import public_resources_bp
+from routes.admin import admin_bp
 from flask_mail import Mail
-
+from werkzeug.security import generate_password_hash, check_password_hash
 
 mail = Mail()
 
@@ -24,7 +26,12 @@ def create_app():
     app.register_blueprint(ai_quiz_bp, url_prefix="/api/quiz")
     app.register_blueprint(resources_bp, url_prefix="/api/resources")
     app.register_blueprint(career_explorer_bp, url_prefix='/api/career')
+    app.register_blueprint(public_resources_bp, url_prefix='/api/public')
+    app.register_blueprint(admin_bp, url_prefix='/api/admin')
+    # ps=generate_password_hash("adminpassword")
 
+    # print(f"Admin password hash: {ps}")
+    
     @app.route("/")
     def home():
         return {"message": "Flask API Running 🚀"}

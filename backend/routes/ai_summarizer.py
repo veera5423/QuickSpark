@@ -139,6 +139,7 @@ import uuid
 import psycopg2.extras
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
+from utils.rate_limit import check_and_increment_usage
 from db.mongo_client import supabase, resources_collection, Config, pg_conn, db
 
 ai_summarizer_bp = Blueprint("ai_summarizer", __name__)
@@ -226,7 +227,11 @@ def upload_and_summarize():
     Upload, save, summarize, AND create vector embeddings.
     """
     print("Endpoint reached: /upload-and-summarize")
-    
+    if not check_and_increment_usage(current_user_id):
+            return jsonify({
+                "message": "AI Chat limit exceeded. Upgrade to Premium for more usage.",
+                "answer": "AI Chat limit reached. Please upgrade your account to continue."
+            }), 429 # 429 Too Many Requests
     # Check if AI models are ready
     if not summarizer_model:
         return jsonify({"message": "AI models are not initialized. Check API key."}), 500
@@ -400,6 +405,11 @@ def chat_with_resource():
     print("Endpoint reached: /chat-with-resource")
     try:
         current_user_id = get_jwt_identity()
+        if not check_and_increment_usage(current_user_id):
+            return jsonify({
+                "message": "AI Chat limit exceeded. Upgrade to Premium for more usage.",
+                "answer": "AI Chat limit reached. Please upgrade your account to continue."
+            }), 429 # 429 Too Many Requests
         data = request.get_json()
         question = data.get("question")
         resource_uuid = data.get("resource_id") # The UUID we saved

@@ -8,7 +8,7 @@ const Navbar = () => {
   const { logout, user, getMe} = useAuth(); // Assuming 'user' object is available
   useEffect(() => {
     getMe();
-  }, [user]); 
+  }, []); 
 
   const handleLogout = () => {
     // Clear token and handle redirection
@@ -17,7 +17,7 @@ const Navbar = () => {
   };
 
   // Determine username display
-  const userName = user || 'User';
+  const userName = user.username || 'User';
 
   return (
     <nav className="fixed top-0 right-0 left-0 md:left-20 lg:left-64 z-40 bg-white shadow-md border-b border-gray-100 transition-all duration-300">

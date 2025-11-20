@@ -18,6 +18,7 @@ const MockTests = () => {
     const [loading, setLoading] = useState(false);
     const [attempts, setAttempts] = useState([]);
     const [error, setError] = useState(null);
+    const [limitExceeded, setLimitExceeded] = useState(false);
 
     // Quiz Mode State
     const [quizMode, setQuizMode] = useState('resource'); // 'resource' or 'text'
@@ -35,8 +36,10 @@ const MockTests = () => {
             ]);
             // Sort attempts by date descending for history card
             const sortedAttempts = attemptsRes.attempts?.sort((a, b) => new Date(b.submitted_at) - new Date(a.submitted_at)) || [];
+            const filteredResources = resourcesRes.resources?.filter(r => r.is_public !== true) || [];
+// console.log(filteredResources);
 
-            setResources(resourcesRes.resources || []);
+            setResources(filteredResources);
             setAttempts(sortedAttempts);
             setError(null);
         } catch (error) {
@@ -65,13 +68,20 @@ const MockTests = () => {
             } else {
                 response = await quizAPI.generateQuizFromText(textInput.trim(), difficulty, numQuestions);
             }
+            
+            
 
             setModalQuizData(response);
             setIsModalOpen(true);
             
         } catch (error) {
             console.error('Failed to generate quiz:', error.response?.data || error);
+
             setError(error.response?.data?.message || 'Failed to generate quiz due to an API error.');
+            if (error.response?.status === 429) {
+                setLimitExceeded(true);
+            }
+            
         } finally {
             setLoading(false);
         }
@@ -150,6 +160,22 @@ const MockTests = () => {
                 {error && (
                     <div className="bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6 shadow-sm">
                         ⚠️ **Error:** {error}
+                    </div>
+                )}
+
+                {/* Usage Limit Exceeded Popup */}
+                {limitExceeded && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <div className="bg-white p-6 rounded-lg shadow-lg max-w-md">
+                            <h3 className="text-lg font-bold mb-4 text-red-600">Usage Limit Exceeded</h3>
+                            <p className="mb-4 text-gray-700">You have reached your quiz generation limit. Upgrade to premium for more quizzes.</p>
+                            <button
+                                onClick={() => setLimitExceeded(false)}
+                                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded font-semibold"
+                            >
+                                OK
+                            </button>
+                        </div>
                     </div>
                 )}
 

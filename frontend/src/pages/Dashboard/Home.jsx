@@ -169,6 +169,8 @@ const Home = () => {
     loadDashboardData();
     getMe();
   }, []);
+  console.log(user);
+  
 
   const loadDashboardData = async () => {
     try {
@@ -234,7 +236,7 @@ const Home = () => {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
-            Welcome back, <span className="text-indigo-600">{user || 'Student'}</span>! 👋
+            Welcome back, <span className="text-indigo-600">{user.username || 'Student'}</span>! 👋
           </h1>
           <p className="mt-1 text-gray-500">Here is what's happening with your learning journey today.</p>
         </div>

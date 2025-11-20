@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, FileText, Bot, Layers, TrendingUp, Briefcase, Zap, Menu, X } from 'lucide-react';
+import { Home, FileText, Bot, Layers, TrendingUp, Briefcase, Zap, Menu, X, Library, Upload, Shield } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useEffect } from 'react';
 
@@ -8,6 +8,7 @@ import { useEffect } from 'react';
 const navItems = [
     { name: 'Dashboard', path: '/dashboard', icon: Home },
     { name: 'My Resources', path: '/dashboard/resources', icon: FileText },
+    { name: 'Public Library', path: '/dashboard/public-resources', icon: Library },
     { name: 'AI Summarizer', path: '/dashboard/ai-summarizer', icon: Bot },
     { name: 'Mock Tests', path: '/dashboard/mock-tests', icon: Zap },
     { name: 'Skill Progress', path: '/dashboard/skills', icon: Layers },
@@ -20,11 +21,16 @@ const Sidebar = () => {
     const [isExpanded, setIsExpanded] = useState(true);
     const {user,getMe}=useAuth()
     useEffect(() => {
-      getMe();
-    }, [user]);
+      if (!user) {
+        getMe();
+      }
+    }, []);
+    
 
     const toggleSidebar = () => setIsExpanded(!isExpanded);
-    const UserName=user||"UserName"
+    const UserName = user?.username || "UserName"
+    const isAdmin = user?.is_admin; // Assuming user object has is_admin field
+    const isPremium = user?.is_premium; // Assuming user object has is_premium field
 
     return (
         <>
@@ -86,6 +92,29 @@ const Sidebar = () => {
                             </li>
                         );
                     })}
+                    
+                    {/* Admin Panel - conditionally rendered */}
+                    {isAdmin && (
+                        <li>
+                            <Link
+                                to="/dashboard/admin"
+                                className={`flex items-center p-3 rounded-xl transition-colors duration-150 group ${
+                                    pathname === '/dashboard/admin'
+                                        ? 'bg-red-600 text-white shadow-lg' 
+                                        : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                                }`}
+                            >
+                                <Shield className={`w-5 h-5 flex-shrink-0 ${isExpanded ? 'mr-3' : 'mx-auto'}`} />
+                                <span 
+                                    className={`font-semibold overflow-hidden whitespace-nowrap transition-opacity duration-300 ${
+                                        isExpanded ? 'opacity-100' : 'opacity-0 absolute left-20'
+                                    }`}
+                                >
+                                    Admin Panel
+                                </span>
+                            </Link>
+                        </li>
+                    )}
                 </ul>
                 
                 {/* Placeholder for Profile/Footer info */}
@@ -94,7 +123,7 @@ const Sidebar = () => {
                         <div className="w-8 h-8 bg-indigo-500 rounded-full mr-3 flex items-center justify-center font-bold">U</div>
                         <div>
                             <p className="text-white font-semibold">{UserName}</p>
-                            <p>Premium</p>
+                            <p>{isAdmin ? 'Admin' : isPremium ? 'Premium' :'Genaral'}</p>
                         </div>
                     </div>
                 </div>

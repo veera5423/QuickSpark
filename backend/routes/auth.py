@@ -102,6 +102,8 @@ def get_current_user():
     return jsonify({
         "id": str(user["_id"]),
         "username": user["username"],
-        "email": user["email"]
+        "email": user["email"],
+        "is_admin": user.get("is_admin", False),
+        "is_premium": user.get("is_premium", False)
     }), 200
     

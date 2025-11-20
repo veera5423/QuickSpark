@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import ProtectedRoute from './components/common/ProtectedRoute';
+import AdminProtectedRoute from './components/common/AdminProtectedRoute';
 import AuthLayout from './layouts/AuthLayout';
 import DashboardLayout from './layouts/DashboardLayout';
 
@@ -21,6 +22,9 @@ import AISummarizer from './pages/Dashboard/AISummarizer';
 import MockTests from './pages/Dashboard/MockTests';
 import Skills from './pages/Dashboard/Skills';
 import Careers from './pages/Dashboard/Careers';
+import PublicResources from './pages/Dashboard/PublicResources';
+import SubmitResource from './pages/Dashboard/SubmitResource';
+import AdminDashboard from './pages/Dashboard/AdminDashboard';
 
 // Other Pages
 import NotFound from './pages/NotFound';
@@ -31,8 +35,8 @@ import Contact from './pages/Contact';
 import Hero from './components/common/Hero';
 
 const AppRouter = () => {
-  
- 
+
+
   return (
     <ThemeProvider>
       <AuthProvider>
@@ -84,6 +88,27 @@ const AppRouter = () => {
               <ProtectedRoute>
                 <ResourceChat />
               </ProtectedRoute>
+            } />
+            <Route path="/dashboard/public-resources" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <PublicResources />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/submit-resource" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <SubmitResource />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/admin" element={
+              <AdminProtectedRoute>
+                <DashboardLayout>
+                  <AdminDashboard />
+                </DashboardLayout>
+              </AdminProtectedRoute>
             } />
             <Route path="/dashboard/ai-summarizer" element={
               <ProtectedRoute>

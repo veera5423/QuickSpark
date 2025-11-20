@@ -31,6 +31,8 @@ export const AuthProvider = ({ children }) => {
       });
       if (response.ok) {
         setIsAuthenticated(true);
+        // Fetch user data after successful validation
+        await getMe(token);
       } else {
         throw new Error('Invalid token');
       }
@@ -44,23 +46,21 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-const getMe= async (token) => {
+  const getMe = async (token) => {
     try {
       const response = await authAPI.getMe(token);
       if (response.status === 200) {
-        setUser(response.data.username);
+        setUser(response.data);
       }
     } catch (error) {
       console.error('Failed to fetch user profile:', error);
     }
-  };  
+  };
 
   const login = (token, userData) => {
     localStorage.setItem('token', token);
     setIsAuthenticated(true);
-    // console.log(userData.username);
-    
-    setUser(userData.username);
+    setUser(userData);
   };
 
   const logout = () => {
@@ -70,7 +70,7 @@ const getMe= async (token) => {
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated,isLoading, user, login, logout,getMe }}>
+    <AuthContext.Provider value={{ isAuthenticated, isLoading, user, login, logout, getMe }}>
       {children}
     </AuthContext.Provider>
   );

@@ -5,6 +5,7 @@ from datetime import datetime
 import json
 import logging
 
+from utils.rate_limit import check_and_increment_usage
 from db.mongo_client import db
 from utils.gemini_helper import summarize_with_gemini
 from utils.quiz_prompt import quiz_generation_prompt
@@ -44,6 +45,12 @@ def generate_quiz_from_text():
     num_questions = body.get("num_questions", 10)
     if not isinstance(num_questions, int) or num_questions < 1 or num_questions > 20:
         return jsonify({"message": "num_questions must be an integer between 1 and 20"}), 400
+    
+    if not check_and_increment_usage(current_user_id):
+            return jsonify({
+                "message": "AI Chat limit exceeded. Upgrade to Premium for more usage.",
+                "answer": "AI Chat limit reached. Please upgrade your account to continue."
+            }), 429 # 429 Too Many Requests
 
     # 3️ Create quiz prompt
     prompt = quiz_generation_prompt(text, level=level, num_questions=num_questions)
@@ -108,6 +115,11 @@ def generate_quiz(resource_id):
     """Generate MCQs from summarized text of a resource with difficulty levels."""
     try:
         current_user_id = get_jwt_identity()
+        if not check_and_increment_usage(current_user_id):
+            return jsonify({
+                "message": "AI Chat limit exceeded. Upgrade to Premium for more usage.",
+                "answer": "AI Chat limit reached. Please upgrade your account to continue."
+            }), 429 # 429 Too Many Requests
     except Exception as e:
         logger.error(f"Authentication error: {e}")
         return jsonify({"message": "Authentication failed"}), 401
