@@ -60,7 +60,8 @@ const MockTests = () => {
         }
         
         setLoading(true);
-        try {
+        try 
+        {
             let response;
             
             if (quizMode === 'resource') {
@@ -74,7 +75,8 @@ const MockTests = () => {
             setModalQuizData(response);
             setIsModalOpen(true);
             
-        } catch (error) {
+        } 
+        catch (error) {
             console.error('Failed to generate quiz:', error.response?.data || error);
 
             setError(error.response?.data?.message || 'Failed to generate quiz due to an API error.');
@@ -82,7 +84,7 @@ const MockTests = () => {
                 setLimitExceeded(true);
             }
             
-        } finally {
+         } finally {
             setLoading(false);
         }
     };
