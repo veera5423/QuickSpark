@@ -21,4 +21,5 @@ class Config:
     SUPABASE_KEY= os.getenv("SUPABASE_KEY")
     SUPABASE_BUCKET= os.getenv("SUPABASE_BUCKET")
     SUPABASE_DB_URL= os.getenv("SUPABASE_DB_URL")
+    FRONTEND= os.getenv("FRONTEND_URL", "http://localhost:5173")
 
