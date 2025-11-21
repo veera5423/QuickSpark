@@ -32,7 +32,7 @@ def create_app():
     
     CORS(
         app,
-        origins=["http://localhost:5173", Config.FRONTEND],
+        origins=[Config.FRONTEND],
         supports_credentials=True,
         allow_headers="*",
         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]
