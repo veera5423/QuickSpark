@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Home, FileText, Bot, Layers, TrendingUp, Briefcase, Zap, Menu, X, Library, Upload, Shield } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { useEffect } from 'react';
+import { useLayout } from '../../context/LayoutContext';
 
 // Define the navigation items and their icons
 const navItems = [
@@ -18,7 +18,11 @@ const navItems = [
 
 const Sidebar = () => {
     const { pathname } = useLocation();
-    const [isExpanded, setIsExpanded] = useState(true);
+    const layout = useLayout();
+    // If used inside a LayoutProvider, use shared state; otherwise fallback to local state
+    const [localExpanded, setLocalExpanded] = useState(true);
+    const isExpanded = layout?.isExpanded ?? localExpanded;
+    const setIsExpanded = layout?.setIsExpanded ?? setLocalExpanded;
     const {user,getMe}=useAuth()
     useEffect(() => {
       if (!user) {
@@ -35,7 +39,7 @@ const Sidebar = () => {
     return (
         <>
             {/* Mobile Header/Toggle Button */}
-            <div className="fixed top-0 left-0 z-40 w-full bg-gray-900 md:hidden p-3 shadow-lg flex justify-between items-center">
+            <div className="fixed top-0 left-0 z-50 w-full bg-gray-900 md:hidden p-3 shadow-lg flex justify-between items-center">
                 <Zap className="w-6 h-6 text-yellow-500" />
                 <span className="text-xl font-extrabold text-indigo-400">QuickSpark AI</span>
                 <button onClick={toggleSidebar} className="text-white p-1 rounded-md hover:bg-gray-700">
@@ -45,7 +49,7 @@ const Sidebar = () => {
 
             {/* Sidebar Desktop/Tablet */}
             <div 
-                className={`fixed top-0 z-30 h-screen bg-gray-900 text-white transition-all duration-300 shadow-2xl overflow-y-auto ${
+                className={`fixed top-0 z-50 h-screen bg-gray-900 text-white transition-all duration-300 shadow-2xl overflow-y-auto ${
                     isExpanded ? 'w-64' : 'w-20'
                 } ${isExpanded ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:top-0`}
                 style={{ paddingTop: '5rem' }} // Space for potential fixed top header
@@ -80,7 +84,7 @@ const Sidebar = () => {
                                             : 'text-gray-300 hover:bg-gray-700 hover:text-white'
                                     }`}
                                 >
-                                    <IconComponent className={`w-5 h-5 flex-shrink-0 ${isExpanded ? 'mr-3' : 'mx-auto'}`} />
+                                    <IconComponent className={`w-5 h-5 shrink-0 ${isExpanded ? 'mr-3' : 'mx-auto'}`} />
                                     <span 
                                         className={`font-semibold overflow-hidden whitespace-nowrap transition-opacity duration-300 ${
                                             isExpanded ? 'opacity-100' : 'opacity-0 absolute left-20'
@@ -104,7 +108,7 @@ const Sidebar = () => {
                                         : 'text-gray-300 hover:bg-gray-700 hover:text-white'
                                 }`}
                             >
-                                <Shield className={`w-5 h-5 flex-shrink-0 ${isExpanded ? 'mr-3' : 'mx-auto'}`} />
+                                <Shield className={`w-5 h-5 shrink-0 ${isExpanded ? 'mr-3' : 'mx-auto'}`} />
                                 <span 
                                     className={`font-semibold overflow-hidden whitespace-nowrap transition-opacity duration-300 ${
                                         isExpanded ? 'opacity-100' : 'opacity-0 absolute left-20'
@@ -133,7 +137,7 @@ const Sidebar = () => {
             {isExpanded && (
                 <div 
                     onClick={toggleSidebar} 
-                    className="fixed inset-0 z-20 bg-black opacity-50 md:hidden"
+                    className="fixed inset-0 z-40 bg-black opacity-50 md:hidden"
                 ></div>
             )}
         </>

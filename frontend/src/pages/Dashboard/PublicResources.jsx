@@ -90,9 +90,9 @@ const PublicResources = () => {
         <div className="flex gap-2">
           <Button
             onClick={() => navigate('/dashboard/submit-resource')}
-            className="bg-green-600 hover:bg-green-700 text-white"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white"
           >
-            ➕ Submit Resource
+            Submit Resource
           </Button>
         </div>
       </div>
