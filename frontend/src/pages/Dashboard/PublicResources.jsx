@@ -4,6 +4,8 @@ import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import { getPublicResources, interactWithResource } from '../../api/resourcesAPI';
+import LikeButton from '../../components/ui/Likes';
+import DislikeButton from '../../components/ui/Dislikes';
 
 const PublicResources = () => {
   const navigate = useNavigate();
@@ -11,7 +13,6 @@ const PublicResources = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState(null);
-  const [interacting, setInteracting] = useState(null);
 
   useEffect(() => {
     loadResources();
@@ -30,6 +31,8 @@ const PublicResources = () => {
       setLoading(true);
       const response = await getPublicResources(searchQuery);
       setResources(response.resources || []);
+      
+      
     } catch (error) {
       console.error('Failed to load public resources:', error);
       setError('Failed to load public resources');
@@ -38,24 +41,21 @@ const PublicResources = () => {
     }
   };
 
+//  console.log(resources); 
+
+  const [interacting, setInteracting] = useState(null);
+
+  const updateResourceCounts = (resourceId, counts) => {
+    if (!counts) return;
+    setResources(prev => prev.map(r => r.id === resourceId ? { ...r, likes: counts.likes ?? r.likes, dislikes: counts.dislikes ?? r.dislikes } : r));
+  };
+
   const handleInteraction = async (resourceId, actionType, reason = null) => {
     try {
       setInteracting(resourceId);
-      await interactWithResource(resourceId, actionType, reason);
-
-      // Update local state to reflect the change
-      setResources(prevResources =>
-        prevResources.map(resource => {
-          if (resource.id === resourceId) {
-            if (actionType === 'like') {
-              return { ...resource, likes: resource.likes + 1 };
-            } else if (actionType === 'dislike') {
-              return { ...resource, dislikes: resource.dislikes + 1 };
-            }
-          }
-          return resource;
-        })
-      );
+      const res = await interactWithResource(resourceId, actionType, reason);
+      const counts = res?.counts;
+      if (counts) updateResourceCounts(resourceId, counts);
     } catch (error) {
       console.error('Failed to interact with resource:', error);
       setError('Failed to process interaction');
@@ -140,7 +140,7 @@ const PublicResources = () => {
         </div>
       ) : (
         /* --- RESOURCE GRID --- */
-        console.log(resources),
+        // console.log(resources),
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {resources.map(resource => (
@@ -167,41 +167,23 @@ const PublicResources = () => {
                   <h3 className="font-bold text-gray-900 truncate text-lg" title={resource.filename}>
                     {resource.filename}
                   </h3>
-                  <p className="text-xs text-gray-500 mt-1">
+                  {/* <p className="text-xs text-gray-500 mt-1">
                     {resource.platform} • {resource.likes} 👍 • {resource.dislikes} 👎
-                  </p>
+                  </p> */}
                 </div>
 
                 {/* Description */}
                 <div className="flex-1">
                   <p className="text-sm text-gray-600 line-clamp-3 leading-relaxed">
-                    {resource.description}
+                    {resource.summary}
                   </p>
                 </div>
 
                 {/* Interaction Buttons */}
                 <div className="flex justify-between items-center pt-3 border-t border-gray-100">
                   <div className="flex gap-2">
-                    <Button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleInteraction(resource.id, 'like');
-                      }}
-                      disabled={interacting === resource.id}
-                      className="text-xs px-2 py-1 bg-green-400 text-green-700 hover:bg-green-500 border border-green-200"
-                    >
-                      👍 Like
-                    </Button>
-                    <Button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleInteraction(resource.id, 'dislike');
-                      }}
-                      disabled={interacting === resource.id}
-                      className="text-xs px-2 py-1 bg-red-400 text-red-700 hover:bg-red-500 border border-red-200"
-                    >
-                      👎 Dislike
-                    </Button>
+                    <LikeButton resourceId={resource.id} initial={resource.likes} onCounts={(c) => updateResourceCounts(resource.id, c)} />
+                    <DislikeButton resourceId={resource.id} initial={resource.dislikes} onCounts={(c) => updateResourceCounts(resource.id, c)} />
                   </div>
                   <Button
                     onClick={(e) => {

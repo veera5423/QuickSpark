@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import Card from '../components/ui/Card';
-import Input from '../components/ui/Input';
-import Button from '../components/ui/Button';
-import Header from '../components/common/Header';
-import Footer from '../components/common/Footer';
+import Card from '../ui/Card';
+import Input from '../ui/Input';
+import Button from '../ui/Button';
+import Header from './Header';
+import Footer from './Footer';
+import axiosClient from '../../api/axiosClient';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -23,10 +24,13 @@ const Contact = () => {
     // Simulate form submission
     try {
       // In a real app, this would send to backend
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await axiosClient.post('/api/mail/send-email', formData);
       setStatus('Message sent successfully! We\'ll get back to you soon.');
       setFormData({ name: '', email: '', subject: '', message: '' });
-    } catch {
+    } catch(error) 
+    {
+      console.log(error);
+      
       setStatus('Failed to send message. Please try again.');
     } finally {
       setLoading(false);
@@ -67,7 +71,7 @@ const Contact = () => {
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900">Email</h3>
-                    <p className="text-gray-600">hello@quickspark.ai</p>
+                    <p className="text-gray-600">quickspark.1help@gmail.com</p>
                   </div>
                 </div>
 

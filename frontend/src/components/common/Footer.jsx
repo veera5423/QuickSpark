@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
   return (
@@ -18,9 +19,10 @@ const Footer = () => {
           <div>
             <h4 className="text-lg font-semibold text-white mb-3">Company</h4>
             <ul className="space-y-2 text-sm">
-              <li><a href="#" className="hover:text-indigo-400 transition-colors">About Us</a></li>
-              <li><a href="#" className="hover:text-indigo-400 transition-colors">Blog</a></li>
-              <li><a href="#" className="hover:text-indigo-400 transition-colors">Pricing</a></li>
+              <li><Link to="/about-us" className="hover:text-indigo-400 transition-colors">About Us</Link></li>
+              <li><Link to="/blog" className="hover:text-indigo-400 transition-colors">Blog</Link></li>
+              <li><Link to="/contact" className="hover:text-indigo-400 transition-colors">Contact</Link></li>
+              <li><Link to="/pricing" className="hover:text-indigo-400 transition-colors">Pricing</Link></li>
             </ul>
           </div>
 
@@ -28,9 +30,9 @@ const Footer = () => {
           <div>
             <h4 className="text-lg font-semibold text-white mb-3">Features</h4>
             <ul className="space-y-2 text-sm">
-              <li><a href="#" className="hover:text-indigo-400 transition-colors">AI Summarizer</a></li>
-              <li><a href="#" className="hover:text-indigo-400 transition-colors">Mock Tests</a></li>
-              <li><a href="#" className="hover:text-indigo-400 transition-colors">Skill Tracking</a></li>
+              <li><Link to="/dashboard/ai-summarizer" className="hover:text-indigo-400 transition-colors">AI Summarizer</Link></li>
+              <li><Link to="/dashboard/mock-tests" className="hover:text-indigo-400 transition-colors">Mock Tests</Link></li>
+              <li><Link to="/dashboard/skills" className="hover:text-indigo-400 transition-colors">Skill Tracking</Link></li>
             </ul>
           </div>
 
@@ -38,8 +40,8 @@ const Footer = () => {
           <div>
             <h4 className="text-lg font-semibold text-white mb-3">Legal</h4>
             <ul className="space-y-2 text-sm">
-              <li><a href="#" className="hover:text-indigo-400 transition-colors">Terms of Service</a></li>
-              <li><a href="#" className="hover:text-indigo-400 transition-colors">Privacy Policy</a></li>
+              <li><Link to="/terms" className="hover:text-indigo-400 transition-colors">Terms of Service</Link></li>
+              <li><Link to="/privacy-policy" className="hover:text-indigo-400 transition-colors">Privacy Policy</Link></li>
             </ul>
           </div>
         </div>

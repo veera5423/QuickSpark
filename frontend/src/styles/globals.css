@@ -1,16 +1,4 @@
 @import "tailwindcss";
 
-/* Custom CSS or Theme Definition Block */
-@theme {
-  --animate-slide-in-tilt: slide-in-tilt 0.5s ease-out;
-  @keyframes slide-in-tilt {
-    0% {
-      opacity: 0;
-      transform: translateX(-20px) rotate(-1deg);
-    }
-    100% {
-      opacity: 1;
-      transform: translateX(0) rotate(0);
-    }
-  }
-}
+
+

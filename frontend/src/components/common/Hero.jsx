@@ -5,8 +5,14 @@ import Header from './Header'; // Assumed enhanced Header
 import Footer from './Footer'; // Assumed enhanced Footer
 import { Bot, Zap, Layers } from 'lucide-react';
 import MessageBanner from './MessageBanner';
+import { useAuth } from '../../context/AuthContext';
+import { useEffect } from 'react';
 
 const Hero = () => {
+    const {getMe}=useAuth();
+    useEffect(() => {
+        getMe();
+    }, []);
     // Helper component for uniform feature display
     const FeatureCard = ({ icon: Icon, title, description, color }) => (
         <Card className={`p-6 text-center shadow-xl border-t-4 border-${color}-500 transition-transform duration-300 hover:scale-[1.03] hover:shadow-2xl`}>
@@ -122,7 +128,7 @@ const Hero = () => {
                         </p>
                         <Button
                             onClick={() => window.location.href = '/register'}
-                            className="px-12 py-4 bg-indigo-700 text-white hover:bg-gray-100 text-xl hover:text-indigo-700 font-bold shadow-2xl transition-transform duration-150 transform hover:-translate-y-0.5"
+                            className="px-12 py-4 bg-indigo-600 text-white hover:bg-gray-100 text-xl hover:text-indigo-700 font-bold shadow-2xl transition-transform duration-150 transform hover:-translate-y-0.5 cursor-pointer"
                         >
                             Join QuickSpark AI
                         </Button>

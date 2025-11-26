@@ -9,10 +9,11 @@ class UserModel:
         return db.users.find_one({"email": email})
 
     @staticmethod
-    def create_user(username, email, password, auth_provider="local", is_verified=False):
+    def create_user(username, email, password, gender, auth_provider="local", is_verified=False):
         new_user = {
             "username": username,
             "email": email,
+            "gender": gender,
             "password": generate_password_hash(password) if password else None,
             "is_verified": is_verified,
             "auth_provider": auth_provider,

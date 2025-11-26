@@ -24,19 +24,20 @@ export const getPublicResources = async (searchQuery = '') => {
   }
 };
 
-export const submitLink = async (url) => {
+export const submitLink = async (url, description = '') => {
   try {
-    const response = await axiosClient.post('/api/public/submit-link', { url });
+    const response = await axiosClient.post('/api/public/submit-link', { url, description });
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;
   }
 };
 
-export const submitPdf = async (file) => {
+export const submitPdf = async (file, description = '') => {
   try {
     const formData = new FormData();
     formData.append('file', file);
+    if (description) formData.append('description', description);
     const response = await axiosClient.post('/api/public/submit-pdf', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -54,7 +55,7 @@ export const interactWithResource = async (resourceId, actionType, reason = null
     if (actionType === 'report' && reason) {
       data.reason = reason;
     }
-    const response = await axiosClient.post('/api/public/interact', data);
+      const response = await axiosClient.post(`/api/public/interact/${resourceId}`, data);
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;

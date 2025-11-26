@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
-import Unauthorized from '../../pages/Unauthorized';
+import Unauthorized from './Unauthorized';
 
 const AdminProtectedRoute = ({ children }) => {
   const { isAuthenticated, isLoading, user } = useContext(AuthContext);

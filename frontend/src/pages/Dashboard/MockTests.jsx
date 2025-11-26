@@ -170,7 +170,7 @@ const MockTests = () => {
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                         <div className="bg-white p-6 rounded-lg shadow-lg max-w-md">
                             <h3 className="text-lg font-bold mb-4 text-red-600">Usage Limit Exceeded</h3>
-                            <p className="mb-4 text-gray-700">You have reached your quiz generation limit. Upgrade to premium for more quizzes.</p>
+                            <p className="mb-4 text-gray-700">You have reached your quiz generation limit. Upgrade to premium for more quizzes.To Get Upgrade add five Public Resources </p>
                             <button
                                 onClick={() => setLimitExceeded(false)}
                                 className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded font-semibold"

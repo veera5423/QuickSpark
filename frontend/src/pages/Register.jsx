@@ -12,7 +12,8 @@ const Register = () => {
     name: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    gender: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -85,11 +86,13 @@ const Register = () => {
         username: formData.name,
         email: formData.email,
         password: formData.password
+        ,
+        gender: formData.gender || undefined
       });
       setMessage(response.data.message || 'Registration successful! Please check your email or spam to verify your account.');
       
       // Optional: Clear form data after successful registration
-      setFormData({ name: '', email: '', password: '', confirmPassword: '' });
+      setFormData({ name: '', email: '', password: '', confirmPassword: '', gender: '' });
 
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed');
@@ -152,6 +155,21 @@ const Register = () => {
             placeholder="your.email@example.com"
             icon={Mail}
           />
+          <div>
+            <label className="block text-sm font-medium mb-1 text-gray-700">Gender</label>
+            <select
+              name="gender"
+              value={formData.gender}
+              onChange={(e) => setFormData({...formData, gender: e.target.value})}
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 shadow-sm transition-all bg-white"
+            >
+              <option value="">Select gender (optional)</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+              
+            </select>
+          </div>
           <Input
             type="password"
             name="password"

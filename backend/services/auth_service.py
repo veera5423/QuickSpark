@@ -1,8 +1,8 @@
-import email
+
 
 from config import Config
 import requests
-from utils.email_helper import send_email
+
 from models.user import UserModel
 from flask_jwt_extended import create_access_token, decode_token
 from datetime import timedelta
@@ -71,14 +71,14 @@ class AuthService:
 
 
     @staticmethod
-    def register(username, email, password):
+    def register(username, email, password, gender):
         if UserModel.find_by_email(email):
             return {"message": "Email already exists"}, 400
 
-        user=UserModel.create_user(username, email, password)
+        user=UserModel.create_user(username, email, password, gender)
         print(f"User created with ID: {user['_id']}")
         token = create_access_token(identity=str(user["_id"]), expires_delta=timedelta(days=1))
-        verify_link = f"http://localhost:5173/verify-email/{token}"
+        verify_link = f"https://quick-spark.vercel.app/verify-email/{token}"
 
         html = f"""
             <h2>Verify your email</h2>
@@ -129,7 +129,7 @@ class AuthService:
             return {"message": "User not found"}, 404
 
         token = create_access_token(identity=str(user["_id"]), expires_delta=timedelta(hours=1))
-        reset_link = f"http://localhost:5173/reset-password/{token}"
+        reset_link = f"https://quick-spark.vercel.app/reset-password/{token}"
 
         html = f"""     
             <h2>Password Reset</h2>

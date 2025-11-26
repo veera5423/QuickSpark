@@ -3,13 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input'
-import {submitLink} from '../../api/resourcesAPI';
+import { submitLink, submitPdf } from '../../api/resourcesAPI';
 
 const SubmitResource = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('link');
   const [url, setUrl] = useState('');
   const [file, setFile] = useState(null);
+  const [description, setDescription] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
@@ -25,19 +26,10 @@ const SubmitResource = () => {
     try {
       setSubmitting(true);
       setError(null);
-
-      const response = await submitLink(url);
-      console.log(response);
-      
-
-      const data = await response
-
-      if (response.ok) {
-        setSuccess('Link submitted successfully for verification!');
-        setUrl('');
-      } else {
-        setError(data.message || 'Failed to submit link');
-      }
+      const data = await submitLink(url, description);
+      setSuccess(data.message || 'Link submitted successfully for verification!');
+      setUrl('');
+      setDescription('');
     } catch (error) {
       console.error('Error submitting link:', error);
       setError('Network error. Please try again.');
@@ -70,27 +62,12 @@ const SubmitResource = () => {
       setSubmitting(true);
       setError(null);
 
-      const formData = new FormData();
-      formData.append('file', file);
-
-      const response = await fetch('/api/public/submit-pdf', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: formData
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setSuccess('PDF submitted successfully for verification!');
-        setFile(null);
-        if (fileInputRef.current) {
-          fileInputRef.current.value = '';
-        }
-      } else {
-        setError(data.message || 'Failed to submit PDF');
+      const data = await submitPdf(file, description);
+      setSuccess(data.message || 'PDF submitted successfully for verification!');
+      setFile(null);
+      setDescription('');
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
       }
     } catch (error) {
       console.error('Error submitting PDF:', error);
@@ -176,9 +153,13 @@ const SubmitResource = () => {
                 required
                 className="w-full"
               />
-              <p className="text-xs text-gray-500 mt-1">
-                Supported: YouTube videos, articles, blog posts, etc.
-              </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Supported: YouTube videos, articles, blog posts, etc.
+                </p>
+              <div>
+                <label htmlFor="link-desc" className="block text-sm font-medium text-gray-700 mt-3">Description (optional)</label>
+                <textarea id="link-desc" value={description} onChange={(e) => setDescription(e.target.value)} rows={3} className="w-full mt-2 p-2 border rounded" placeholder="Add a short description about the link or its relevance" />
+              </div>
             </div>
             <Button
               type="submit"
@@ -220,6 +201,10 @@ const SubmitResource = () => {
                 </p>
               </div>
             )}
+            <div>
+              <label htmlFor="pdf-desc" className="block text-sm font-medium text-gray-700">Description (optional)</label>
+              <textarea id="pdf-desc" value={description} onChange={(e) => setDescription(e.target.value)} rows={4} className="w-full mt-2 p-2 border rounded" placeholder="Add a short description about the PDF content" />
+            </div>
             <Button
               type="submit"
               disabled={submitting || !file}

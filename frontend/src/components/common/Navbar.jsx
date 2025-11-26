@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { LogOut, UserCircle } from 'lucide-react';
+import { LogOut, UserCircle, Sparkles } from 'lucide-react';
 import { useLayout } from '../../context/LayoutContext';
 
 const Navbar = () => {
@@ -61,8 +61,19 @@ const Navbar = () => {
         </div>
         
         {/* --- Navigation & User Info --- */}
-        <div className="hidden md:block">
+        <div className="hidden md:flex md:items-center md:space-x-6">
             <h1 className="text-xl font-semibold text-gray-800">Dashboard Overview</h1>
+            { (user?.is_premium || user?.is_admin) && (
+              <Link
+                to="/dashboard/resume-check"
+                title="Resume Check (Pro)"
+                className="inline-flex items-center gap-2 text-sm font-semibold px-3 py-1 rounded-full bg-gradient-to-r from-indigo-600 to-pink-500 text-white shadow-md transform transition-transform duration-150 hover:scale-105"
+              >
+                <Sparkles className="w-4 h-4 text-white" />
+                <span>Resume Check</span>
+                <span className="ml-2 inline-flex items-center justify-center bg-white/20 text-xs px-2 py-0.5 rounded-full">Pro</span>
+              </Link>
+            ) }
         </div>
 
         <div className="flex items-center space-x-6">

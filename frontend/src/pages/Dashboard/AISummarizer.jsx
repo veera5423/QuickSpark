@@ -8,6 +8,7 @@ const AISummarizer = () => {
   const navigate = useNavigate(); // ◀️ Initialize hook
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
+  const [limitExceeded, setLimitExceeded] = useState(false);
   const fileInputRef = useRef(null);
 
   const handleFileUpload = async (event) => {
@@ -45,6 +46,9 @@ const AISummarizer = () => {
     } catch (error) {
       console.error('Failed to upload file:', error);
       setError(error.response?.data?.message || 'Failed to upload and summarize PDF');
+      if (error.response?.status === 429) {
+        setLimitExceeded(true);
+      }
       setUploading(false); // Only stop loading if there's an error
     }
   };
@@ -109,6 +113,33 @@ const AISummarizer = () => {
           {error && (
             <div className="mx-8 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center justify-center gap-2">
               <span>⚠️</span> {error}
+            </div>
+          )}
+          
+          {/* Usage Limit Exceeded Popup (same style as MockTests) */}
+          {limitExceeded && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white p-6 rounded-lg shadow-lg max-w-md">
+                <h3 className="text-lg font-bold mb-4 text-red-600">Usage Limit Exceeded</h3>
+                <p className="mb-4 text-gray-700">You have reached your summarization limit. Upgrade to premium for more uploads. To Get Upgrade add five public resources   </p>
+                <div className="flex justify-end gap-2">
+                  <button
+                    onClick={() => setLimitExceeded(false)}
+                    className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded font-semibold"
+                  >
+                    Dismiss
+                  </button>
+                  <button
+                    onClick={() => {
+                      setLimitExceeded(false);
+                      navigate('/dashboard/submit-resource');
+                    }}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded font-semibold"
+                  >
+                    Upgrade
+                  </button>
+                </div>
+              </div>
             </div>
           )}
         </div>

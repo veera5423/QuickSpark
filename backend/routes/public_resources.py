@@ -12,6 +12,7 @@ from PyPDF2 import PdfReader
 
 
 # Import all collections defined in db.py
+from utils.sendgrid_helper import send_email_sendgrid
 from db.mongo_client import db, resources_collection, links_collection, resource_interactions_collection,Config,supabase #
 
 public_resources_bp = Blueprint("public_resources", __name__)
@@ -57,6 +58,7 @@ def submit_public_link():
         
         data = request.get_json()
         url = data.get("url", "").strip()
+        description = data.get("description", "").strip()
         
         if not url or not re.match(r'https?://\S+', url):
             return jsonify({"message": "Invalid or missing URL."}), 400
@@ -71,6 +73,7 @@ def submit_public_link():
             "platform": metadata["platform"],
             "duration": metadata["duration"],
             "submitted_by": user_obj_id,
+            "description": description,
             "created_at": datetime.utcnow()
         }
         link_result = links_collection.insert_one(link_doc)
@@ -82,6 +85,7 @@ def submit_public_link():
             "original_filename": metadata["title"],
             "link_id": link_result.inserted_id, 
             "public_url": url,
+            "summary": description or metadata.get('title'),
             "is_public": True,
             "verification_status": "pending", 
             "created_at": datetime.utcnow()
@@ -114,6 +118,7 @@ def verify_resource(resource_id):
         # 🚨 ADMIN CHECK HERE: Add logic to verify current user is admin
         
         resource_obj_id = ObjectId(resource_id)
+        userId=resources_collection.find_one({"_id":resource_obj_id})["user_id"]
         
         # 1. Update the resource status in MongoDB
         resource = resources_collection.find_one_and_update(
@@ -125,18 +130,33 @@ def verify_resource(resource_id):
             }},
             return_document=ReturnDocument.AFTER
         )
+        resource_link=resource.get('public_url')
 
         if not resource:
             return jsonify({"message": "Resource not found"}), 404
         
         # --- 2. NOTIFICATION LOGIC (Using existing email service) ---
+        userMail=db.users.find_one({"_id":userId})["email"]
+        subject = "✨ Your Resource Has Been Verified!"
+        body = f"""
+        Hello Contributor,
+        Great news! Your submitted resource titled "{resource.get('original_filename')}" has been reviewed and verified by our admin team.
+        It is now live in the QuickSpark AI public resources library for all learners to access.
+        Thank you for contributing to our learning community!
+        Happy Learning!
+        The QuickSpark AI Team
+        """
+        send_email_sendgrid(userMail, subject, body)
+
+
+
         
         # Fetch ALL users for notification
         # Assuming db.users is available and contains an 'email' field
         all_users_cursor = db.users.find({}, {"email": 1, "_id": 0})
         
-        frontend_base_url = "https://your-app-domain.com" 
-        resource_link = f"{frontend_base_url}/dashboard/resources/chat/{resource.get('resource_uuid') or resource_id}"
+        frontend_base_url = "https://quick-spark.vercel.app/" 
+        # resource_link = f"{frontend_base_url}/dashboard/public-resources/{resource.get('resource_uuid') or resource_id}"
         resource_title = resource.get('original_filename') or 'New Resource'
         
         # NOTE: You must import your existing send_email_notification helper
@@ -161,7 +181,7 @@ def verify_resource(resource_id):
             recipient_email = user_doc.get('email')
             if recipient_email:
                 # 🚨 REPLACE THIS WITH YOUR ACTUAL EMAIL CALL
-                # send_email_notification(recipient_email, subject, body_template) 
+                send_email_sendgrid(recipient_email, subject, body_template) 
                 print(f"DEBUG: Email intended for {recipient_email}") # Placeholder
                 notification_count += 1
         
@@ -180,7 +200,7 @@ def verify_resource(resource_id):
 # -----------------------------------------------------------------
 @public_resources_bp.route("/interact/<resource_id>", methods=["POST"])
 @jwt_required()
-def handle_resource_interaction():
+def handle_resource_interaction(resource_id):
     """
     Handles 'like', 'dislike', and 'report' actions on a resource.
     """
@@ -188,40 +208,89 @@ def handle_resource_interaction():
         current_user_id = get_jwt_identity()
         user_obj_id = ObjectId(current_user_id)
         
+        # Allow preflight OPTIONS to succeed without authentication
+        if request.method == 'OPTIONS':
+            return jsonify({}), 200
+
         data = request.get_json()
-        resource_id = data.get("resource_id")
         action_type = data.get("action_type")
         report_reason = data.get("reason")
-        
+
         if action_type not in ['like', 'dislike', 'report']:
             return jsonify({"message": "Invalid action type."}), 400
-        
-        # 1. Prevent duplicate like/dislike (enforce only one state)
+
+        # Helper: compute current like/dislike counts for the resource
+        def _get_counts(rid):
+            likes = resource_interactions_collection.count_documents({"resource_id": rid, "action_type": "like"})
+            dislikes = resource_interactions_collection.count_documents({"resource_id": rid, "action_type": "dislike"})
+            return {"likes": likes, "dislikes": dislikes}
+
+        # Handle like/dislike as a toggle: a user can have at most one like/dislike per resource.
         if action_type in ['like', 'dislike']:
-            resource_interactions_collection.delete_many({
+            # Find existing like/dislike (if any)
+            existing = resource_interactions_collection.find_one({
                 "user_id": user_obj_id,
                 "resource_id": resource_id,
-                "action_type": {"$in": ['like', 'dislike']}
+                "action_type": {"$in": ["like", "dislike"]}
             })
-            
-        # 2. Record the new interaction
-        interaction_doc = {
-            "resource_id": resource_id,
-            "user_id": user_obj_id,
-            "action_type": action_type,
-            "created_at": datetime.utcnow(),
-        }
-        
-        if action_type == 'report':
-            interaction_doc['report_reason'] = report_reason
-            # FUTURE: Add Admin notification logic here
 
-        resource_interactions_collection.insert_one(interaction_doc)
+            # If same action exists -> toggle off (remove)
+            if existing and existing.get('action_type') == action_type:
+                resource_interactions_collection.delete_one({"_id": existing['_id']})
+                counts = _get_counts(resource_id)
+                return jsonify({"message": f"Removed '{action_type}'","status": "removed", "counts": counts}), 200
+
+            # If opposite action exists -> switch it to the new action (update)
+            if existing and existing.get('action_type') != action_type:
+                resource_interactions_collection.update_one(
+                    {"_id": existing['_id']},
+                    {"$set": {"action_type": action_type, "updated_at": datetime.utcnow()}},
+                )
+                counts = _get_counts(resource_id)
+                print(counts['likes'])
+                resources_collection.update_one(
+                    {"_id": ObjectId(resource_id)},
+                    {"$set": {
+                    "likes": counts['likes'],
+                    "dislikes": counts['dislikes']
+                    }}
+                )
+                return jsonify({"message": f"Action switched to '{action_type}'","status": "success", "counts": counts}), 200
+
+            # No existing like/dislike -> insert new one
+            interaction_doc = {
+                "resource_id": resource_id,
+                "user_id": user_obj_id,
+                "action_type": action_type,
+                "created_at": datetime.utcnow(),
+            }
+            resource_interactions_collection.insert_one(interaction_doc)
+            counts= _get_counts(resource_id)
+            print(counts)
+            resources_collection.update_one(
+                {"_id": ObjectId(resource_id)},
+                {"$set": {
+                    "likes": counts['likes'],
+                    "dislikes": counts['dislikes']
+                }}
+            )
+            return jsonify({"message": f"Action '{action_type}' recorded successfully.", "status": "success", "counts": counts}), 201
         
-        return jsonify({
-            "message": f"Action '{action_type}' recorded successfully.",
-            "status": "success"
-        }), 201
+          # Placeholder for future use
+
+        # Reports are recorded as separate documents (allow multiple reports)
+        if action_type == 'report':
+            interaction_doc = {
+                "resource_id": resource_id,
+                "user_id": user_obj_id,
+                "action_type": action_type,
+                "report_reason": report_reason,
+                "created_at": datetime.utcnow(),
+            }
+            resource_interactions_collection.insert_one(interaction_doc)
+            # FUTURE: Add Admin notification logic here
+            counts = _get_counts(resource_id)
+            return jsonify({"message": "Report recorded successfully.", "status": "reported", "counts": counts}), 201
 
     except errors.InvalidId:
         return jsonify({"message": "Invalid user ID or Resource ID"}), 400
@@ -273,15 +342,15 @@ def public_resource_search():
             }}
         ]
         
-        raw_stats = list(resource_interactions_collection.aggregate(stats_pipeline))
+        # raw_stats = list(resource_interactions_collection.aggregate(stats_pipeline))
         
-        # Convert raw stats into a map keyed by resource ID
-        stats_map = {}
-        for stat in raw_stats:
-            res_id = stat['_id']['resource_id']
-            if res_id not in stats_map:
-                stats_map[res_id] = {'likes': 0, 'dislikes': 0}
-            stats_map[res_id][stat['_id']['action']] = stat['count']
+        # # Convert raw stats into a map keyed by resource ID
+        # stats_map = {}
+        # for stat in raw_stats:
+        #     res_id = stat['_id']['resource_id']
+        #     if res_id not in stats_map:
+        #         stats_map[res_id] = {'likes': 0, 'dislikes': 0}
+        #     stats_map[res_id][stat['_id']['action']] = stat['count']
         
         # 4. Final Data Compilation
         final_output = []
@@ -297,8 +366,8 @@ def public_resource_search():
                 "filename": resource.get('original_filename'),
                 "description": resource.get('summary', 'No summary available.'),
                 "review_source": link_info['url'] if link_info else resource.get('public_url'),
-                "likes": stats_map.get(res_id_str, {}).get('likes', 0),
-                "dislikes": stats_map.get(res_id_str, {}).get('dislikes', 0),
+                "likes": resource.get('likes', 0),
+                "dislikes": resource.get('dislikes', 0),
                 "platform": link_info['platform'] if link_info else 'PDF'
             }
             final_output.append(output)
@@ -334,6 +403,7 @@ def submit_public_pdf():
             return jsonify({"message": "Only PDF files are supported."}), 400
         
         filename = secure_filename(file.filename)
+        description = request.form.get('description', '').strip()
         file_bytes = file.read()
         file_size = len(file_bytes)
         
@@ -362,7 +432,7 @@ def submit_public_pdf():
             "public_url": public_url,
             "is_public": True,
             "verification_status": "pending", # 🚨 KEY DIFFERENCE: Pending review
-            "summary": None, # No summary yet
+            "summary": description or None, # Use provided description as initial summary
             "created_at": datetime.utcnow(),
             "metadata": {
                 "file_size_kb": file_size / 1024,

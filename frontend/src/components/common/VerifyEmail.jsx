@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import Card from '../components/ui/Card';
-import Button from '../components/ui/Button';
-import { authAPI } from '../api/authAPI';
+import Card from '../ui/Card';
+import Button from '../ui/Button';
+import { authAPI } from '../../api/authAPI';
 import { Loader2, CheckCircle, XCircle, LogIn, Mail } from 'lucide-react';
 
 const VerifyEmail = () => {
