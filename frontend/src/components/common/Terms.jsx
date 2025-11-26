@@ -35,7 +35,7 @@ const Terms = () => {
 
         <Card className="p-6">
           <h2 className="text-xl font-semibold mb-2">Contact</h2>
-          <p className="text-gray-700">If you have questions about these Terms, contact support@quick-spark.example.</p>
+          <p className="text-gray-700">If you have questions about these Terms, contact quickspark.1help@gmail.com.</p>
         </Card>
       </main>
       <Footer />
