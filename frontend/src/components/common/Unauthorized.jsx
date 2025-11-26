@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import Card from '../components/ui/Card';
-import Button from '../components/ui/Button';
+
+import Button from '../ui/Button';
 import { Lock, LogIn, UserPlus, Clock } from 'lucide-react';
 
 const Unauthorized = () => {

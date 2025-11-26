@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -10,9 +10,9 @@ import DashboardLayout from './layouts/DashboardLayout';
 // Auth Pages
 import Login from './pages/Login';
 import Register from './pages/Register';
-import ForgotPassword from './pages/ForgotPassword';
-import ResetPassword from './pages/ResetPassword';
-import VerifyEmail from './pages/VerifyEmail';
+import ForgotPassword from './components/common/ForgotPassword';
+import ResetPassword from './components/common/ResetPassword';
+import VerifyEmail from './components/common/VerifyEmail';
 
 // Dashboard Pages
 import Home from './pages/Dashboard/Home';
@@ -25,13 +25,19 @@ import Careers from './pages/Dashboard/Careers';
 import PublicResources from './pages/Dashboard/PublicResources';
 import SubmitResource from './pages/Dashboard/SubmitResource';
 import AdminDashboard from './pages/Dashboard/AdminDashboard';
+import ResumeChecker from './pages/Dashboard/ResumeChecker';
 
 // Other Pages
-import NotFound from './pages/NotFound';
+import NotFound from './components/common/NotFound';
 import CareerExplorer from './pages/Dashboard/CareerExplorer';
 import QuizDetails from './pages/Dashboard/QuizDetails';
-import About from './pages/About';
-import Contact from './pages/Contact';
+
+import AboutUs from './components/common/AboutUs';
+import PrivacyPolicy from './components/common/PrivacyPolicy';
+import Blog from './components/common/Blog';
+import BlogPost from './components/common/BlogPost';
+import Terms from './components/common/Terms';
+import Contact from './components/common/Contact';
 import Hero from './components/common/Hero';
 
 const AppRouter = () => {
@@ -117,6 +123,13 @@ const AppRouter = () => {
                 </DashboardLayout>
               </ProtectedRoute>
             } />
+            <Route path="/dashboard/resume-check" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <ResumeChecker />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
             <Route path="/dashboard/mock-tests" element={
               <ProtectedRoute>
                 <DashboardLayout>
@@ -154,7 +167,12 @@ const AppRouter = () => {
             } />
 
             {/* Public Routes */}
-            <Route path="/about" element={<About />} />
+            
+            <Route path="/about-us" element={<AboutUs />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:slug" element={<BlogPost />} />
+            <Route path="/terms" element={<Terms />} />
             <Route path="/contact" element={<Contact />} />
 
             {/* Default redirect */}

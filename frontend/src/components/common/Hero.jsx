@@ -4,8 +4,15 @@ import Button from '../ui/Button';
 import Header from './Header'; // Assumed enhanced Header
 import Footer from './Footer'; // Assumed enhanced Footer
 import { Bot, Zap, Layers } from 'lucide-react';
+import MessageBanner from './MessageBanner';
+import { useAuth } from '../../context/AuthContext';
+import { useEffect } from 'react';
 
 const Hero = () => {
+    const {getMe}=useAuth();
+    useEffect(() => {
+        getMe();
+    }, []);
     // Helper component for uniform feature display
     const FeatureCard = ({ icon: Icon, title, description, color }) => (
         <Card className={`p-6 text-center shadow-xl border-t-4 border-${color}-500 transition-transform duration-300 hover:scale-[1.03] hover:shadow-2xl`}>
@@ -21,6 +28,7 @@ const Hero = () => {
         <div className="min-h-screen pt-16 bg-gray-50 font-sans">
             <Header />
 
+                <MessageBanner/>
             <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
                 
                 {/* --- 1. Main Hero Section (Large, High-Impact Call to Action) --- */}
@@ -113,14 +121,14 @@ const Hero = () => {
 
                 {/* --- 4. Final Call to Action --- */}
                 <section className="text-center pt-16 pb-12">
-                    <Card className="p-10 bg-indigo-600 text-white shadow-2xl">
+                    <Card className="p-10 bg-indigo-400 text-gray-800  shadow-2xl">
                         <h2 className="text-4xl font-extrabold mb-4">Ready to Spark Your Potential?</h2>
                         <p className="text-xl opacity-90 mb-8 max-w-2xl mx-auto">
                             Unlock a smarter way to study. Create your free account in seconds and start mastering your curriculum today.
                         </p>
                         <Button
                             onClick={() => window.location.href = '/register'}
-                            className="px-12 py-4 bg-white text-indigo-700 hover:bg-gray-100 text-xl font-bold shadow-2xl transition-transform duration-150 transform hover:-translate-y-0.5"
+                            className="px-12 py-4 bg-indigo-600 text-white hover:bg-gray-100 text-xl hover:text-indigo-700 font-bold shadow-2xl transition-transform duration-150 transform hover:-translate-y-0.5 cursor-pointer"
                         >
                             Join QuickSpark AI
                         </Button>

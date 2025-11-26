@@ -13,8 +13,9 @@ def register():
     username = data.get("username")
     email = data.get("email")
     password = data.get("password")
+    gender = data.get("gender")
 
-    response, status = AuthService.register(username, email, password)
+    response, status = AuthService.register(username, email, password, gender)
 
     return jsonify(response), status
 

@@ -141,6 +141,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from utils.rate_limit import check_and_increment_usage
 from db.mongo_client import supabase, resources_collection, Config, pg_conn, db
+from utils.gemini_helper import summarize_with_gemini
 
 ai_summarizer_bp = Blueprint("ai_summarizer", __name__)
 
@@ -168,13 +169,9 @@ text_splitter = RecursiveCharacterTextSplitter(
 
 def get_summary_from_gemini(chunk):
     """Summarize a single chunk using the new GenerativeModel."""
-    if not summarizer_model:
-        raise Exception("Summarizer model not initialized")
-    
-    response = summarizer_model.generate_content(
-        f"Summarize this academic content clearly and concisely:\n\n{chunk}"
-    )
-    return response.text
+    # Use shared helper which handles the client and model call
+    prompt = f"Summarize this academic content clearly and concisely:\n\n{chunk}"
+    return summarize_with_gemini(prompt)
 
 def create_and_store_embeddings(text_chunks, resource_uuid, user_id):
     if not pg_conn:
@@ -227,20 +224,22 @@ def upload_and_summarize():
     Upload, save, summarize, AND create vector embeddings.
     """
     print("Endpoint reached: /upload-and-summarize")
-    if not check_and_increment_usage(current_user_id):
-            return jsonify({
-                "message": "AI Chat limit exceeded. Upgrade to Premium for more usage.",
-                "answer": "AI Chat limit reached. Please upgrade your account to continue."
-            }), 429 # 429 Too Many Requests
+    # Authenticate user and enforce usage limits
     # Check if AI models are ready
     if not summarizer_model:
         return jsonify({"message": "AI models are not initialized. Check API key."}), 500
-        
     try:
         current_user_id = get_jwt_identity()
         print(f"JWT Identity: {current_user_id}")
     except Exception as e:
         return jsonify({"message": f"Authentication error: {str(e)}"}), 401
+
+    # Now check and increment usage for this authenticated user
+    if not check_and_increment_usage(current_user_id):
+        return jsonify({
+            "message": "AI Chat limit exceeded. Upgrade to Premium for more usage.",
+            "answer": "AI Chat limit reached. Please upgrade your account to continue."
+        }), 429 # 429 Too Many Requests
 
     if "file" not in request.files:
         return jsonify({"message": "No file part"}), 400
@@ -473,14 +472,12 @@ def chat_with_resource():
         print("Generating final answer...")
         if not summarizer_model: # We can reuse the summarizer model for chat
             return jsonify({"message": "Chat model not initialized"}), 500
-            
-        response = summarizer_model.generate_content(
-            prompt,
-            request_options={"timeout": 180}
-            )
-        
+
+        # Use shared helper for generation
+        answer_text = summarize_with_gemini(prompt)
+
         print("Answer generated successfully.")
-        return jsonify({"answer": response.text}), 200
+        return jsonify({"answer": answer_text}), 200
 
     except Exception as e:
         print(f"❌ Error in chat endpoint: {str(e)}")

@@ -1,10 +1,24 @@
 import React from 'react';
 
-const Input = ({ type = 'text', placeholder, value, onChange, className = '', label, required, icon: Icon }) => {
+const Input = ({
+  type = 'text',
+  placeholder,
+  value,
+  onChange,
+  className = '',
+  label,
+  required,
+  icon: Icon,
+  name,
+  id,
+  ...rest
+}) => {
+  const inputId = id || name;
+
   return (
     <div className="space-y-1">
       {label && (
-        <label className="block text-sm font-medium text-gray-700">
+        <label htmlFor={inputId} className="block text-sm font-medium text-gray-700">
           {label} {required && <span className="text-red-500">*</span>}
         </label>
       )}
@@ -15,12 +29,15 @@ const Input = ({ type = 'text', placeholder, value, onChange, className = '', la
           </div>
         )}
         <input
+          id={inputId}
+          name={name}
           type={type}
           placeholder={placeholder}
           value={value}
           onChange={onChange}
           required={required}
           className={`w-full ${Icon ? 'pl-10' : 'pl-3'} pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${className}`}
+          {...rest}
         />
       </div>
     </div>
