@@ -41,7 +41,7 @@ const Sidebar = () => {
             {/* Mobile Header/Toggle Button */}
             <div className="fixed top-0 left-0 z-50 w-full bg-gray-900 md:hidden p-3 shadow-lg flex justify-between items-center">
                 <Zap className="w-6 h-6 text-yellow-500" />
-                <span className="text-xl font-extrabold text-indigo-400">QuickSpark AI</span>
+                <Link to="/" className="text-xl font-extrabold text-indigo-400 cursor-pointer">QuickSpark AI</Link>
                 <button onClick={toggleSidebar} className="text-white p-1 rounded-md hover:bg-gray-700">
                     {isExpanded ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
                 </button>
@@ -57,7 +57,7 @@ const Sidebar = () => {
                 {/* Logo/Brand Area */}
                 <div className={`p-5 mb-6 border-b border-gray-700 ${isExpanded ? 'block' : 'hidden'} flex`}>
                     <Zap className="w-6 h-6 text-yellow-500" />
-                    <span className="text-2xl font-extrabold text-indigo-400 tracking-wider">QuickSpark AI</span>
+                    <Link to="/" className="text-2xl font-extrabold text-indigo-400 tracking-wider">QuickSpark AI</Link>
                 </div>
                 
                 {/* Desktop Toggle Button */}

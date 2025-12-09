@@ -46,8 +46,8 @@ const SubmitResource = () => {
       return;
     }
 
-    // Validate file type
-    if (!file.name.toLowerCase().endswith('.pdf')) {
+    // Validate file type (guard name and use correct JS method)
+    if (!file.name || typeof file.name !== 'string' || !file.name.toLowerCase().endsWith('.pdf')) {
       setError('Only PDF files are supported');
       return;
     }

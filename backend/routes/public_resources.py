@@ -132,21 +132,25 @@ def verify_resource(resource_id):
         )
         resource_link=resource.get('public_url')
 
+          
+
+
         if not resource:
             return jsonify({"message": "Resource not found"}), 404
         
         # --- 2. NOTIFICATION LOGIC (Using existing email service) ---
         userMail=db.users.find_one({"_id":userId})["email"]
         subject = "✨ Your Resource Has Been Verified!"
-        body = f"""
-        Hello Contributor,
-        Great news! Your submitted resource titled "{resource.get('original_filename')}" has been reviewed and verified by our admin team.
-        It is now live in the QuickSpark AI public resources library for all learners to access.
-        Thank you for contributing to our learning community!
-        Happy Learning!
-        The QuickSpark AI Team
+        # Send contributor notification as HTML
+        contributor_html = f"""
+        <p>Hello Contributor,</p>
+        <p>Great news! Your submitted resource titled "<strong>{resource.get('original_filename')}</strong>" has been reviewed and verified by our admin team.</p>
+        <p>It is now live in the QuickSpark AI public resources library for all learners to access.</p>
+        <p>View it here: <a href=\"{resource_link}\" target=\"_blank\">{resource_link}</a></p>
+        <p>Thank you for contributing to our learning community!</p>
+        <p>Happy Learning!<br/>The QuickSpark AI Team</p>
         """
-        send_email_sendgrid(userMail, subject, body)
+        send_email_sendgrid(userMail, subject, contributor_html)
 
 
 
@@ -164,26 +168,23 @@ def verify_resource(resource_id):
 
         notification_count = 0
         subject = f"✨ New Verified Resource: {resource_title}"
-        body_template = f"""
-        Hello Learner,
-
-        Great news! A new study resource has been approved and added to the public library: "{resource_title}".
-
-        You can access it immediately here:
-
-        ➡️ {resource_link}
-
-        Happy Learning!
-        The QuickSpark AI Team
+        # HTML-formatted broadcast to learners
+        broadcast_html = f"""
+        <p>Hello Learner,</p>
+        <p>Great news! A new study resource has been approved and added to the public library: "<strong>{resource_title}</strong>".</p>
+        <p>You can access it immediately here: <a href=\"{resource_link}\" target=\"_blank\">{resource_link}</a></p>
+        <p>Happy Learning!<br/>The QuickSpark AI Team</p>
         """
-        
+
         for user_doc in all_users_cursor:
             recipient_email = user_doc.get('email')
             if recipient_email:
-                # 🚨 REPLACE THIS WITH YOUR ACTUAL EMAIL CALL
-                send_email_sendgrid(recipient_email, subject, body_template) 
-                print(f"DEBUG: Email intended for {recipient_email}") # Placeholder
-                notification_count += 1
+                try:
+                    send_email_sendgrid(recipient_email, subject, broadcast_html)
+                    print(f"DEBUG: Email sent to {recipient_email}")
+                    notification_count += 1
+                except Exception as mail_err:
+                    print(f"Failed to send email to {recipient_email}: {mail_err}")
         
         return jsonify({
             "message": f"Resource '{resource_title}' verified and {notification_count} notifications triggered.",
@@ -367,6 +368,7 @@ def public_resource_search():
                 "description": resource.get('summary', 'No summary available.'),
                 "review_source": link_info['url'] if link_info else resource.get('public_url'),
                 "likes": resource.get('likes', 0),
+                
                 "dislikes": resource.get('dislikes', 0),
                 "platform": link_info['platform'] if link_info else 'PDF'
             }

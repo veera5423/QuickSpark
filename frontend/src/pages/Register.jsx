@@ -190,7 +190,25 @@ const Register = () => {
             placeholder="Confirm your password"
             icon={Lock}
           />
+          <span className="flex items-center space-x-2">
+          <Input 
+            type="checkbox"
+            name="terms"
+            required
+            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+          />
+          <div className="text-sm text-gray-600">
+            I agree to the {' '}
+            <Link to="/terms" className="text-indigo-600 hover:text-indigo-800 font-medium">
+              Terms of Service
+            </Link> {' '}
+            and {' '}
+            <Link to="/privacy" className="text-indigo-600 hover:text-indigo-800 font-medium">
+              Privacy Policy
+            </Link>.
+          </div></span>
         </div>
+
 
         {/* Primary Register Button (Enhanced) */}
         <Button 
