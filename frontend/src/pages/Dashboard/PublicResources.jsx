@@ -13,6 +13,7 @@ const PublicResources = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState(null);
+  const [filterType, setFilterType] = useState('all'); // 'all' | 'pdf' | 'link'
 
   useEffect(() => {
     loadResources();
@@ -71,6 +72,14 @@ const PublicResources = () => {
     }
   };
 
+  // Filter resources based on selected segment
+  const filteredResources = resources.filter(r => {
+    if (filterType === 'all') return true;
+    if (filterType === 'pdf') return (r.platform && r.platform.toLowerCase() === 'pdf') || (r.type && r.type.toLowerCase() === 'pdf');
+    if (filterType === 'link') return !((r.platform && r.platform.toLowerCase() === 'pdf') || (r.type && r.type.toLowerCase() === 'pdf'));
+    return true;
+  });
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -108,6 +117,33 @@ const PublicResources = () => {
         />
       </div>
 
+      {/* --- SEGMENTED CONTROL: All / PDFs / Links --- */}
+      <div className="mt-4">
+        <div className="inline-flex rounded-lg bg-gray-100 p-1 ">
+          <button
+            onClick={() => setFilterType('all')}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition cursor-pointer ${filterType === 'all' ? 'bg-white shadow-sm text-indigo-600' : 'text-gray-600 hover:text-gray-800'}`}
+            aria-pressed={filterType === 'all'}
+          >
+            All
+          </button>
+          <button
+            onClick={() => setFilterType('pdf')}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition cursor-pointer ${filterType === 'pdf' ? 'bg-white shadow-sm text-indigo-600' : 'text-gray-600 hover:text-gray-800'}`}
+            aria-pressed={filterType === 'pdf'}
+          >
+            PDFs
+          </button>
+          <button
+            onClick={() => setFilterType('link')}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition cursor-pointer ${filterType === 'link' ? 'bg-white shadow-sm text-indigo-600' : 'text-gray-600 hover:text-gray-800'}`}
+            aria-pressed={filterType === 'link'}
+          >
+            Links
+          </button>
+        </div>
+      </div>
+
       {/* --- ERROR MESSAGE --- */}
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center gap-2">
@@ -143,7 +179,9 @@ const PublicResources = () => {
         // console.log(resources),
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {resources.map(resource => (
+            {filteredResources.map(resource => (
+            // console.log(resource),
+            
             <Card
               key={resource.id}
               className="group hover:shadow-xl transition-all duration-200 cursor-pointer border border-gray-100 hover:border-indigo-200"
@@ -174,8 +212,9 @@ const PublicResources = () => {
 
                 {/* Description */}
                 <div className="flex-1">
-                  <p className="text-sm text-gray-600 line-clamp-3 leading-relaxed">
-                    {resource.summary}
+                  <p className="text-sm text-black line-clamp-3 leading-relaxed">
+                    {resource.description || 'No description provided.'}
+                   
                   </p>
                 </div>
 

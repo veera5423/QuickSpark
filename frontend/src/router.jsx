@@ -39,6 +39,7 @@ import BlogPost from './components/common/BlogPost';
 import Terms from './components/common/Terms';
 import Contact from './components/common/Contact';
 import Hero from './components/common/Hero';
+import TestRefresh from './components/TestRefresh';
 
 const AppRouter = () => {
 
@@ -174,6 +175,8 @@ const AppRouter = () => {
             <Route path="/blog/:slug" element={<BlogPost />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/contact" element={<Contact />} />
+
+            <Route path="/test-refresh" element={<TestRefresh/>} />
 
             {/* Default redirect */}
             <Route path="/" element={<Hero/>} />

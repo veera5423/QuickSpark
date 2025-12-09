@@ -61,6 +61,21 @@ const QuizModal = ({
     }
   }, [isOpen, skill, mode, externalQuizData]);
 
+  // Warn user before closing the window if in the middle of a quiz
+    useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      e.preventDefault();
+      e.returnValue = ""; // required for Chrome
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
+
+
   // --- Step Mode Navigation and Submission ---
   const handleNext = () => {
     const newAnswers = [...answers, selectedOption];
