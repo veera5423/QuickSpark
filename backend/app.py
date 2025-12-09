@@ -5,6 +5,7 @@ from extensions.jwt import jwt
 from routes.auth import auth_bp
 from routes.ai_summarizer import ai_summarizer_bp
 from routes.resume_check import resume_check_bp
+from routes.user_requests import user_requests_bp
 from routes.ai_quiz_generator import ai_quiz_bp
 from routes.resources import resources_bp
 from routes.career_explorer import career_explorer_bp
@@ -32,6 +33,7 @@ def create_app():
     app.register_blueprint(public_resources_bp, url_prefix='/api/public')
     app.register_blueprint(admin_bp, url_prefix='/api/admin')
     app.register_blueprint(send_mail_bp, url_prefix='/api/mail')
+    app.register_blueprint(user_requests_bp, url_prefix='/api/users')
     # ps=generate_password_hash("adminpassword")
 
     # print(f"Admin password hash: {ps}")

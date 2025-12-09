@@ -139,7 +139,8 @@ def verify_resource(resource_id):
             return jsonify({"message": "Resource not found"}), 404
         
         # --- 2. NOTIFICATION LOGIC (Using existing email service) ---
-        userMail=db.users.find_one({"_id":userId})["email"]
+        user_doc = db.users.find_one({"_id": userId})
+        userMail = user_doc.get("email") if user_doc else None
         subject = "✨ Your Resource Has Been Verified!"
         # Send contributor notification as HTML
         contributor_html = f"""
@@ -186,6 +187,42 @@ def verify_resource(resource_id):
                 except Exception as mail_err:
                     print(f"Failed to send email to {recipient_email}: {mail_err}")
         
+        # --- 3. AUTO-UPGRADE CHECK ---
+        try:
+            # Increment verified upload counter for the contributor
+            updated_user = db.users.find_one_and_update(
+                {"_id": userId},
+                {"$inc": {"verified_upload_count": 1}},
+                return_document=ReturnDocument.AFTER
+            )
+            verified_count = updated_user.get('verified_upload_count', 0) if updated_user else 0
+
+            # If contributor reaches threshold and isn't already Pro, auto-upgrade
+            AUTO_UPGRADE_THRESHOLD = 3
+            if verified_count >= AUTO_UPGRADE_THRESHOLD and not (updated_user.get('is_pro_member', False) if updated_user else False):
+                db.users.update_one(
+                    {"_id": userId},
+                    {"$set": {
+                        "is_pro_member": True,
+                        "pro_upgraded_at": datetime.utcnow(),
+                        "pro_upgraded_by": "auto"
+                    }}
+                )
+                try:
+                    upgrade_subject = "🎉 You've been upgraded to QuickSpark Pro!"
+                    upgrade_html = f"""
+                    <p>Hi {user_doc.get('name', '') if user_doc else 'Contributor'},</p>
+                    <p>Thanks for contributing high-quality resources — we've auto-upgraded your account to <strong>QuickSpark Pro</strong> as a token of appreciation.</p>
+                    <p>You can now access Pro features like the Resume Check and extended AI usage limits. Welcome to Pro!</p>
+                    <p>— The QuickSpark Team</p>
+                    """
+                    if userMail:
+                        send_email_sendgrid(userMail, upgrade_subject, upgrade_html)
+                except Exception as mail_err:
+                    print(f"Failed to send upgrade email to {userMail}: {mail_err}")
+        except Exception as au_err:
+            print(f"Auto-upgrade check failed: {au_err}")
+
         return jsonify({
             "message": f"Resource '{resource_title}' verified and {notification_count} notifications triggered.",
             "status": "verified"

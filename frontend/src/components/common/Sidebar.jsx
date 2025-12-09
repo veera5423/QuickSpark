@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import RequestProModal from './RequestProModal';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, FileText, Bot, Layers, TrendingUp, Briefcase, Zap, Menu, X, Library, Upload, Shield } from 'lucide-react';
+import { Home, FileText, Bot, Layers, TrendingUp, Briefcase, Zap, Menu, X, Library, Upload, Shield, Sparkles, LogOut as LogOutIcon } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useLayout } from '../../context/LayoutContext';
 
@@ -23,7 +24,7 @@ const Sidebar = () => {
     const [localExpanded, setLocalExpanded] = useState(true);
     const isExpanded = layout?.isExpanded ?? localExpanded;
     const setIsExpanded = layout?.setIsExpanded ?? setLocalExpanded;
-    const {user,getMe}=useAuth()
+    const {user,getMe,logout}=useAuth()
     useEffect(() => {
       if (!user) {
         getMe();
@@ -32,6 +33,7 @@ const Sidebar = () => {
     
 
     const toggleSidebar = () => setIsExpanded(!isExpanded);
+    const [showRequestModal, setShowRequestModal] = useState(false);
     const UserName = user?.username || "UserName"
     const isAdmin = user?.is_admin; // Assuming user object has is_admin field
     const isPremium = user?.is_premium; // Assuming user object has is_premium field
@@ -39,13 +41,39 @@ const Sidebar = () => {
     return (
         <>
             {/* Mobile Header/Toggle Button */}
-            <div className="fixed top-0 left-0 z-50 w-full bg-gray-900 md:hidden p-3 shadow-lg flex justify-between items-center">
-                <Zap className="w-6 h-6 text-yellow-500" />
-                <Link to="/" className="text-xl font-extrabold text-indigo-400 cursor-pointer">QuickSpark AI</Link>
-                <button onClick={toggleSidebar} className="text-white p-1 rounded-md hover:bg-gray-700">
-                    {isExpanded ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-                </button>
-            </div>
+                        <div className="fixed top-0 left-0 z-50 w-full bg-gray-900 md:hidden p-3 shadow-lg flex justify-between items-center">
+                                <Zap className="w-6 h-6 text-yellow-500" />
+                                <Link to="/" className="text-xl font-extrabold text-indigo-400 cursor-pointer">QuickSpark AI</Link>
+                                <div className="flex items-center space-x-2">
+                                    {/* Mobile Get Pro pill */}
+                                    {!isPremium && !isAdmin && (
+                                        <button
+                                            onClick={() => setShowRequestModal(true)}
+                                            className="mr-2 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-semibold shadow-sm"
+                                            title="Request Pro Access"
+                                        >
+                                            <Sparkles className="w-4 h-4" />
+                                            <span className="text-xs">Get Pro</span>
+                                            <span className="ml-1 inline-flex items-center justify-center bg-white/20 text-xs px-2 py-0.5 rounded-full">★</span>
+                                        </button>
+                                    )}
+
+                                    {/* Mobile logout icon */}
+                                    <button
+                                        onClick={() => { try { logout(); } catch{}; window.location.href = '/login'; }}
+                                        className="text-white p-1 rounded-md hover:bg-gray-700"
+                                        title="Logout"
+                                        aria-label="Logout"
+                                    >
+                                        <LogOutIcon className="w-5 h-5" />
+                                    </button>
+
+                                    {/* Sidebar toggle */}
+                                    <button onClick={toggleSidebar} className="text-white p-1 rounded-md hover:bg-gray-700">
+                                            {isExpanded ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                                    </button>
+                                </div>
+                        </div>
 
             {/* Sidebar Desktop/Tablet */}
             <div 
@@ -97,6 +125,22 @@ const Sidebar = () => {
                         );
                     })}
                     
+                    {/* Conditional Pro / Request Pro action
+                                {!isPremium && !isAdmin && (
+                                    <li>
+                                        <button
+                                            onClick={() => setShowRequestModal(true)}
+                                            className="mr-2 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-semibold shadow-lg transform transition-transform hover:scale-105"
+                                            title="Request Pro Access"
+                                            aria-label="Request Pro Access"
+                                        >
+                                            <Upload className={`w-5 h-5 shrink-0 ${isExpanded ? 'mr-3' : 'mx-auto'}`} />
+                                            <span className="text-xs">Get Pro</span>
+                                            <span className="ml-1 inline-flex items-center justify-center bg-white/20 text-xs px-2 py-0.5 rounded-full">★</span>
+                                        </button>
+                                    </li>
+                                )} */}
+
                     {/* Admin Panel - conditionally rendered */}
                     {isAdmin && (
                         <li>
@@ -140,6 +184,8 @@ const Sidebar = () => {
                     className="fixed inset-0 z-40 bg-black opacity-50 md:hidden"
                 ></div>
             )}
+            {/* Request Pro Modal */}
+            <RequestProModal isOpen={showRequestModal} onClose={() => setShowRequestModal(false)} />
         </>
     );
 };

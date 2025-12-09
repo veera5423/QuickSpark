@@ -7,6 +7,7 @@ from utils.gemini_helper import summarize_with_gemini
 
 from utils.rate_limit import check_and_increment_usage
 from db.mongo_client import Config, users_collection
+from datetime import datetime
 
 resume_check_bp = Blueprint("resume_check", __name__)
 
@@ -31,10 +32,23 @@ def resume_check():
     # Ensure only Pro/Premium users can access this feature
     try:
         from bson import ObjectId
-        user_doc = users_collection.find_one({"_id": ObjectId(current_user_id)}, {"is_pro_member": 1})
+        user_doc = users_collection.find_one({"_id": ObjectId(current_user_id)}, {"is_pro_member": 1, "has_used_trial": 1})
         is_pro = user_doc.get("is_pro_member", False) if user_doc else False
+        has_used_trial = user_doc.get("has_used_trial", False) if user_doc else False
+
+        # Allow a single one-time trial use for non-pro users
         if not is_pro:
-            return jsonify({"message": "Resume check is available for Pro/Premium users only."}), 403
+            if not has_used_trial:
+                # Mark trial used and allow this request to proceed
+                try:
+                    users_collection.update_one(
+                        {"_id": ObjectId(current_user_id)},
+                        {"$set": {"has_used_trial": True, "trial_used_at": datetime.utcnow()}}
+                    )
+                except Exception as e:
+                    print(f"Failed to mark trial usage: {e}")
+            else:
+                return jsonify({"message": "Resume check is available for Pro/Premium users only."}), 403
     except Exception as e:
         print(f"Subscription check failed: {e}")
         return jsonify({"message": "Unable to verify subscription status."}), 500
