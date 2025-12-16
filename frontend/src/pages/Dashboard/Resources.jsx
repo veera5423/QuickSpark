@@ -143,7 +143,7 @@ const Resources = () => {
           <Button
             onClick={handleUploadClick}
             disabled={uploading}
-            className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200"
+            className="bg-indigo-500 text-indigo-700 hover:bg-indigo-600 border border-indigo-200 cursor-pointer"
           >
             Select a File
           </Button>

@@ -131,7 +131,6 @@ const AppRouter = () => {
                 </DashboardLayout>
               </ProtectedRoute>
             } />
-            {/* Request Pro is now handled via modal in Navbar/Sidebar */}
             <Route path="/dashboard/mock-tests" element={
               <ProtectedRoute>
                 <DashboardLayout>

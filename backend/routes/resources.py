@@ -5,6 +5,17 @@ from db.mongo_client import db
 
 resources_bp = Blueprint("resources", __name__)
 
+def convert_objectids(obj):
+    """Recursively convert ObjectIds to strings in a dict or list."""
+    if isinstance(obj, dict):
+        return {k: convert_objectids(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [convert_objectids(item) for item in obj]
+    elif isinstance(obj, ObjectId):
+        return str(obj)
+    else:
+        return obj
+
 @resources_bp.route("/", methods=["GET"])
 @jwt_required()
 def get_resources():
@@ -21,12 +32,8 @@ def get_resources():
 
     try:
         resources = list(db.resources.find({"user_id": user_obj_id}).sort("created_at", -1))
-        # Convert ObjectIds to strings for JSON serialization
-        for resource in resources:
-            resource["_id"] = str(resource["_id"])
-            resource["user_id"] = str(resource["user_id"])
-            if "resource_uuid" in resource:
-                resource["resource_uuid"] = resource["resource_uuid"]
+        # Convert all ObjectIds to strings for JSON serialization
+        resources = convert_objectids(resources)
     except Exception as e:
         return jsonify({"message": "Database error"}), 500
 

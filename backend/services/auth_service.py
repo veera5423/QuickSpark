@@ -89,8 +89,19 @@ class AuthService:
 
 
 
-        send_email_sendgrid(email, "Verify Your Email", html)        
-        
+        send_email_sendgrid(email, "Verify Your Email", html)     
+
+        # welcome email
+
+        html = f"""
+            <h2>Welcome to QuickSpark, {username}!</h2>
+            <p>Thank you for registering with QuickSpark. We're excited to have you join our community!</p>
+            <p>Your account has been created successfully. Please check your email (including spam folder) for the verification link to activate your account and start exploring our features.</p>
+            <p>If you have any questions, feel free to reach out to our support team.</p>
+            <p>Best regards,<br>The QuickSpark Team</p>
+        """
+           
+        send_email_sendgrid(email, "Welcome to QuickSpark!", html)
 
         return {"message": "Registered successfully. Check your email or spam to verify your account."}, 200
         

@@ -1,21 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import RequestProModal from './RequestProModal';
 import { Link, useLocation } from 'react-router-dom';
 import { Home, FileText, Bot, Layers, TrendingUp, Briefcase, Zap, Menu, X, Library, Upload, Shield, Sparkles, LogOut as LogOutIcon } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useLayout } from '../../context/LayoutContext';
-
-// Define the navigation items and their icons
-const navItems = [
-    { name: 'Dashboard', path: '/dashboard', icon: Home },
-    { name: 'My Resources', path: '/dashboard/resources', icon: FileText },
-    { name: 'Public Library', path: '/dashboard/public-resources', icon: Library },
-    { name: 'AI Summarizer', path: '/dashboard/ai-summarizer', icon: Bot },
-    { name: 'Mock Tests', path: '/dashboard/mock-tests', icon: Zap },
-    { name: 'Skill Progress', path: '/dashboard/skills', icon: Layers },
-    { name: 'Career Insights', path: '/dashboard/careers', icon: TrendingUp },
-    { name: 'Career Explorer', path: '/dashboard/career-explorer', icon: Briefcase },
-];
 
 const Sidebar = () => {
     const { pathname } = useLocation();
@@ -36,7 +24,31 @@ const Sidebar = () => {
     const [showRequestModal, setShowRequestModal] = useState(false);
     const UserName = user?.username || "UserName"
     const isAdmin = user?.is_admin; // Assuming user object has is_admin field
-    const isPremium = user?.is_premium; // Assuming user object has is_premium field
+    const isPremium = user?.is_pro_member; // Assuming user object has is_pro_member field
+
+    // Define the navigation items dynamically based on user status
+    const navItems = useMemo(() => {
+        const baseItems = [
+            { name: 'Dashboard', path: '/dashboard', icon: Home },
+            { name: 'My Resources', path: '/dashboard/resources', icon: FileText },
+            { name: 'Public Library', path: '/dashboard/public-resources', icon: Library },
+            { name: 'AI Summarizer', path: '/dashboard/ai-summarizer', icon: Bot },
+        ];
+        
+        // Add Resume Check for Pro members and Admins
+        if (isPremium || isAdmin) {
+            baseItems.push({ name: 'Resume Check', path: '/dashboard/resume-check', icon: Sparkles, isPro: true });
+        }
+        
+        baseItems.push(
+            { name: 'Mock Tests', path: '/dashboard/mock-tests', icon: Zap },
+            { name: 'Skill Progress', path: '/dashboard/skills', icon: Layers },
+            { name: 'Career Insights', path: '/dashboard/careers', icon: TrendingUp },
+            { name: 'Career Explorer', path: '/dashboard/career-explorer', icon: Briefcase }
+        );
+        
+        return baseItems;
+    }, [isPremium, isAdmin])
 
     return (
         <>
@@ -106,20 +118,27 @@ const Sidebar = () => {
                             <li key={item.name}>
                                 <Link
                                     to={item.path}
-                                    className={`flex items-center p-3 rounded-xl transition-colors duration-150 group ${
+                                    className={`flex items-center justify-between p-3 rounded-xl transition-colors duration-150 group ${
                                         isActive 
                                             ? 'bg-indigo-600 text-white shadow-lg' 
                                             : 'text-gray-300 hover:bg-gray-700 hover:text-white'
-                                    }`}
+                                    } ${item.isPro ? 'bg-gradient-to-r from-indigo-600 to-pink-600 sm:hidden ' : ''}`}
                                 >
-                                    <IconComponent className={`w-5 h-5 shrink-0 ${isExpanded ? 'mr-3' : 'mx-auto'}`} />
-                                    <span 
-                                        className={`font-semibold overflow-hidden whitespace-nowrap transition-opacity duration-300 ${
-                                            isExpanded ? 'opacity-100' : 'opacity-0 absolute left-20'
-                                        }`}
-                                    >
-                                        {item.name}
-                                    </span>
+                                    <div className="flex items-center">
+                                        <IconComponent className={`w-5 h-5 shrink-0 ${isExpanded ? 'mr-3' : 'mx-auto'}`} />
+                                        <span 
+                                            className={`font-semibold overflow-hidden whitespace-nowrap transition-opacity duration-300 ${
+                                                isExpanded ? 'opacity-100' : 'opacity-0 absolute left-20'
+                                            }`}
+                                        >
+                                            {item.name}
+                                        </span>
+                                    </div>
+                                    {item.isPro && isExpanded && (
+                                        <span className="ml-2 inline-flex items-center justify-center bg-white/20 text-xs px-2 py-0.5 rounded-full font-bold">
+                                            PRO
+                                        </span>
+                                    )}
                                 </Link>
                             </li>
                         );

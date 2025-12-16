@@ -60,7 +60,7 @@ const Navbar = () => {
             ⚡ QuickSpark AI
           </Link>
           {/* Mobile Resume Check (visible on small screens) */}
-            { (user?.is_premium || user?.is_admin) ? (
+            { (user?.is_pro_member || user?.is_admin) ? (
             <Link
               to="/dashboard/resume-check"
               title="Resume Check (Pro)"
@@ -85,7 +85,7 @@ const Navbar = () => {
         {/* --- Navigation & User Info --- */}
         <div className="hidden md:flex md:items-center md:space-x-6">
             <h1 className="text-xl font-semibold text-gray-800">Dashboard Overview</h1>
-            { (user?.is_premium || user?.is_admin) ? (
+            { (user?.is_pro_member || user?.is_admin) ? (
               <Link
                 to="/dashboard/resume-check"
                 title="Resume Check (Pro)"
