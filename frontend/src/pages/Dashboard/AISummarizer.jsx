@@ -58,16 +58,16 @@ const AISummarizer = () => {
   };
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-4 sm:p-6">
       <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">AI Study Assistant</h1>
-        <p className="text-gray-600 max-w-xl mx-auto">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">AI Study Assistant</h1>
+        <p className="text-sm sm:text-base text-gray-600 max-w-xl mx-auto px-4">
           Upload a document to generate an AI summary, create quizzes, and chat with your study material.
         </p>
       </div>
 
       <Card className="max-w-2xl mx-auto border-2 border-dashed border-gray-300 shadow-none hover:border-indigo-300 transition-colors">
-        <div className="space-y-8 py-10">
+        <div className="space-y-6 sm:space-y-8 py-6 sm:py-10 px-4 sm:px-6">
           
           {/* Upload UI */}
           <div className="text-center">
@@ -118,26 +118,29 @@ const AISummarizer = () => {
           
           {/* Usage Limit Exceeded Popup (same style as MockTests) */}
           {limitExceeded && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <div className="bg-white p-6 rounded-lg shadow-lg max-w-md">
-                <h3 className="text-lg font-bold mb-4 text-red-600">Usage Limit Exceeded</h3>
-                <p className="mb-4 text-gray-700">You have reached your summarization limit. Upgrade to premium for more uploads. To Get Upgrade add five public resources   </p>
-                <div className="flex justify-end gap-2">
-                  <button
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white p-4 sm:p-6 rounded-lg shadow-lg max-w-sm sm:max-w-md w-full mx-4">
+                <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4 text-red-600">Usage Limit Exceeded</h3>
+                <p className="mb-4 text-sm sm:text-base text-gray-700">You have reached your summarization limit. Upgrade to premium for more uploads. To Get Upgrade add five public resources</p>
+                <div className="flex flex-col sm:flex-row justify-end gap-2">
+                  <Button
                     onClick={() => setLimitExceeded(false)}
-                    className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded font-semibold"
+                    variant="outline"
+                    size="sm"
+                    className="w-full sm:w-auto"
                   >
                     Dismiss
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     onClick={() => {
                       setLimitExceeded(false);
                       navigate('/dashboard/submit-resource');
                     }}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded font-semibold"
+                    size="sm"
+                    className="w-full sm:w-auto"
                   >
                     Upgrade
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -146,21 +149,21 @@ const AISummarizer = () => {
       </Card>
 
       {/* Features Grid (Visual Flair) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mt-12">
-        <div className="text-center p-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 max-w-4xl mx-auto mt-8 sm:mt-12 px-4">
+        <div className="text-center p-3 sm:p-4">
           <div className="text-2xl mb-2">📝</div>
-          <h3 className="font-bold text-gray-800">Smart Summaries</h3>
-          <p className="text-sm text-gray-500">Get key concepts instantly.</p>
+          <h3 className="font-bold text-gray-800 text-sm sm:text-base">Smart Summaries</h3>
+          <p className="text-xs sm:text-sm text-gray-500">Get key concepts instantly.</p>
         </div>
-        <div className="text-center p-4">
+        <div className="text-center p-3 sm:p-4">
           <div className="text-2xl mb-2">💬</div>
-          <h3 className="font-bold text-gray-800">AI Chat</h3>
-          <p className="text-sm text-gray-500">Ask specific questions.</p>
+          <h3 className="font-bold text-gray-800 text-sm sm:text-base">AI Chat</h3>
+          <p className="text-xs sm:text-sm text-gray-500">Ask specific questions.</p>
         </div>
-        <div className="text-center p-4">
+        <div className="text-center p-3 sm:p-4">
           <div className="text-2xl mb-2">🧠</div>
-          <h3 className="font-bold text-gray-800">Auto-Quizzes</h3>
-          <p className="text-sm text-gray-500">Test your knowledge.</p>
+          <h3 className="font-bold text-gray-800 text-sm sm:text-base">Auto-Quizzes</h3>
+          <p className="text-xs sm:text-sm text-gray-500">Test your knowledge.</p>
         </div>
       </div>
     </div>

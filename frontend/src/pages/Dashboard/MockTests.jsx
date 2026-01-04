@@ -125,22 +125,22 @@ const MockTests = () => {
 
 
     return (
-        <div className="space-y-10 p-4 max-w-6xl mx-auto">
-            <h1 className="text-4xl font-extrabold text-gray-900 border-b pb-4">
+        <div className="space-y-6 sm:space-y-8 lg:space-y-10 p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 border-b pb-3 sm:pb-4">
                 🧠 AI Mock Test Generator
             </h1>
 
             {/* Quiz Generation Card */}
-            <Card className="p-8 bg-white shadow-2xl border border-indigo-200">
-                <h2 className="text-2xl font-bold mb-6 text-indigo-700">Custom Test Builder</h2>
-                
+            <Card className="p-4 sm:p-6 lg:p-8 bg-white shadow-2xl border border-indigo-200">
+                <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-indigo-700">Custom Test Builder</h2>
+
                 {/* Mode Selection */}
-                <div className="mb-6 flex gap-4 p-2 bg-gray-50 rounded-xl border border-gray-200">
+                <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row gap-2 sm:gap-4 p-2 bg-gray-50 rounded-lg sm:rounded-xl border border-gray-200">
                     <button
                         onClick={() => setQuizMode('resource')}
-                        className={`flex-1 py-2 rounded-lg font-semibold transition-colors ${
-                            quizMode === 'resource' 
-                            ? 'bg-indigo-600 text-white shadow-md' 
+                        className={`flex-1 py-2 px-3 sm:px-4 rounded-md sm:rounded-lg text-sm sm:text-base font-semibold transition-colors ${
+                            quizMode === 'resource'
+                            ? 'bg-indigo-600 text-white shadow-md'
                             : 'text-gray-700 hover:bg-gray-100'
                         }`}
                     >
@@ -148,9 +148,9 @@ const MockTests = () => {
                     </button>
                     <button
                         onClick={() => setQuizMode('text')}
-                        className={`flex-1 py-2 rounded-lg font-semibold transition-colors ${
-                            quizMode === 'text' 
-                            ? 'bg-indigo-600 text-white shadow-md' 
+                        className={`flex-1 py-2 px-3 sm:px-4 rounded-md sm:rounded-lg text-sm sm:text-base font-semibold transition-colors ${
+                            quizMode === 'text'
+                            ? 'bg-indigo-600 text-white shadow-md'
                             : 'text-gray-700 hover:bg-gray-100'
                         }`}
                     >
@@ -167,22 +167,24 @@ const MockTests = () => {
 
                 {/* Usage Limit Exceeded Popup */}
                 {limitExceeded && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                        <div className="bg-white p-6 rounded-lg shadow-lg max-w-md">
-                            <h3 className="text-lg font-bold mb-4 text-red-600">Usage Limit Exceeded</h3>
-                            <p className="mb-4 text-gray-700">You have reached your quiz generation limit. Upgrade to premium for more quizzes.To Get Upgrade add five Public Resources </p>
-                            <button
-                                onClick={() => setLimitExceeded(false)}
-                                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded font-semibold"
-                            >
-                                OK
-                            </button>
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                        <div className="bg-white p-4 sm:p-6 rounded-lg shadow-lg max-w-sm sm:max-w-md w-full mx-4">
+                            <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4 text-red-600">Usage Limit Exceeded</h3>
+                            <p className="mb-4 text-sm sm:text-base text-gray-700">You have reached your quiz generation limit. Upgrade to premium for more quizzes.To Get Upgrade add five Public Resources</p>
+                            <div className="flex justify-end">
+                                <Button
+                                    onClick={() => setLimitExceeded(false)}
+                                    size="sm"
+                                >
+                                    OK
+                                </Button>
+                            </div>
                         </div>
                     </div>
                 )}
 
                 {/* Input Fields and Controls */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 items-end">
                     
                     {/* Dynamic Content Source */}
                     {quizMode === 'resource' ? (
