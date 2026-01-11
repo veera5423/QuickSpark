@@ -13,11 +13,13 @@ export const chatWithResource = async (resourceId, question) => {
 };
 
 // Public Resources API
-export const getPublicResources = async (searchQuery = '') => {
+export const getPublicResources = async (searchQuery = '', filterType = 'all') => {
   try {
-    const response = await axiosClient.get('/api/public/public-search', {
-      params: { q: searchQuery }
-    });
+    const params = new URLSearchParams();
+    if (searchQuery) params.append('q', searchQuery);
+    if (filterType && filterType !== 'all') params.append('type', filterType);
+
+    const response = await axiosClient.get(`/api/public/public-search?${params.toString()}`);
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;

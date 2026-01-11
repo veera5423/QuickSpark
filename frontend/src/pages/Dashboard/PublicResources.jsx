@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Search, X, Filter, Clock, TrendingUp } from 'lucide-react';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
+import PDFViewerModal from '../../components/ui/PDFViewerModal';
 import { getPublicResources, interactWithResource } from '../../api/resourcesAPI';
 import LikeButton from '../../components/ui/Likes';
 import DislikeButton from '../../components/ui/Dislikes';
@@ -12,34 +14,129 @@ const PublicResources = () => {
   const [resources, setResources] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState(null);
   const [filterType, setFilterType] = useState('all'); // 'all' | 'pdf' | 'link'
+  const [pdfModalOpen, setPdfModalOpen] = useState(false);
+  const [selectedPdf, setSelectedPdf] = useState(null);
+  const [searchHistory, setSearchHistory] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [searchStats, setSearchStats] = useState({ total: 0, filtered: 0 });
+  const [isTyping, setIsTyping] = useState(false);
+  
+  // Refs for debouncing
+  const searchTimeoutRef = useRef(null);
+  const abortControllerRef = useRef(null);
 
+  // Load search history from localStorage
+  useEffect(() => {
+    const history = localStorage.getItem('publicResourcesSearchHistory');
+    if (history) {
+      try {
+        setSearchHistory(JSON.parse(history));
+      } catch (e) {
+        console.error('Failed to parse search history:', e);
+      }
+    }
+  }, []);
+
+  // Enhanced debouncing with typing indicator
+  useEffect(() => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    if (searchQuery !== debouncedSearchQuery) {
+      setIsTyping(true);
+      
+      searchTimeoutRef.current = setTimeout(() => {
+        setDebouncedSearchQuery(searchQuery);
+        setIsTyping(false);
+      }, searchQuery.length > 3 ? 200 : 500); // Faster debounce for longer queries
+    }
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [searchQuery, debouncedSearchQuery]);
+
+  // Load resources with request cancellation
+  useEffect(() => {
+    loadResources();
+  }, [debouncedSearchQuery, filterType]);
+
+  // Initial load
   useEffect(() => {
     loadResources();
   }, []);
 
-  useEffect(() => {
-    const debounceTimer = setTimeout(() => {
-      loadResources();
-    }, 300);
+  const loadResources = useCallback(async () => {
+    // Cancel previous request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
 
-    return () => clearTimeout(debounceTimer);
-  }, [searchQuery]);
+    // Create new abort controller
+    abortControllerRef.current = new AbortController();
 
-  const loadResources = async () => {
     try {
-      setLoading(true);
-      const response = await getPublicResources(searchQuery);
-      setResources(response.resources || []);
+      setIsSearching(true);
+      setError(null);
+
+      const response = await getPublicResources(debouncedSearchQuery, filterType);
+      const resourcesData = response.resources || [];
       
-      
+      setResources(resourcesData);
+      setSearchStats({
+        total: resourcesData.length,
+        filtered: resourcesData.length
+      });
+
+      // Add to search history if it's a meaningful search
+      if (debouncedSearchQuery.trim() && debouncedSearchQuery.length > 2) {
+        const newHistory = [debouncedSearchQuery.trim(), ...searchHistory.filter(item => item !== debouncedSearchQuery.trim())].slice(0, 5);
+        setSearchHistory(newHistory);
+        localStorage.setItem('publicResourcesSearchHistory', JSON.stringify(newHistory));
+      }
     } catch (error) {
+      if (error.name === 'AbortError') {
+        // Request was cancelled, ignore
+        return;
+      }
       console.error('Failed to load public resources:', error);
       setError('Failed to load public resources');
     } finally {
       setLoading(false);
+      setIsSearching(false);
     }
+  }, [debouncedSearchQuery, filterType, searchHistory]);
+
+  // Clear search
+  const clearSearch = () => {
+    setSearchQuery('');
+    setDebouncedSearchQuery('');
+  };
+
+  // Handle search input
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    setShowSuggestions(value.length > 0);
+  };
+
+  // Select from search history
+  const selectFromHistory = (historyItem) => {
+    setSearchQuery(historyItem);
+    setShowSuggestions(false);
+  };
+
+  // Clear search history
+  const clearSearchHistory = () => {
+    setSearchHistory([]);
+    localStorage.removeItem('publicResourcesSearchHistory');
   };
 
 //  console.log(resources); 
@@ -69,6 +166,22 @@ const PublicResources = () => {
     const reason = prompt('Please provide a reason for reporting this resource:');
     if (reason && reason.trim()) {
       handleInteraction(resourceId, 'report', reason.trim());
+    }
+  };
+
+  const handleResourceClick = (resource) => {
+    const isPdf = (resource.platform && resource.platform.toLowerCase() === 'pdf') ||
+                  (resource.type && resource.type.toLowerCase() === 'pdf');
+
+    if (isPdf) {
+      setSelectedPdf({
+        url: resource.review_source,
+        title: resource.filename
+      });
+      setPdfModalOpen(true);
+    } else {
+      // For links, open in new tab
+      window.open(resource.review_source, '_blank');
     }
   };
 
@@ -107,14 +220,77 @@ const PublicResources = () => {
       </div>
 
       {/* --- SEARCH BAR --- */}
-      <div className="max-w-md">
-        <Input
-          type="text"
-          placeholder="Search resources..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full"
-        />
+      <div className="max-w-md relative">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Input
+            type="text"
+            placeholder="Search resources..."
+            value={searchQuery}
+            onChange={handleSearchChange}
+            onFocus={() => searchQuery && setShowSuggestions(true)}
+            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+            className="pl-10 pr-10"
+          />
+          {searchQuery && (
+            <button
+              onClick={clearSearch}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+
+        {/* Search Suggestions */}
+        {showSuggestions && searchHistory.length > 0 && (
+          <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg">
+            <div className="p-2 border-b border-gray-100">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-gray-500 font-medium">Recent Searches</span>
+                <button
+                  onClick={clearSearchHistory}
+                  className="text-xs text-gray-400 hover:text-gray-600"
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
+            {searchHistory.map((item, index) => (
+              <button
+                key={index}
+                onClick={() => selectFromHistory(item)}
+                className="w-full text-left px-3 py-2 hover:bg-gray-50 text-sm text-gray-700"
+              >
+                {item}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Search Status */}
+        {(isSearching || isTyping) && (
+          <div className="mt-2 text-sm text-blue-600 flex items-center">
+            <div className="animate-spin rounded-full h-3 w-3 border-b border-blue-600 mr-2"></div>
+            {isTyping ? 'Typing...' : 'Searching...'}
+          </div>
+        )}
+
+        {/* Search Stats */}
+        {searchStats.total > 0 && !isSearching && !isTyping && (
+          <div className="mt-2 text-sm text-gray-500 flex items-center gap-4">
+            <span className="flex items-center gap-1">
+              <TrendingUp className="h-3 w-3" />
+              {searchStats.total} resource{searchStats.total !== 1 ? 's' : ''} found
+            </span>
+            {debouncedSearchQuery && (
+              <span className="flex items-center gap-1">
+                <Clock className="h-3 w-3" />
+                Search: "{debouncedSearchQuery}"
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* --- SEGMENTED CONTROL: All / PDFs / Links --- */}
@@ -185,7 +361,7 @@ const PublicResources = () => {
             <Card
               key={resource.id}
               className="group hover:shadow-xl transition-all duration-200 cursor-pointer border border-gray-100 hover:border-indigo-200"
-              onClick={() => window.open(resource.review_source, '_blank')}
+              onClick={() => handleResourceClick(resource)}
               
             >
               <div className="flex flex-col h-full space-y-4 p-4">
@@ -238,13 +414,24 @@ const PublicResources = () => {
 
                 {/* Hover Action Hint */}
                 <div className="text-indigo-600 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity text-right">
-                  Open 
+                  {((resource.platform && resource.platform.toLowerCase() === 'pdf') || (resource.type && resource.type.toLowerCase() === 'pdf')) ? 'View PDF' : 'Open Link'}
                 </div>
               </div>
             </Card>
           ))}
         </div>
       )}
+      
+      {/* PDF Viewer Modal */}
+      <PDFViewerModal
+        isOpen={pdfModalOpen}
+        onClose={() => {
+          setPdfModalOpen(false);
+          setSelectedPdf(null);
+        }}
+        pdfUrl={selectedPdf?.url}
+        title={selectedPdf?.title}
+      />
     </div>
   );
 };

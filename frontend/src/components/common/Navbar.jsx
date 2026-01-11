@@ -19,6 +19,8 @@ const Navbar = () => {
 
   // Determine username display
   const userName = user?.username || 'User';
+  // console.log(user);
+  
 
   const layout = useLayout();
   const isExpanded = layout?.isExpanded ?? true;
