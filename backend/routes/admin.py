@@ -43,7 +43,7 @@ def admin_required(fn):
 
 @admin_bp.route("/users", methods=["GET"])
 @jwt_required()
-@admin_required # 🚨 PROTECTED ROUTE
+@admin_required 
 def list_all_users():
     """
     Lists all users with their current status (Admin, Premium).
@@ -80,7 +80,7 @@ def list_all_users():
 
 @admin_bp.route("/users/<user_id>/toggle", methods=["POST"])
 @jwt_required()
-@admin_required # 🚨 PROTECTED ROUTE
+@admin_required 
 def toggle_user_status(user_id):
     """
     Toggles is_admin or is_pro_member status for a user.
@@ -125,7 +125,7 @@ def toggle_user_status(user_id):
 
 @admin_bp.route("/resources/all", methods=["GET"])
 @jwt_required()
-@admin_required # 🚨 PROTECTED ROUTE
+@admin_required 
 def list_all_resources():
     """
     Lists ALL resources (private, public, pending, verified) for admin review.
@@ -169,7 +169,7 @@ def list_all_resources():
 
 @admin_bp.route("/dashboard-stats", methods=["GET"])
 @jwt_required()
-@admin_required # 🚨 PROTECTED ROUTE
+@admin_required 
 def get_admin_dashboard_stats():
     """
     Provides key statistics for the Admin dashboard overview.
@@ -209,7 +209,7 @@ def get_admin_dashboard_stats():
 
 @admin_bp.route("/resources/<resource_id>", methods=["DELETE"], provide_automatic_options=False)
 @jwt_required()
-@admin_required # 🚨 PROTECTED ROUTE
+@admin_required 
 def delete_resource(resource_id):
     """
     Delete a resource by ID.
@@ -245,7 +245,7 @@ def delete_resource_options(resource_id):
 
 @admin_bp.route("/reports", methods=["GET"], provide_automatic_options=False)
 @jwt_required()
-@admin_required # 🚨 PROTECTED ROUTE
+@admin_required 
 def get_resource_reports():
     """
     Fetch all resource reports.

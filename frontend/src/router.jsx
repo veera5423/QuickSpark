@@ -1,4 +1,5 @@
 
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -26,6 +27,8 @@ import PublicResources from './pages/Dashboard/PublicResources';
 import SubmitResource from './pages/Dashboard/SubmitResource';
 import AdminDashboard from './pages/Dashboard/AdminDashboard';
 import ResumeChecker from './pages/Dashboard/ResumeChecker';
+import VoiceInterview from './pages/Dashboard/VoiceInterview';
+import ProFeatures from './pages/Dashboard/ProFeatures';
 
 // Other Pages
 import NotFound from './components/common/NotFound';
@@ -40,9 +43,68 @@ import Terms from './components/common/Terms';
 import Contact from './components/common/Contact';
 import Hero from './components/common/Hero';
 import TestRefresh from './components/TestRefresh';
+import FeedbackModal from './components/common/FeedbackModal';
+import axiosClient from './api/axiosClient';
 
 const AppRouter = () => {
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
 
+  // Check if we should show feedback modal
+  useEffect(() => {
+    const checkFeedbackModal = () => {
+      const feedbackGiven = localStorage.getItem('feedback_given');
+      const feedbackSkipped = localStorage.getItem('feedback_skipped');
+      const lastShown = localStorage.getItem('feedback_last_shown');
+
+      // Don't show if feedback already given
+      if (feedbackGiven) return;
+
+      // Don't show if skipped recently (within 24 hours)
+      if (feedbackSkipped) {
+        const skippedTime = parseInt(feedbackSkipped);
+        const hoursSinceSkipped = (Date.now() - skippedTime) / (1000 * 60 * 60);
+        if (hoursSinceSkipped < 24) return;
+      }
+
+      // Don't show if shown recently (within 7 days)
+      if (lastShown) {
+        const lastShownTime = parseInt(lastShown);
+        const daysSinceShown = (Date.now() - lastShownTime) / (1000 * 60 * 60 * 24);
+        if (daysSinceShown < 7) return;
+      }
+
+      // Random chance (10% probability)
+      if (Math.random() < 0.1) {
+        localStorage.setItem('feedback_last_shown', Date.now().toString());
+        setShowFeedbackModal(true);
+      }
+    };
+
+    // Check after a delay to not interrupt initial loading
+    const timer = setTimeout(checkFeedbackModal, 10000); // 10 seconds after app load
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleFeedbackSubmit = async (feedbackData) => {
+    try {
+      const response = await axiosClient.post('/api/mail/submit-feedback', feedbackData);
+      
+      console.log('Feedback submitted successfully:', response.data);
+      
+      // Mark as given
+      localStorage.setItem('feedback_given', 'true');
+      
+    } catch (error) {
+      console.error('Failed to submit feedback:', error);
+      
+      // Even if submission fails, mark as given to avoid spamming the user
+      localStorage.setItem('feedback_given', 'true');
+      
+      const errorMessage = error.response?.data?.message || error.message || 'Unknown error';
+      throw new Error(`Failed to submit feedback: ${errorMessage}`);
+    }
+  };
 
   return (
     <ThemeProvider>
@@ -117,6 +179,20 @@ const AppRouter = () => {
                 </DashboardLayout>
               </AdminProtectedRoute>
             } />
+            <Route path="/dashboard/voice-interview" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <VoiceInterview />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/pro-features" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <ProFeatures />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
             <Route path="/dashboard/ai-summarizer" element={
               <ProtectedRoute>
                 <DashboardLayout>
@@ -184,6 +260,11 @@ const AppRouter = () => {
             {/* 404 */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <FeedbackModal
+            isOpen={showFeedbackModal}
+            onClose={() => setShowFeedbackModal(false)}
+            onSubmit={handleFeedbackSubmit}
+          />
         </Router>
       </AuthProvider>
     </ThemeProvider>

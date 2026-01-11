@@ -37,7 +37,7 @@ const LikeButton = ({ resourceId, initial = 0, onCounts }) => {
   };
 
   return (
-    <Button onClick={handleClick} className="text-xs px-2 py-1 bg-green-500 text-black hover:bg-green-600" disabled={loading}>
+    <Button onClick={handleClick} className="text-xs px-2 py-1 hover:shadow-lg transform hover:-translate-y-0.5"  variant="success" disabled={loading}>
       👍 {count}
     </Button>
   );

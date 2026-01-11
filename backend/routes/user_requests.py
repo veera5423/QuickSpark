@@ -27,9 +27,9 @@ def request_pro():
         data = request.get_json() or {}
         message = data.get("message", "")
 
-        user_doc = users_collection.find_one({"_id": user_obj_id}, {"email": 1, "name": 1})
+        user_doc = users_collection.find_one({"_id": user_obj_id}, {"email": 1, "username": 1})
         user_email = user_doc.get("email") if user_doc else None
-        user_name = user_doc.get("name") if user_doc else None
+        user_name = user_doc.get("username") if user_doc else None
 
         # Record request
         req_doc = {

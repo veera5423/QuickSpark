@@ -220,3 +220,115 @@ def send_email():
     except Exception as e:
         print(f"Email sending failed: {e}")
         return jsonify({"message": f"Failed to send email: {str(e)}"}), 500
+
+@send_mail_bp.route("/submit-feedback", methods=["POST"])
+def submit_feedback():
+    """
+    Submit user feedback.
+    Expects JSON: { rating: int, feedback: str, email: str, timestamp: str }
+    Returns JSON: { message: str }
+    """
+    data = request.get_json()
+    rating = data.get("rating")
+    feedback_text = data.get("feedback", "")
+    user_email = data.get("email", "")
+    timestamp = data.get("timestamp", "")
+
+    if not rating or rating < 1 or rating > 5:
+        return jsonify({"message": "Valid rating (1-5) is required."}), 400
+
+    # Send feedback email to admin
+    to_email = 'quickspark.1help@gmail.com'
+    subject = f"New User Feedback - Rating: {rating}/5"
+
+    html_message = f"""
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>New User Feedback - QuickSpark</title>
+        <style>
+            body {{
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                margin: 0;
+                padding: 0;
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }}
+            .container {{
+                max-width: 600px;
+                background: white;
+                border-radius: 20px;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                overflow: hidden;
+                margin: 20px;
+            }}
+            .header {{
+                background: linear-gradient(135deg, #2196F3, #21CBF3);
+                color: white;
+                padding: 40px 30px;
+                text-align: center;
+            }}
+            .content {{
+                padding: 40px 30px;
+            }}
+            .rating {{
+                font-size: 24px;
+                font-weight: bold;
+                color: #ff9800;
+                text-align: center;
+                margin: 20px 0;
+            }}
+            .feedback {{
+                background: #f8f9fa;
+                border-left: 4px solid #2196F3;
+                padding: 20px;
+                margin: 20px 0;
+                border-radius: 8px;
+            }}
+            .footer {{
+                background: #f8f9fa;
+                padding: 20px 30px;
+                text-align: center;
+                color: #666;
+                font-size: 14px;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>⭐ New User Feedback</h1>
+                <p>QuickSpark AI User Experience</p>
+            </div>
+            <div class="content">
+                <div class="rating">
+                    Rating: {'⭐' * rating}{'☆' * (5 - rating)} ({rating}/5)
+                </div>
+                
+                {f'<div class="feedback"><strong>User Feedback:</strong><br>{feedback_text}</div>' if feedback_text else ''}
+                
+                {f'<p><strong>User Email:</strong> {user_email}</p>' if user_email else '<p><em>Anonymous feedback</em></p>'}
+                
+                <p><strong>Submitted:</strong> {timestamp}</p>
+            </div>
+            <div class="footer">
+                <p>This feedback was submitted through the QuickSpark AI platform.</p>
+                <p>Keep building amazing features! 🚀</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+    try:
+        result = sendgrid_helper.send_email_sendgrid(to_email, subject, html_message)
+        return jsonify({"message": "Thank you for your feedback!"}), 200
+    
+    except Exception as e:
+        print(f"Feedback submission failed: {e}")
+        return jsonify({"message": f"Failed to submit feedback: {str(e)}"}), 500

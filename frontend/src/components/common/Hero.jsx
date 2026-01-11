@@ -3,7 +3,7 @@ import Card from '../ui/Card';
 import Button from '../ui/Button';
 import Header from './Header'; // Assumed enhanced Header
 import Footer from './Footer'; // Assumed enhanced Footer
-import { Bot, Zap, Layers, FileText, Users, Map } from 'lucide-react';
+import { Bot, Zap, Layers, FileText, Users, Map, Mic } from 'lucide-react';
 import MessageBanner from './MessageBanner';
 import { useAuth } from '../../context/AuthContext';
 import { useEffect } from 'react';
@@ -85,6 +85,12 @@ const Hero = () => {
                             title="Resume Checker"
                             description="Upload your resume and get AI-powered analysis against job descriptions to improve your chances of landing interviews."
                             color="red"
+                        />
+                        <FeatureCard
+                            icon={Mic}
+                            title="Voice Interview"
+                            description="Practice real job interviews with AI-powered voice interaction, personalized questions, and instant feedback."
+                            color="indigo"
                         />
                         <FeatureCard
                             icon={Users}

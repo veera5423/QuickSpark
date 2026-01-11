@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { LogOut, UserCircle, Sparkles } from 'lucide-react';
+import { LogOut, UserCircle, Sparkles, Mic } from 'lucide-react';
 import { useLayout } from '../../context/LayoutContext';
 import RequestProModal from './RequestProModal';
 
@@ -62,7 +62,7 @@ const Navbar = () => {
             ⚡ QuickSpark AI
           </Link>
           {/* Mobile Resume Check (visible on small screens) */}
-            { (user?.is_pro_member || user?.is_admin) ? (
+            {/* { (user?.is_pro_member || user?.is_admin) ? (
             <Link
               to="/dashboard/resume-check"
               title="Resume Check (Pro)"
@@ -81,22 +81,44 @@ const Navbar = () => {
               <span className="text-xs">Get Pro</span>
               <span className="ml-1 inline-flex items-center justify-center bg-white/20 text-xs px-2 py-0.5 rounded-full">★</span>
             </button>
-          )}
+          )} */}
+          {/* Mobile Voice Interview (visible on small screens) */}
+          {/* { (user?.is_pro_member || user?.is_admin) && (
+            <Link
+              to="/dashboard/voice-interview"
+              title="Voice Interview (Pro)"
+              className="md:hidden ml-2 inline-flex items-center gap-2 text-sm font-semibold px-2 py-1 rounded-full bg-gradient-to-r from-purple-600 to-blue-500 text-white shadow-sm"
+            >
+              <Mic className="w-4 h-4 text-white" />
+              <span className="text-xs">Voice</span>
+            </Link>
+          )} */}
         </div>
         
         {/* --- Navigation & User Info --- */}
         <div className="hidden md:flex md:items-center md:space-x-6">
             <h1 className="text-xl font-semibold text-gray-800">Dashboard Overview</h1>
             { (user?.is_pro_member || user?.is_admin) ? (
-              <Link
-                to="/dashboard/resume-check"
-                title="Resume Check (Pro)"
-                className="inline-flex items-center gap-2 text-sm font-semibold px-3 py-1 rounded-full bg-gradient-to-r from-indigo-600 to-pink-500 text-white shadow-md transform transition-transform duration-150 hover:scale-105"
-              >
-                <Sparkles className="w-4 h-4 text-white" />
-                <span>Resume Check</span>
-                <span className="ml-2 inline-flex items-center justify-center bg-white/20 text-xs px-2 py-0.5 rounded-full">Pro</span>
-              </Link>
+              <>
+                <Link
+                  to="/dashboard/resume-check"
+                  title="Resume Check (Pro)"
+                  className="inline-flex items-center gap-2 text-sm font-semibold px-3 py-1 rounded-full bg-gradient-to-r from-indigo-600 to-pink-500 text-white shadow-md transform transition-transform duration-150 hover:scale-105"
+                >
+                  <Sparkles className="w-4 h-4 text-white" />
+                  <span>Resume Check</span>
+                  <span className="ml-2 inline-flex items-center justify-center bg-white/20 text-xs px-2 py-0.5 rounded-full">Pro</span>
+                </Link>
+                <Link
+                  to="/dashboard/voice-interview"
+                  title="Voice Interview (Pro)"
+                  className="inline-flex items-center gap-2 text-sm font-semibold px-3 py-1 rounded-full bg-gradient-to-r from-pink-500 to-indigo-600 text-white shadow-md transform transition-transform duration-150 hover:scale-105"
+                >
+                  <Mic className="w-4 h-4 text-white" />
+                  <span>Voice Interview</span>
+                  <span className="ml-2 inline-flex items-center justify-center bg-white/20 text-xs px-2 py-0.5 rounded-full">Pro</span>
+                </Link>
+              </>
             ) : (
               <button
                 onClick={() => setShowRequestModal(true)}

@@ -12,6 +12,7 @@ from routes.career_explorer import career_explorer_bp
 from routes.public_resources import public_resources_bp
 from routes.admin import admin_bp
 from routes.send_mail import send_mail_bp
+from routes.voice_interview import voice_interview_bp
 from flask_mail import Mail
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -34,6 +35,7 @@ def create_app():
     app.register_blueprint(admin_bp, url_prefix='/api/admin')
     app.register_blueprint(send_mail_bp, url_prefix='/api/mail')
     app.register_blueprint(user_requests_bp, url_prefix='/api/users')
+    app.register_blueprint(voice_interview_bp, url_prefix='/api/voice-interview')
     # ps=generate_password_hash("adminpassword")
 
     # print(f"Admin password hash: {ps}")
@@ -43,6 +45,10 @@ def create_app():
         return {"message": "Flask API Running 🚀"}
 
     return app
+
+
+if __name__ == "__main__":
+    app = create_app()
 
 
 if __name__ == "__main__":

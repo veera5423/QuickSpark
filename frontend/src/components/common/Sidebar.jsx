@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import RequestProModal from './RequestProModal';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, FileText, Bot, Layers, TrendingUp, Briefcase, Zap, Menu, X, Library, Upload, Shield, Sparkles, LogOut as LogOutIcon } from 'lucide-react';
+import { Home, FileText, Bot, Layers, TrendingUp, Briefcase, Zap, Menu, X, Library, Mic, Shield, Sparkles, LogOut as LogOutIcon } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useLayout } from '../../context/LayoutContext';
 
@@ -38,6 +38,7 @@ const Sidebar = () => {
         // Add Resume Check for Pro members and Admins
         if (isPremium || isAdmin) {
             baseItems.push({ name: 'Resume Check', path: '/dashboard/resume-check', icon: Sparkles, isPro: true });
+            baseItems.push({ name: 'Voice Interview', path: '/dashboard/voice-interview', icon: Mic, isPro: true });
         }
         
         baseItems.push(
@@ -46,6 +47,11 @@ const Sidebar = () => {
             { name: 'Career Insights', path: '/dashboard/careers', icon: TrendingUp },
             { name: 'Career Explorer', path: '/dashboard/career-explorer', icon: Briefcase }
         );
+
+        // Add Pro Features for non-premium users
+        if (!isPremium && !isAdmin) {
+            baseItems.push({ name: 'Pro Features', path: '/dashboard/pro-features', icon: Sparkles });
+        }
         
         return baseItems;
     }, [isPremium, isAdmin])
