@@ -98,10 +98,10 @@ const Sidebar = () => {
                 className={`fixed top-0 z-50 h-screen bg-gray-900 text-white transition-all duration-300 shadow-2xl overflow-y-auto ${
                     isExpanded ? 'w-64' : 'w-20'
                 } ${isExpanded ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:top-0`}
-                style={{ paddingTop: '5rem' }} // Space for potential fixed top header
+                style={{ paddingTop: '3rem' }} // Space for potential fixed top header
             >
                 {/* Logo/Brand Area */}
-                <div className={`p-5 mb-6 border-b border-gray-700 ${isExpanded ? 'block' : 'hidden'} flex`}>
+                <div className={`p-4 mb-6 border-b border-gray-700 ${isExpanded ? 'block' : 'hidden'} flex`}>
                     <Zap className="w-6 h-6 text-yellow-500" />
                     <Link to="/" className="text-2xl font-extrabold text-indigo-400 tracking-wider">QuickSpark AI</Link>
                 </div>
