@@ -5,6 +5,7 @@ import { Home, FileText, Bot, Layers, TrendingUp, Briefcase, Zap, Menu, X, Libra
 import { useAuth } from '../../context/AuthContext';
 import { useLayout } from '../../context/LayoutContext';
 
+
 const Sidebar = () => {
     const { pathname } = useLocation();
     const layout = useLayout();
