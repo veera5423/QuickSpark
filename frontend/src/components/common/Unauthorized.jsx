@@ -37,7 +37,7 @@ const Unauthorized = () => {
           
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Access Denied</h1>
           <p className="text-gray-600 mb-6">
-            You need to be **authenticated** to view the dashboard. Please sign in to continue your learning session.
+            You need to be <b>authenticated</b> to view the dashboard. Please sign in to continue your learning session.
           </p>
           
           <div className="space-y-4">

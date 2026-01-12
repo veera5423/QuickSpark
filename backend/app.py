@@ -5,12 +5,14 @@ from extensions.jwt import jwt
 from routes.auth import auth_bp
 from routes.ai_summarizer import ai_summarizer_bp
 from routes.resume_check import resume_check_bp
+from routes.user_requests import user_requests_bp
 from routes.ai_quiz_generator import ai_quiz_bp
 from routes.resources import resources_bp
 from routes.career_explorer import career_explorer_bp
 from routes.public_resources import public_resources_bp
 from routes.admin import admin_bp
 from routes.send_mail import send_mail_bp
+from routes.voice_interview import voice_interview_bp
 from flask_mail import Mail
 
 mail = Mail()
@@ -33,6 +35,8 @@ def create_app():
     app.register_blueprint(public_resources_bp, url_prefix='/api/public')
     app.register_blueprint(admin_bp, url_prefix='/api/admin')
     app.register_blueprint(send_mail_bp, url_prefix='/api/mail')
+    app.register_blueprint(user_requests_bp, url_prefix='/api/users')
+    app.register_blueprint(voice_interview_bp, url_prefix='/api/voice-interview')
     # ps=generate_password_hash("adminpassword")
 
     
@@ -49,6 +53,10 @@ def create_app():
         return {"message": "Flask API Running 🚀"}
 
     return app
+
+if __name__ == "__main__":
+    app = create_app()
+
 
 if __name__ == "__main__":
     app = create_app()

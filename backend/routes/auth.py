@@ -105,6 +105,6 @@ def get_current_user():
         "username": user["username"],
         "email": user["email"],
         "is_admin": user.get("is_admin", False),
-        "is_premium": user.get("is_premium", False)
+        "is_pro_member": user.get("is_pro_member", False)
     }), 200
     

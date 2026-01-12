@@ -43,7 +43,7 @@ def admin_required(fn):
 
 @admin_bp.route("/users", methods=["GET"])
 @jwt_required()
-@admin_required # 🚨 PROTECTED ROUTE
+@admin_required 
 def list_all_users():
     """
     Lists all users with their current status (Admin, Premium).
@@ -80,7 +80,7 @@ def list_all_users():
 
 @admin_bp.route("/users/<user_id>/toggle", methods=["POST"])
 @jwt_required()
-@admin_required # 🚨 PROTECTED ROUTE
+@admin_required 
 def toggle_user_status(user_id):
     """
     Toggles is_admin or is_pro_member status for a user.
@@ -125,7 +125,7 @@ def toggle_user_status(user_id):
 
 @admin_bp.route("/resources/all", methods=["GET"])
 @jwt_required()
-@admin_required # 🚨 PROTECTED ROUTE
+@admin_required 
 def list_all_resources():
     """
     Lists ALL resources (private, public, pending, verified) for admin review.
@@ -169,20 +169,116 @@ def list_all_resources():
 
 @admin_bp.route("/dashboard-stats", methods=["GET"])
 @jwt_required()
-@admin_required # 🚨 PROTECTED ROUTE
+@admin_required 
 def get_admin_dashboard_stats():
     """
     Provides key statistics for the Admin dashboard overview.
     """
     try:
+        total_users = users_collection.count_documents({})
+        total_resources = resources_collection.count_documents({})
+        pending_review = resources_collection.count_documents({"verification_status": "pending"})
+        verified_resources = resources_collection.count_documents({"verification_status": "verified"})
+        pro_members = users_collection.count_documents({"is_pro_member": True})
+        total_reports = db.resource_interactions.count_documents({"action_type": "report"})
+        pending_pro_requests = db.pro_requests.count_documents({"status": "pending"})
+        
+        # Calculate percentages and ratios
+        verification_percentage = round((verified_resources / total_resources * 100) if total_resources > 0 else 0, 1)
+        pro_percentage = round((pro_members / total_users * 100) if total_users > 0 else 0, 1)
+        
         stats = {
-            "total_users": users_collection.count_documents({}),
-            "total_resources": resources_collection.count_documents({}),
-            "pending_review": resources_collection.count_documents({"verification_status": "pending"}),
-            "verified_resources": resources_collection.count_documents({"verification_status": "verified"}),
-            "pro_members": users_collection.count_documents({"is_pro_member": True})
+            "total_users": total_users,
+            "total_resources": total_resources,
+            "pending_review": pending_review,
+            "verified_resources": verified_resources,
+            "pro_members": pro_members,
+            "total_reports": total_reports,
+            "pending_pro_requests": pending_pro_requests,
+            "verification_percentage": verification_percentage,
+            "pro_percentage": pro_percentage,
+            "unverified_resources": total_resources - verified_resources
         }
         return jsonify(stats), 200
     except Exception as e:
         return jsonify({"message": f"Error fetching dashboard stats: {str(e)}"}), 500
-    
+
+# -----------------------------------------------------------------
+# 4. 🗑️ DELETE RESOURCE
+# -----------------------------------------------------------------
+
+@admin_bp.route("/resources/<resource_id>", methods=["DELETE"], provide_automatic_options=False)
+@jwt_required()
+@admin_required 
+def delete_resource(resource_id):
+    """
+    Delete a resource by ID.
+    """
+    try:
+        try:
+            resource_obj_id = ObjectId(resource_id)
+        except errors.InvalidId:
+            return jsonify({"message": "Invalid resource ID."}), 400
+
+        resource = resources_collection.find_one({"_id": resource_obj_id})
+        if not resource:
+            return jsonify({"message": "Resource not found."}), 404
+
+        # Delete the resource
+        resources_collection.delete_one({"_id": resource_obj_id})
+        
+        # Optionally delete related interactions
+        db.resource_interactions.delete_many({"resource_id": resource_id})
+
+        return jsonify({"message": "Resource deleted successfully."}), 200
+    except Exception as e:
+        return jsonify({"message": f"Error deleting resource: {str(e)}"}), 500
+
+# OPTIONS handler for DELETE (no auth required for preflight)
+@admin_bp.route("/resources/<resource_id>", methods=["OPTIONS"])
+def delete_resource_options(resource_id):
+    return jsonify({}), 200
+
+# -----------------------------------------------------------------
+# 5. 📊 RESOURCE REPORTS
+# -----------------------------------------------------------------
+
+@admin_bp.route("/reports", methods=["GET"], provide_automatic_options=False)
+@jwt_required()
+@admin_required 
+def get_resource_reports():
+    """
+    Fetch all resource reports.
+    """
+    try:
+        reports = list(db.resource_interactions.find({"action_type": "report"}).sort("created_at", -1))
+        
+        # Hydrate with resource and user info
+        resource_ids = {r.get("resource_id") for r in reports if r.get("resource_id")}
+        user_ids = {r.get("user_id") for r in reports if r.get("user_id")}
+        
+        resources_map = {str(doc["_id"]): doc.get("original_filename", "Unknown") for doc in resources_collection.find({"_id": {"$in": [ObjectId(rid) if isinstance(rid, str) else rid for rid in resource_ids]}}, {"original_filename": 1})}
+        users_map = {doc["_id"]: doc.get("email", "Unknown") for doc in users_collection.find({"_id": {"$in": list(user_ids)}}, {"email": 1})}
+        
+        output = []
+        for report in reports:
+            resource_name = resources_map.get(str(report.get("resource_id")), "Unknown")
+            reporter_email = users_map.get(report.get("user_id"), "Unknown")
+            
+            output.append({
+                "id": str(report["_id"]),
+                "resource_id": str(report["resource_id"]),
+                "resource_name": resource_name,
+                "reporter_email": reporter_email,
+                "reason": report.get("report_reason", "No reason provided"),
+                "reported_at": report.get("created_at").isoformat() if report.get("created_at") else "N/A"
+            })
+        
+        return jsonify({"reports": output}), 200
+    except Exception as e:
+        return jsonify({"message": f"Error fetching reports: {str(e)}"}), 500
+
+# OPTIONS handler for GET reports (no auth required for preflight)
+@admin_bp.route("/reports", methods=["OPTIONS"])
+def get_reports_options():
+    return jsonify({}), 200

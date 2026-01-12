@@ -22,6 +22,11 @@ const Chatbox = ({ resourceId, onClose }) => {
       setMessages(prev => [...prev, aiMessage]);
     } catch (error) {
       console.error('Chat error:', error);
+      if (error.status==429) {
+        const rateLimitMessage = { type: 'ai', content: 'You have reached the rate limit. Please try again later.' };
+        setMessages(prev => [...prev, rateLimitMessage]);
+        return;
+      }
       const errorMessage = { type: 'ai', content: 'Sorry, I encountered an error. Please try again.' };
       setMessages(prev => [...prev, errorMessage]);
     } finally {

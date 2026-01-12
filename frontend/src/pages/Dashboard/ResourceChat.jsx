@@ -114,7 +114,7 @@ const fetchResource = async () => {
                      {resource.linked_modules?.mock_test_id && (
                         <Button 
                             onClick={() => navigate(`/dashboard/mock-tests?resource=${resource._id}`)}
-                            className="bg-green-50 text-green-700 hover:bg-green-100 border border-green-200 text-sm"
+                            className="bg-green-500 text-green-700 hover:bg-green-700 border border-green-200 text-sm cursor-pointer px-3 py-1 rounded-lg"
                         >
                             📝 Take Quiz
                         </Button>

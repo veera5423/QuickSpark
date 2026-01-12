@@ -139,16 +139,168 @@ def verify_resource(resource_id):
             return jsonify({"message": "Resource not found"}), 404
         
         # --- 2. NOTIFICATION LOGIC (Using existing email service) ---
-        userMail=db.users.find_one({"_id":userId})["email"]
+        user_doc = db.users.find_one({"_id": userId})
+        userMail = user_doc.get("email") if user_doc else None
         subject = "✨ Your Resource Has Been Verified!"
         # Send contributor notification as HTML
         contributor_html = f"""
-        <p>Hello Contributor,</p>
-        <p>Great news! Your submitted resource titled "<strong>{resource.get('original_filename')}</strong>" has been reviewed and verified by our admin team.</p>
-        <p>It is now live in the QuickSpark AI public resources library for all learners to access.</p>
-        <p>View it here: <a href=\"{resource_link}\" target=\"_blank\">{resource_link}</a></p>
-        <p>Thank you for contributing to our learning community!</p>
-        <p>Happy Learning!<br/>The QuickSpark AI Team</p>
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Your Resource is Live! - QuickSpark</title>
+            <style>
+                body {{
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    margin: 0;
+                    padding: 0;
+                    min-height: 100vh;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }}
+                .container {{
+                    max-width: 600px;
+                    background: white;
+                    border-radius: 20px;
+                    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                    overflow: hidden;
+                    margin: 20px;
+                }}
+                .header {{
+                    background: linear-gradient(135deg, #4CAF50, #45a049);
+                    color: white;
+                    padding: 40px 30px;
+                    text-align: center;
+                }}
+                .header h1 {{
+                    margin: 0;
+                    font-size: 28px;
+                    font-weight: 600;
+                }}
+                .content {{
+                    padding: 40px 30px;
+                }}
+                .success-icon {{
+                    font-size: 64px;
+                    text-align: center;
+                    margin-bottom: 20px;
+                }}
+                .content h2 {{
+                    color: #333;
+                    font-size: 24px;
+                    margin-bottom: 20px;
+                    font-weight: 500;
+                    text-align: center;
+                }}
+                .content p {{
+                    color: #666;
+                    font-size: 16px;
+                    line-height: 1.6;
+                    margin-bottom: 20px;
+                }}
+                .resource-card {{
+                    background: #f8f9fa;
+                    border-radius: 15px;
+                    padding: 25px;
+                    margin: 25px 0;
+                    border-left: 5px solid #4CAF50;
+                }}
+                .resource-title {{
+                    font-size: 18px;
+                    font-weight: 600;
+                    color: #333;
+                    margin-bottom: 10px;
+                }}
+                .view-btn {{
+                    display: inline-block;
+                    background: linear-gradient(135deg, #4CAF50, #45a049);
+                    color: white;
+                    text-decoration: none;
+                    padding: 15px 30px;
+                    border-radius: 50px;
+                    font-weight: 600;
+                    font-size: 16px;
+                    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+                    transition: all 0.3s ease;
+                    margin: 20px 0;
+                }}
+                .view-btn:hover {{
+                    transform: translateY(-2px);
+                    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+                }}
+                .stats {{
+                    background: #e8f5e8;
+                    border-radius: 10px;
+                    padding: 20px;
+                    margin-top: 20px;
+                    text-align: center;
+                }}
+                .stats h3 {{
+                    color: #2e7d32;
+                    margin-bottom: 10px;
+                    font-size: 16px;
+                }}
+                .stats p {{
+                    color: #2e7d32;
+                    margin: 0;
+                    font-size: 14px;
+                }}
+                .footer {{
+                    background: #f8f9fa;
+                    padding: 30px;
+                    text-align: center;
+                    color: #666;
+                    font-size: 14px;
+                }}
+                .footer p {{
+                    margin: 5px 0;
+                }}
+                .spark-icon {{
+                    font-size: 48px;
+                    margin-bottom: 10px;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <div class="spark-icon">✨</div>
+                    <h1>QuickSpark</h1>
+                </div>
+                <div class="content">
+                    <div class="success-icon">🎉</div>
+                    <h2>Congratulations, Contributor!</h2>
+                    <p>Great news! Your submitted resource has been reviewed and approved by our expert team. It's now live and available to help learners worldwide!</p>
+                    
+                    <div class="resource-card">
+                        <div class="resource-title">📚 {resource.get('original_filename')}</div>
+                        <p>Your contribution is now part of our growing library of quality learning resources.</p>
+                    </div>
+                    
+                    <center>
+                        <a href="{resource_link}" class="view-btn">View Your Resource</a>
+                    </center>
+                    
+                    <div class="stats">
+                        <h3>🌟 Impact</h3>
+                        <p>Your resource will now help countless learners on their journey to success!</p>
+                    </div>
+                    
+                    <p>Thank you for being an invaluable part of the QuickSpark community. Keep contributing and making a difference!</p>
+                </div>
+                <div class="footer">
+                    <p><strong>QuickSpark Community Team</strong></p>
+                    <p>Empowering learners through collaborative knowledge sharing</p>
+                    <p style="font-size: 12px; margin-top: 15px;">
+                        Want to contribute more? <a href="https://quick-spark.vercel.app/dashboard/submit-resource" style="color: #4CAF50;">Submit another resource</a>
+                    </p>
+                </div>
+            </div>
+        </body>
+        </html>
         """
         send_email_sendgrid(userMail, subject, contributor_html)
 
@@ -170,10 +322,217 @@ def verify_resource(resource_id):
         subject = f"✨ New Verified Resource: {resource_title}"
         # HTML-formatted broadcast to learners
         broadcast_html = f"""
-        <p>Hello Learner,</p>
-        <p>Great news! A new study resource has been approved and added to the public library: "<strong>{resource_title}</strong>".</p>
-        <p>You can access it immediately here: <a href=\"{resource_link}\" target=\"_blank\">{resource_link}</a></p>
-        <p>Happy Learning!<br/>The QuickSpark AI Team</p>
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>New Resource Available! - QuickSpark</title>
+            <style>
+                body {{
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    margin: 0;
+                    padding: 0;
+                    min-height: 100vh;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }}
+                .container {{
+                    max-width: 600px;
+                    background: white;
+                    border-radius: 20px;
+                    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                    overflow: hidden;
+                    margin: 20px;
+                }}
+                .header {{
+                    background: linear-gradient(135deg, #9C27B0, #7B1FA2);
+                    color: white;
+                    padding: 40px 30px;
+                    text-align: center;
+                }}
+                .header h1 {{
+                    margin: 0;
+                    font-size: 28px;
+                    font-weight: 600;
+                }}
+                .content {{
+                    padding: 40px 30px;
+                }}
+                .announcement-icon {{
+                    font-size: 64px;
+                    text-align: center;
+                    margin-bottom: 20px;
+                }}
+                .content h2 {{
+                    color: #333;
+                    font-size: 24px;
+                    margin-bottom: 20px;
+                    font-weight: 500;
+                    text-align: center;
+                }}
+                .content p {{
+                    color: #666;
+                    font-size: 16px;
+                    line-height: 1.6;
+                    margin-bottom: 20px;
+                }}
+                .resource-highlight {{
+                    background: linear-gradient(135deg, #f3e5f5, #e1bee7);
+                    border-radius: 15px;
+                    padding: 25px;
+                    margin: 25px 0;
+                    border-left: 5px solid #9C27B0;
+                    text-align: center;
+                }}
+                .resource-title {{
+                    font-size: 20px;
+                    font-weight: 600;
+                    color: #333;
+                    margin-bottom: 15px;
+                }}
+                .resource-badge {{
+                    display: inline-block;
+                    background: #9C27B0;
+                    color: white;
+                    padding: 8px 16px;
+                    border-radius: 20px;
+                    font-size: 12px;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                    margin-bottom: 15px;
+                }}
+                .access-btn {{
+                    display: inline-block;
+                    background: linear-gradient(135deg, #9C27B0, #7B1FA2);
+                    color: white;
+                    text-decoration: none;
+                    padding: 15px 30px;
+                    border-radius: 50px;
+                    font-weight: 600;
+                    font-size: 16px;
+                    box-shadow: 0 4px 15px rgba(156, 39, 176, 0.3);
+                    transition: all 0.3s ease;
+                    margin: 20px 0;
+                }}
+                .access-btn:hover {{
+                    transform: translateY(-2px);
+                    box-shadow: 0 6px 20px rgba(156, 39, 176, 0.4);
+                }}
+                .benefits {{
+                    background: #f8f9fa;
+                    border-radius: 15px;
+                    padding: 25px;
+                    margin: 25px 0;
+                }}
+                .benefits h3 {{
+                    color: #333;
+                    font-size: 18px;
+                    margin-bottom: 15px;
+                    text-align: center;
+                }}
+                .benefit-list {{
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 15px;
+                }}
+                .benefit-item {{
+                    display: flex;
+                    align-items: center;
+                    padding: 10px;
+                    background: white;
+                    border-radius: 10px;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                }}
+                .benefit-icon {{
+                    font-size: 20px;
+                    margin-right: 10px;
+                    color: #9C27B0;
+                }}
+                .benefit-text {{
+                    font-size: 14px;
+                    color: #333;
+                    font-weight: 500;
+                }}
+                .footer {{
+                    background: #f8f9fa;
+                    padding: 30px;
+                    text-align: center;
+                    color: #666;
+                    font-size: 14px;
+                }}
+                .footer p {{
+                    margin: 5px 0;
+                }}
+                .spark-icon {{
+                    font-size: 48px;
+                    margin-bottom: 10px;
+                }}
+                @media (max-width: 480px) {{
+                    .benefit-list {{
+                        grid-template-columns: 1fr;
+                    }}
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <div class="spark-icon">📚</div>
+                    <h1>QuickSpark</h1>
+                </div>
+                <div class="content">
+                    <div class="announcement-icon">🔔</div>
+                    <h2>New Learning Resource Available!</h2>
+                    <p>Exciting news! Our community has added a brand new verified resource to help you on your learning journey.</p>
+                    
+                    <div class="resource-highlight">
+                        <div class="resource-badge">New Resource</div>
+                        <div class="resource-title">{resource_title}</div>
+                        <p>This resource has been carefully reviewed and approved by our expert team for quality and relevance.</p>
+                    </div>
+                    
+                    <center>
+                        <a href="{resource_link}" class="access-btn">Access Resource Now</a>
+                    </center>
+                    
+                    <div class="benefits">
+                        <h3>Why explore this resource?</h3>
+                        <div class="benefit-list">
+                            <div class="benefit-item">
+                                <span class="benefit-icon">✅</span>
+                                <span class="benefit-text">Expert Reviewed</span>
+                            </div>
+                            <div class="benefit-item">
+                                <span class="benefit-icon">🎯</span>
+                                <span class="benefit-text">High Quality Content</span>
+                            </div>
+                            <div class="benefit-item">
+                                <span class="benefit-icon">🚀</span>
+                                <span class="benefit-text">Career Focused</span>
+                            </div>
+                            <div class="benefit-item">
+                                <span class="benefit-icon">🌟</span>
+                                <span class="benefit-text">Community Approved</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <p>Keep learning, keep growing! The QuickSpark community is here to support your success.</p>
+                </div>
+                <div class="footer">
+                    <p><strong>QuickSpark Learning Community</strong></p>
+                    <p>Growing together through shared knowledge</p>
+                    <p style="font-size: 12px; margin-top: 15px;">
+                        Don't want these notifications? <a href="#" style="color: #9C27B0;">Update your preferences</a>
+                    </p>
+                </div>
+            </div>
+        </body>
+        </html>
         """
 
         for user_doc in all_users_cursor:
@@ -186,6 +545,240 @@ def verify_resource(resource_id):
                 except Exception as mail_err:
                     print(f"Failed to send email to {recipient_email}: {mail_err}")
         
+        # --- 3. AUTO-UPGRADE CHECK ---
+        try:
+            # Increment verified upload counter for the contributor
+            updated_user = db.users.find_one_and_update(
+                {"_id": userId},
+                {"$inc": {"verified_upload_count": 1}},
+                return_document=ReturnDocument.AFTER
+            )
+            verified_count = updated_user.get('verified_upload_count', 0) if updated_user else 0
+
+            # If contributor reaches threshold and isn't already Pro, auto-upgrade
+            AUTO_UPGRADE_THRESHOLD = 3
+            if verified_count >= AUTO_UPGRADE_THRESHOLD and not (updated_user.get('is_pro_member', False) if updated_user else False):
+                db.users.update_one(
+                    {"_id": userId},
+                    {"$set": {
+                        "is_pro_member": True,
+                        "pro_upgraded_at": datetime.utcnow(),
+                        "pro_upgraded_by": "auto"
+                    }}
+                )
+                try:
+                    upgrade_subject = "🎉 You've been upgraded to QuickSpark Pro!"
+                    upgrade_html = f"""
+                    <!DOCTYPE html>
+                    <html lang="en">
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <title>Congratulations! You're Now Pro - QuickSpark</title>
+                        <style>
+                            body {{
+                                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                                margin: 0;
+                                padding: 0;
+                                min-height: 100vh;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                            }}
+                            .container {{
+                                max-width: 600px;
+                                background: white;
+                                border-radius: 20px;
+                                box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                                overflow: hidden;
+                                margin: 20px;
+                            }}
+                            .header {{
+                                background: linear-gradient(135deg, #FFD700, #FFA000);
+                                color: white;
+                                padding: 40px 30px;
+                                text-align: center;
+                                position: relative;
+                            }}
+                            .header h1 {{
+                                margin: 0;
+                                font-size: 28px;
+                                font-weight: 600;
+                            }}
+                            .crown-icon {{
+                                font-size: 64px;
+                                margin-bottom: 10px;
+                            }}
+                            .content {{
+                                padding: 40px 30px;
+                            }}
+                            .celebration-icon {{
+                                font-size: 64px;
+                                text-align: center;
+                                margin-bottom: 20px;
+                            }}
+                            .content h2 {{
+                                color: #333;
+                                font-size: 24px;
+                                margin-bottom: 20px;
+                                font-weight: 500;
+                                text-align: center;
+                            }}
+                            .content p {{
+                                color: #666;
+                                font-size: 16px;
+                                line-height: 1.6;
+                                margin-bottom: 20px;
+                            }}
+                            .pro-badge {{
+                                background: linear-gradient(135deg, #FFD700, #FFA000);
+                                color: white;
+                                padding: 15px 25px;
+                                border-radius: 50px;
+                                text-align: center;
+                                font-weight: 600;
+                                font-size: 18px;
+                                margin: 25px 0;
+                                box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+                            }}
+                            .features {{
+                                background: #fff8e1;
+                                border-radius: 15px;
+                                padding: 25px;
+                                margin: 25px 0;
+                                border-left: 5px solid #FFD700;
+                            }}
+                            .features h3 {{
+                                color: #333;
+                                font-size: 18px;
+                                margin-bottom: 15px;
+                                text-align: center;
+                            }}
+                            .feature-grid {{
+                                display: grid;
+                                grid-template-columns: 1fr 1fr;
+                                gap: 15px;
+                            }}
+                            .feature-item {{
+                                display: flex;
+                                align-items: center;
+                                padding: 12px;
+                                background: white;
+                                border-radius: 10px;
+                                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                            }}
+                            .feature-icon {{
+                                font-size: 20px;
+                                margin-right: 10px;
+                                color: #FFD700;
+                            }}
+                            .feature-text {{
+                                font-size: 14px;
+                                color: #333;
+                                font-weight: 500;
+                            }}
+                            .explore-btn {{
+                                display: inline-block;
+                                background: linear-gradient(135deg, #FFD700, #FFA000);
+                                color: white;
+                                text-decoration: none;
+                                padding: 15px 30px;
+                                border-radius: 50px;
+                                font-weight: 600;
+                                font-size: 16px;
+                                box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+                                transition: all 0.3s ease;
+                                margin: 20px 0;
+                            }}
+                            .explore-btn:hover {{
+                                transform: translateY(-2px);
+                                box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+                            }}
+                            .footer {{
+                                background: #f8f9fa;
+                                padding: 30px;
+                                text-align: center;
+                                color: #666;
+                                font-size: 14px;
+                            }}
+                            .footer p {{
+                                margin: 5px 0;
+                            }}
+                            .spark-icon {{
+                                font-size: 48px;
+                                margin-bottom: 10px;
+                            }}
+                            @media (max-width: 480px) {{
+                                .feature-grid {{
+                                    grid-template-columns: 1fr;
+                                }}
+                            }}
+                        </style>
+                    </head>
+                    <body>
+                        <div class="container">
+                            <div class="header">
+                                <div class="crown-icon">👑</div>
+                                <h1>QuickSpark Pro</h1>
+                            </div>
+                            <div class="content">
+                                <div class="celebration-icon">🎉</div>
+                                <h2>Congratulations, {user_doc.get('name', '') if user_doc else 'Contributor'}!</h2>
+                                <p>We're absolutely thrilled with your contributions to the QuickSpark community! As a token of our appreciation, we've automatically upgraded your account to <strong>Pro status</strong>.</p>
+                                
+                                <div class="pro-badge">
+                                    ✨ You're Now a QuickSpark Pro Member! ✨
+                                </div>
+                                
+                                <div class="features">
+                                    <h3>Your New Pro Benefits</h3>
+                                    <div class="feature-grid">
+                                        <div class="feature-item">
+                                            <span class="feature-icon">📄</span>
+                                            <span class="feature-text">Advanced Resume Analysis</span>
+                                        </div>
+                                        <div class="feature-item">
+                                            <span class="feature-icon">🤖</span>
+                                            <span class="feature-text">Extended AI Usage</span>
+                                        </div>
+                                        <div class="feature-item">
+                                            <span class="feature-icon">⚡</span>
+                                            <span class="feature-text">Priority Processing</span>
+                                        </div>
+                                        <div class="feature-item">
+                                            <span class="feature-icon">🏆</span>
+                                            <span class="feature-text">Exclusive Pro Features</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <p>You've earned this upgrade by contributing {verified_count} high-quality resources to our community. Keep up the amazing work!</p>
+                                
+                                <center>
+                                    <a href="https://quick-spark.vercel.app/dashboard" class="explore-btn">Explore Pro Features</a>
+                                </center>
+                                
+                                <p>Welcome to the Pro community! We're excited to see what you'll accomplish with your enhanced capabilities.</p>
+                            </div>
+                            <div class="footer">
+                                <p><strong>QuickSpark Pro Team</strong></p>
+                                <p>Excellence rewarded, potential unleashed</p>
+                                <p style="font-size: 12px; margin-top: 15px;">
+                                    Questions about Pro features? <a href="mailto:pro-support@quickspark.com" style="color: #FFD700;">Contact Pro Support</a>
+                                </p>
+                            </div>
+                        </div>
+                    </body>
+                    </html>
+                    """
+                    if userMail:
+                        send_email_sendgrid(userMail, upgrade_subject, upgrade_html)
+                except Exception as mail_err:
+                    print(f"Failed to send upgrade email to {userMail}: {mail_err}")
+        except Exception as au_err:
+            print(f"Auto-upgrade check failed: {au_err}")
+
         return jsonify({
             "message": f"Resource '{resource_title}' verified and {notification_count} notifications triggered.",
             "status": "verified"
@@ -457,3 +1050,37 @@ def submit_public_pdf():
         return jsonify({"message": f"Server error: {str(e)}"}), 500
     
 
+# # -----------------------------------------------------------------
+# # PDF PROXY ROUTE - /api/public/pdf-proxy
+# # -----------------------------------------------------------------
+# @public_resources_bp.route("/pdf-proxy", methods=["GET"])
+# def proxy_pdf():
+#     """
+#     Proxies PDF requests to avoid CORS issues with S3/Supabase.
+#     Expects a 'url' query parameter with the PDF URL.
+#     """
+#     try:
+#         pdf_url = request.args.get('url')
+#         if not pdf_url:
+#             return jsonify({"message": "Missing 'url' parameter"}), 400
+            
+#         # Validate that this is a request for a public resource
+#         # You might want to add additional validation here
+        
+#         # Fetch the PDF from the external URL
+#         response = requests.get(pdf_url, timeout=30)
+#         response.raise_for_status()
+        
+#         # Return the PDF with appropriate headers
+#         return response.content, 200, {
+#             'Content-Type': 'application/pdf',
+#             'Content-Disposition': 'inline',
+#             'Cache-Control': 'public, max-age=3600'  # Cache for 1 hour
+#         }
+        
+#     except requests.exceptions.RequestException as e:
+#         print(f"Error proxying PDF: {e}")
+#         return jsonify({"message": "Failed to fetch PDF"}), 500
+#     except Exception as e:
+#         print(f"Unexpected error in PDF proxy: {e}")
+#         return jsonify({"message": "Server error"}), 500

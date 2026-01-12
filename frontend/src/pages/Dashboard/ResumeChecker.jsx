@@ -79,7 +79,7 @@ const ResumeChecker = () => {
 
                     <div className="flex gap-2 justify-end">
                         <Button variant="secondary" onClick={() => navigate('/dashboard')}>Cancel</Button>
-                        <Button type="submit" disabled={loading} className="bg-indigo-600 hover:bg-indigo-700 text-white">
+                        <Button type="submit" disabled={loading} className="bg-gradient-to-r from-indigo-600 to-pink-600 text-white cursor-pointer hover:shadow-lg">
                             {loading ? 'Analyzing...' : 'Get Score & Feedback'}
                         </Button>
                     </div>

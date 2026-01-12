@@ -8,16 +8,18 @@ export const chatWithResource = async (resourceId, question) => {
     });
     return response.data;
   } catch (error) {
-    throw error.response?.data || error.message;
+    throw error;
   }
 };
 
 // Public Resources API
-export const getPublicResources = async (searchQuery = '') => {
+export const getPublicResources = async (searchQuery = '', filterType = 'all') => {
   try {
-    const response = await axiosClient.get('/api/public/public-search', {
-      params: { q: searchQuery }
-    });
+    const params = new URLSearchParams();
+    if (searchQuery) params.append('q', searchQuery);
+    if (filterType && filterType !== 'all') params.append('type', filterType);
+
+    const response = await axiosClient.get(`/api/public/public-search?${params.toString()}`);
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;
@@ -102,6 +104,48 @@ export const getAllResources = async () => {
 export const verifyResource = async (resourceId) => {
   try {
     const response = await axiosClient.post(`/api/public/admin/verify/${resourceId}`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
+// Pro Requests API (Admin)
+export const getProRequests = async () => {
+  try {
+    const response = await axiosClient.get('/api/users/get-user-requests');
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
+export const resolveProRequest = async (requestId, action, notes = '') => {
+  try {
+    const response = await axiosClient.post(`/api/users/user-requests/${requestId}/resolve`, {
+      action,
+      notes,
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
+// Delete Resource API (Admin)
+export const deleteResource = async (resourceId) => {
+  try {
+    const response = await axiosClient.delete(`/api/admin/resources/${resourceId}`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
+// Get Resource Reports API (Admin)
+export const getResourceReports = async () => {
+  try {
+    const response = await axiosClient.get('/api/admin/reports');
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;
