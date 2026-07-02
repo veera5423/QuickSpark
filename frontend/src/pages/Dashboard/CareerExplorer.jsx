@@ -91,16 +91,16 @@ const CareerExplorer = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="text-xl font-semibold text-blue-600">Exploring career paths...</div>
+        <div className="text-xl font-semibold text-teal-700">Exploring career paths...</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="text-center p-8 bg-red-50 border border-red-300 rounded-lg">
+      <div className="text-center p-8 bg-red-50 border border-red-200 rounded-2xl">
         <p className="text-xl text-red-600 mb-4">{error}</p>
-        <Button onClick={loadCareerRoles} className="mt-4 bg-red-500 hover:bg-red-700">
+        <Button onClick={loadCareerRoles} className="mt-4 bg-slate-900 hover:bg-slate-800 text-white">
           Try Again
         </Button>
       </div>
@@ -111,35 +111,37 @@ const CareerExplorer = () => {
 
   return (
     <div className="space-y-10 max-w-7xl mx-auto p-4 sm:p-6">
-      <h1 className="text-4xl font-extrabold text-gray-800 border-b pb-3">
-        Career Explorer 🗺️
-      </h1>
+      <div className="text-center max-w-3xl mx-auto">
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-teal-600">Career pathing</p>
+        <h1 className="mt-2 text-4xl font-black tracking-tight text-slate-950">Career Explorer 🗺️</h1>
+        <p className="mt-2 text-slate-600">Explore roles, check the skills you already have, and pick the next step with more clarity.</p>
+      </div>
 
       {!selectedRole ? (
         // --- Role Selection View (Grid) ---
         <div>
-          <p className="text-lg text-gray-600 mb-8">
+          <p className="text-lg text-slate-600 mb-8 text-center">
             Select a career path to view its required skills and test your readiness.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {careerRoles.map((role) => (
               <Card
                 key={role._id}
-                className="p-6 shadow-xl border border-gray-100 hover:shadow-2xl transition duration-300 cursor-pointer flex flex-col justify-between"
+                className="p-6 shadow-xl border border-slate-200 hover:shadow-2xl transition duration-300 cursor-pointer flex flex-col justify-between rounded-[2rem] bg-white"
                 onClick={() => loadRoleDetails(role._id)}
               >
                 <div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">{role.role_name}</h3>
-                  <p className="text-gray-500 text-sm mb-4 line-clamp-3 h-14">{role.description}</p>
+                  <h3 className="text-2xl font-bold text-slate-950 mb-2">{role.role_name}</h3>
+                  <p className="text-slate-500 text-sm mb-4 line-clamp-3 h-14">{role.description}</p>
                 </div>
                 <div>
                   {role.avg_salary && (
-                    <p className="text-xl font-extrabold text-green-600 mt-2 mb-4">
+                    <p className="text-xl font-extrabold text-emerald-700 mt-2 mb-4">
                       {role.avg_salary}
-                      <span className="text-sm font-medium text-gray-500 ml-1">Avg Salary</span>
+                      <span className="text-sm font-medium text-slate-500 ml-1">Avg Salary</span>
                     </p>
                   )}
-                  <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                  <Button className="w-full bg-slate-900 hover:bg-slate-800 text-white">
                     Explore Path Details
                   </Button>
                 </div>
@@ -152,27 +154,27 @@ const CareerExplorer = () => {
         <div>
           <Button
             onClick={() => setSelectedRole(null)}
-            className="mb-6 bg-gray-600 text-gray-700 hover:bg-gray-400 border border-gray-300 cursor-pointer"
+            className="mb-6 bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200 cursor-pointer"
           >
             ← Back to All Roles
           </Button>
 
-          <Card className="shadow-2xl p-8 bg-white border border-blue-100">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">{selectedRole.role_name}</h2>
-            <p className="text-gray-600 mb-4 border-b pb-4">{selectedRole.description}</p>
+          <Card className="shadow-2xl p-8 bg-white border border-slate-200 rounded-[2rem]">
+            <h2 className="text-3xl font-black tracking-tight text-slate-950 mb-2">{selectedRole.role_name}</h2>
+            <p className="text-slate-600 mb-4 border-b border-slate-200 pb-4">{selectedRole.description}</p>
             
             <div className="flex flex-wrap items-center justify-between mb-8 pt-4">
                 {selectedRole.avg_salary && (
-                    <div className="text-xl font-extrabold text-green-700 p-2 bg-green-50 rounded-lg">
+                    <div className="text-xl font-extrabold text-emerald-700 p-2 bg-emerald-50 rounded-2xl">
                         💰 Average Salary: {selectedRole.avg_salary}
                     </div>
                 )}
-                <div className="text-md font-semibold text-purple-600 p-2 bg-purple-50 rounded-lg">
+                  <div className="text-md font-semibold text-teal-700 p-2 bg-teal-50 rounded-2xl">
                     {completedSkills.filter(id => selectedRole.skills.map(s => s._id).includes(id)).length} / {selectedRole.skills.length} Skills Mastered
                 </div>
             </div>
 
-            <h3 className="text-2xl font-bold mb-5 text-gray-800">Required Skills Roadmap</h3>
+                <h3 className="text-2xl font-bold mb-5 text-slate-950">Required Skills Roadmap</h3>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {selectedRole.skills.map((skill) => {
                 const completed = isSkillCompleted(skill._id);
@@ -182,15 +184,15 @@ const CareerExplorer = () => {
                 return (
                   <div 
                     key={skill._id} 
-                    className={`border-l-4 rounded-r-lg p-5 transition-all duration-300 shadow-md ${
+                    className={`border-l-4 rounded-r-2xl p-5 transition-all duration-300 shadow-md ${
                       completed 
-                        ? 'bg-green-50 border-green-500' 
-                        : 'bg-white border-blue-400 hover:shadow-lg'
+                        ? 'bg-emerald-50 border-emerald-500' 
+                        : 'bg-white border-slate-300 hover:shadow-lg'
                     }`}
                   >
                     <div className="flex justify-between items-start mb-3">
-                      <h4 className="font-bold text-lg text-gray-900">{skill.skill_name}</h4>
-                      <span className="text-sm font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">{skill.category}</span>
+                      <h4 className="font-bold text-lg text-slate-950">{skill.skill_name}</h4>
+                      <span className="text-sm font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">{skill.category}</span>
                     </div>
                     
                     <Button
@@ -198,8 +200,8 @@ const CareerExplorer = () => {
                       size="sm"
                       className={`w-full text-base h-10 ${
                         completed
-                          ? 'bg-green-600 cursor-default hover:bg-green-600'
-                          : 'bg-blue-600 hover:bg-blue-700'
+                          ? 'bg-emerald-600 cursor-default hover:bg-emerald-600 text-white'
+                          : 'bg-slate-900 hover:bg-slate-800 text-white'
                       }`}
                       disabled={completed}
                     >
@@ -233,24 +235,24 @@ const CareerExplorer = () => {
 
       {/* Confirmation Dialog (Modal enhancement) */}
       {showConfirmDialog && selectedSkillForConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl p-8 w-full max-w-md shadow-2xl transform transition-all">
-            <h3 className="text-2xl font-bold text-gray-900 mb-3 flex items-center">
+          <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-[2rem] p-8 w-full max-w-md shadow-2xl transform transition-all border border-slate-200">
+            <h3 className="text-2xl font-bold text-slate-950 mb-3 flex items-center">
               <span className="text-yellow-500 mr-2 text-3xl">⚠️</span> Take Assessment
             </h3>
-            <p className="text-gray-600 mb-6">
+            <p className="text-slate-600 mb-6">
               To officially mark **{selectedSkillForConfirm.skill_name}** as completed, you must pass the assessment test. Are you ready to begin?
             </p>
             <div className="flex gap-4">
               <Button
                 onClick={handleCancelConfirm}
-                className="flex-1 bg-gray-500 text-gray-700 hover:bg-gray-700"
+                className="flex-1 bg-slate-100 text-slate-800 hover:bg-slate-200"
               >
                 Cancel
               </Button>
               <Button
                 onClick={() => handleTakeTest(selectedSkillForConfirm)}
-                className="flex-1 bg-blue-600 hover:bg-blue-700"
+                className="flex-1 bg-slate-900 hover:bg-slate-800 text-white"
               >
                 Start Test Now
               </Button>

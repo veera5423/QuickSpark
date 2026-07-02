@@ -36,24 +36,24 @@ const BlogPost = () => {
   if (!post) {
     return (
       <div className="max-w-4xl mx-auto p-6 text-center">
-        <h2 className="text-2xl font-bold">Post not found</h2>
-        <p className="mt-3">The article you're looking for doesn't exist. <Link to="/blog" className="text-indigo-600">Back to blog</Link></p>
+        <h2 className="text-2xl font-bold text-slate-950">Post not found</h2>
+        <p className="mt-3 text-slate-600">The article you're looking for doesn't exist. <Link to="/blog" className="text-teal-700">Back to blog</Link></p>
       </div>
     );
   }
 
   return (
     <div className="max-w-4xl mx-auto p-6">
-      <Card className="p-6">
-        <h1 className="text-3xl font-bold mb-2">{post.title}</h1>
-        <div className="text-sm text-gray-500 mb-4">{post.date} • {post.author}</div>
-        <div className="prose max-w-none text-gray-800">
+      <Card className="p-6 rounded-[2rem] border border-slate-200 shadow-sm">
+        <h1 className="text-3xl font-black tracking-tight mb-2 text-slate-950">{post.title}</h1>
+        <div className="text-sm text-slate-500 mb-4">{post.date} • {post.author}</div>
+        <div className="prose max-w-none text-slate-800">
           {post.content.split('\n\n').map((block, i) => (
             <p key={i}>{block}</p>
           ))}
         </div>
         <div className="mt-6">
-          <Link to="/blog" className="text-indigo-600 hover:underline">← Back to blog</Link>
+          <Link to="/blog" className="text-teal-700 hover:underline">← Back to blog</Link>
         </div>
       </Card>
     </div>

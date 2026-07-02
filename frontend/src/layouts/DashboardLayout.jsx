@@ -40,7 +40,7 @@ const DashboardLayout = ({ children }) => {
 
   return (
     <LayoutContext.Provider value={{ isExpanded, setIsExpanded }}>
-      <div className="min-h-screen flex bg-gray-100">
+      <div className="min-h-screen flex bg-slate-50 text-slate-900">
         <Sidebar />
 
         {/* Main Content Area: use inline margin to match sidebar width on desktop */}
@@ -50,7 +50,7 @@ const DashboardLayout = ({ children }) => {
         >
           <Navbar />
 
-          <main className="flex-1 p-6 md:p-8 bg-gray-100 overflow-y-auto mt-6">
+          <main className="flex-1 p-5 sm:p-6 md:p-8 bg-[linear-gradient(180deg,_#f8fafc_0%,_#f1f5f9_100%)] overflow-y-auto mt-4 md:mt-6">
             <MessageBanner />
             {children}
           </main>

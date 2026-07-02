@@ -376,7 +376,7 @@ const AdminDashboard = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-pulse text-indigo-600 font-medium">Loading admin dashboard...</div>
+        <div className="animate-pulse text-teal-700 font-medium">Loading admin dashboard...</div>
       </div>
     );
   }
@@ -387,7 +387,7 @@ const AdminDashboard = () => {
         <div className="text-6xl mb-4">⚠️</div>
         <h3 className="text-xl font-bold text-gray-800 mb-2">Access Error</h3>
         <p className="text-gray-500 mb-6">{error}</p>
-        <Button onClick={() => navigate('/dashboard')} className="bg-indigo-600 text-white">
+        <Button onClick={() => navigate('/dashboard')} className="bg-slate-900 text-white hover:bg-slate-800">
           Back to Dashboard
         </Button>
       </div>
@@ -413,13 +413,13 @@ const AdminDashboard = () => {
       )}
 
       {/* --- TAB NAVIGATION --- */}
-      <div className="flex bg-gray-100 rounded-lg p-1">
+      <div className="flex bg-slate-100 rounded-full p-1 border border-slate-200">
         <button
           onClick={() => setActiveTab('overview')}
           className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors ${
             activeTab === 'overview'
-              ? 'bg-white text-indigo-600 shadow-sm'
-              : 'text-gray-600 hover:text-gray-800'
+              ? 'bg-white text-slate-950 shadow-sm'
+              : 'text-slate-600 hover:text-slate-900'
           }`}
         >
           📊 Overview
@@ -428,8 +428,8 @@ const AdminDashboard = () => {
           onClick={() => setActiveTab('users')}
           className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors ${
             activeTab === 'users'
-              ? 'bg-white text-indigo-600 shadow-sm'
-              : 'text-gray-600 hover:text-gray-800'
+              ? 'bg-white text-slate-950 shadow-sm'
+              : 'text-slate-600 hover:text-slate-900'
           }`}
         >
           👥 Users ({users.length})
@@ -438,8 +438,8 @@ const AdminDashboard = () => {
           onClick={() => setActiveTab('resources')}
           className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors ${
             activeTab === 'resources'
-              ? 'bg-white text-indigo-600 shadow-sm'
-              : 'text-gray-600 hover:text-gray-800'
+              ? 'bg-white text-slate-950 shadow-sm'
+              : 'text-slate-600 hover:text-slate-900'
           }`}
         >
           📚 Resources ({resources.length})
@@ -448,8 +448,8 @@ const AdminDashboard = () => {
           onClick={() => setActiveTab('requests')}
           className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors ${
             activeTab === 'requests'
-              ? 'bg-white text-indigo-600 shadow-sm'
-              : 'text-gray-600 hover:text-gray-800'
+              ? 'bg-white text-slate-950 shadow-sm'
+              : 'text-slate-600 hover:text-slate-900'
           }`}
         >
           📨 Pro Requests ({requests.length})
@@ -458,8 +458,8 @@ const AdminDashboard = () => {
           onClick={() => setActiveTab('reports')}
           className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors ${
             activeTab === 'reports'
-              ? 'bg-white text-indigo-600 shadow-sm'
-              : 'text-gray-600 hover:text-gray-800'
+              ? 'bg-white text-slate-950 shadow-sm'
+              : 'text-slate-600 hover:text-slate-900'
           }`}
         >
           🚨 Reports ({reports.length})
@@ -468,8 +468,8 @@ const AdminDashboard = () => {
           onClick={() => setActiveTab('api-monitoring')}
           className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors ${
             activeTab === 'api-monitoring'
-              ? 'bg-white text-indigo-600 shadow-sm'
-              : 'text-gray-600 hover:text-gray-800'
+              ? 'bg-white text-slate-950 shadow-sm'
+              : 'text-slate-600 hover:text-slate-900'
           }`}
         >
           📊 API Monitoring
@@ -487,7 +487,7 @@ const AdminDashboard = () => {
               <div>
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Key Metrics</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                  <Card className="p-5 border-l-4 border-indigo-600">
+                  <Card className="p-5 border-l-4 border-teal-600">
                     <div className="flex items-center justify-between">
                       <div>
                         <div className="text-sm text-gray-600 font-medium">Total Users</div>
@@ -641,7 +641,7 @@ const AdminDashboard = () => {
             <Card className="p-6">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-semibold">User Management</h2>
-                <Button onClick={loadUsers} className="bg-indigo-600 text-white">
+                <Button onClick={loadUsers} className="bg-slate-900 text-white hover:bg-slate-800">
                   🔄 Refresh
                 </Button>
               </div>
@@ -663,14 +663,14 @@ const AdminDashboard = () => {
                         <td className="py-3">{new Date(user.date_registered).toLocaleDateString()}</td>
                         <td className="py-3 text-center">
                           <span className={`px-2 py-1 rounded-full text-xs ${
-                            user.is_admin ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                            user.is_admin ? 'bg-teal-100 text-teal-800' : 'bg-slate-100 text-slate-700'
                           }`}>
                             {user.is_admin ? 'Yes' : 'No'}
                           </span>
                         </td>
                         <td className="py-3 text-center">
                           <span className={`px-2 py-1 rounded-full text-xs ${
-                            user.is_pro_member ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                            user.is_pro_member ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-700'
                           }`}>
                             {user.is_pro_member ? 'Yes' : 'No'}
                           </span>
@@ -679,18 +679,22 @@ const AdminDashboard = () => {
                           <Button
                             onClick={() => handleToggleUserStatus(user._id, 'is_admin')}
                             disabled={processing === user._id}
-                            className={`text-xs px-2 py-1 ${
-                              user.is_admin ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
-                            } text-white`}
+                            className={`text-xs px-3 py-1.5 rounded-full font-semibold border ${
+                              user.is_admin
+                                ? 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'
+                                : 'bg-teal-600 text-white border-teal-600 hover:bg-teal-700'
+                            }`}
                           >
                             {user.is_admin ? 'Remove Admin' : 'Make Admin'}
                           </Button>
                           <Button
                             onClick={() => handleToggleUserStatus(user._id, 'is_pro_member')}
                             disabled={processing === user._id}
-                            className={`text-xs px-2 py-1 ${
-                              user.is_pro_member ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600'
-                            } text-white`}
+                            className={`text-xs px-3 py-1.5 rounded-full font-semibold border ${
+                              user.is_pro_member
+                                ? 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100'
+                                : 'bg-slate-900 text-white border-slate-900 hover:bg-slate-800'
+                            }`}
                           >
                             {user.is_pro_member ? 'Remove Pro' : 'Make Pro'}
                           </Button>
@@ -748,7 +752,7 @@ const AdminDashboard = () => {
                             <Button
                               onClick={() => handleVerifyResource(resource.id)}
                               disabled={processing === resource.id}
-                              className="text-xs px-3 py-1 bg-green-500 hover:bg-green-600 text-white"
+                              className="text-xs px-3 py-1.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white border border-emerald-600"
                             >
                               {processing === resource.id ? 'Verifying...' : 'Verify'}
                             </Button>
@@ -758,7 +762,7 @@ const AdminDashboard = () => {
                               href={resource.source_url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-xs text-blue-600 hover:text-blue-800"
+                              className="text-xs font-medium text-teal-700 hover:text-teal-900"
                             >
                               View
                             </a>
@@ -766,7 +770,7 @@ const AdminDashboard = () => {
                           <Button
                             onClick={() => handleDeleteResource(resource.id)}
                             disabled={processing === resource.id}
-                            className="text-xs px-3 py-1 bg-red-500 hover:bg-red-600 text-white"
+                            className="text-xs px-3 py-1.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white border border-rose-600"
                           >
                             {processing === resource.id ? 'Deleting...' : 'Delete'}
                           </Button>
@@ -845,14 +849,14 @@ const AdminDashboard = () => {
                               <Button
                                 onClick={() => handleResolveRequest(req._id, 'approve')}
                                 disabled={processing === req._id + 'approve'}
-                                className="text-xs px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white"
+                                className="text-xs px-3 py-1.5 rounded-full bg-slate-900 hover:bg-slate-800 text-white"
                               >
                                 {processing === req._id + 'approve' ? 'Approving...' : 'Make Pro'}
                               </Button>
                               <Button
                                 onClick={() => handleResolveRequest(req._id, 'reject')}
                                 disabled={processing === req._id + 'reject'}
-                                className="text-xs px-3 py-1 bg-red-400 hover:bg-red-500 text-gray-800"
+                                className="text-xs px-3 py-1.5 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200"
                               >
                                 {processing === req._id + 'reject' ? 'Rejecting...' : 'Reject'}
                               </Button>
@@ -885,7 +889,7 @@ const AdminDashboard = () => {
             <Card className="p-6">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-semibold">Resource Reports</h2>
-                <Button onClick={loadReports} className="bg-indigo-600 text-white">
+                <Button onClick={loadReports} className="bg-slate-900 text-white hover:bg-slate-800">
                   🔄 Refresh
                 </Button>
               </div>
@@ -933,7 +937,7 @@ const AdminDashboard = () => {
                   loadApiUsage();
                   loadApiLimits();
                 }}
-                className="bg-indigo-600 text-white"
+                className="bg-slate-900 text-white hover:bg-slate-800"
               >
                 🔄 Refresh Data
               </Button>

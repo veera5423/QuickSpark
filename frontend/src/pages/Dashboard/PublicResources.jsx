@@ -196,7 +196,7 @@ const PublicResources = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-pulse text-indigo-600 font-medium">Loading public library...</div>
+        <div className="animate-pulse text-teal-700 font-medium">Loading public library...</div>
       </div>
     );
   }
@@ -206,13 +206,14 @@ const PublicResources = () => {
       {/* --- HEADER & SEARCH --- */}
       <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Public Library</h1>
-          <p className="text-gray-500 mt-1">Explore verified study resources shared by the community.</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-teal-600">Community resources</p>
+          <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950">Public Library</h1>
+          <p className="text-slate-600 mt-1">Explore verified study resources shared by the community.</p>
         </div>
         <div className="flex gap-2">
           <Button
             onClick={() => navigate('/dashboard/submit-resource')}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white"
+            className="bg-slate-900 hover:bg-slate-800 text-white"
           >
             Submit Resource
           </Button>
@@ -222,7 +223,7 @@ const PublicResources = () => {
       {/* --- SEARCH BAR --- */}
       <div className="max-w-md relative">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
           <Input
             type="text"
             placeholder="Search resources..."
@@ -235,7 +236,7 @@ const PublicResources = () => {
           {searchQuery && (
             <button
               onClick={clearSearch}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-700"
             >
               <X className="h-4 w-4" />
             </button>
@@ -244,13 +245,13 @@ const PublicResources = () => {
 
         {/* Search Suggestions */}
         {showSuggestions && searchHistory.length > 0 && (
-          <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg">
-            <div className="p-2 border-b border-gray-100">
+          <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-2xl shadow-lg overflow-hidden">
+            <div className="p-2 border-b border-slate-100">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-500 font-medium">Recent Searches</span>
+                <span className="text-xs text-slate-500 font-medium">Recent Searches</span>
                 <button
                   onClick={clearSearchHistory}
-                  className="text-xs text-gray-400 hover:text-gray-600"
+                  className="text-xs text-slate-400 hover:text-slate-700"
                 >
                   Clear
                 </button>
@@ -260,7 +261,7 @@ const PublicResources = () => {
               <button
                 key={index}
                 onClick={() => selectFromHistory(item)}
-                className="w-full text-left px-3 py-2 hover:bg-gray-50 text-sm text-gray-700"
+                className="w-full text-left px-3 py-2 hover:bg-slate-50 text-sm text-slate-700"
               >
                 {item}
               </button>
@@ -270,15 +271,15 @@ const PublicResources = () => {
 
         {/* Search Status */}
         {(isSearching || isTyping) && (
-          <div className="mt-2 text-sm text-blue-600 flex items-center">
-            <div className="animate-spin rounded-full h-3 w-3 border-b border-blue-600 mr-2"></div>
+          <div className="mt-2 text-sm text-teal-700 flex items-center">
+            <div className="animate-spin rounded-full h-3 w-3 border-b border-teal-700 mr-2"></div>
             {isTyping ? 'Typing...' : 'Searching...'}
           </div>
         )}
 
         {/* Search Stats */}
         {searchStats.total > 0 && !isSearching && !isTyping && (
-          <div className="mt-2 text-sm text-gray-500 flex items-center gap-4">
+          <div className="mt-2 text-sm text-slate-500 flex items-center gap-4">
             <span className="flex items-center gap-1">
               <TrendingUp className="h-3 w-3" />
               {searchStats.total} resource{searchStats.total !== 1 ? 's' : ''} found
@@ -295,24 +296,24 @@ const PublicResources = () => {
 
       {/* --- SEGMENTED CONTROL: All / PDFs / Links --- */}
       <div className="mt-4">
-        <div className="inline-flex rounded-lg bg-gray-100 p-1 ">
+        <div className="inline-flex rounded-full bg-slate-100 p-1 border border-slate-200">
           <button
             onClick={() => setFilterType('all')}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition cursor-pointer ${filterType === 'all' ? 'bg-white shadow-sm text-indigo-600' : 'text-gray-600 hover:text-gray-800'}`}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition cursor-pointer ${filterType === 'all' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-600 hover:text-slate-900'}`}
             aria-pressed={filterType === 'all'}
           >
             All
           </button>
           <button
             onClick={() => setFilterType('pdf')}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition cursor-pointer ${filterType === 'pdf' ? 'bg-white shadow-sm text-indigo-600' : 'text-gray-600 hover:text-gray-800'}`}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition cursor-pointer ${filterType === 'pdf' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-600 hover:text-slate-900'}`}
             aria-pressed={filterType === 'pdf'}
           >
             PDFs
           </button>
           <button
             onClick={() => setFilterType('link')}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition cursor-pointer ${filterType === 'link' ? 'bg-white shadow-sm text-indigo-600' : 'text-gray-600 hover:text-gray-800'}`}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition cursor-pointer ${filterType === 'link' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-600 hover:text-slate-900'}`}
             aria-pressed={filterType === 'link'}
           >
             Links
@@ -322,7 +323,7 @@ const PublicResources = () => {
 
       {/* --- ERROR MESSAGE --- */}
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center gap-2">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-2xl flex items-center gap-2">
           <span>⚠️</span>
           {error}
         </div>
@@ -330,12 +331,12 @@ const PublicResources = () => {
 
       {/* --- EMPTY STATE --- */}
       {resources.length === 0 && !loading ? (
-        <div className="bg-white border-2 border-dashed border-gray-300 rounded-xl p-12 text-center">
+        <div className="bg-white border-2 border-dashed border-slate-300 rounded-[2rem] p-12 text-center shadow-sm">
           <div className="text-6xl mb-4">📚</div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+          <h3 className="text-xl font-semibold text-slate-950 mb-2">
             {searchQuery ? 'No resources found' : 'No public resources yet'}
           </h3>
-          <p className="text-gray-500 mb-6 max-w-md mx-auto">
+          <p className="text-slate-500 mb-6 max-w-md mx-auto">
             {searchQuery
               ? 'Try adjusting your search terms or browse all resources.'
               : 'Be the first to share educational resources with the community!'
@@ -344,7 +345,7 @@ const PublicResources = () => {
           {!searchQuery && (
             <Button
               onClick={() => navigate('/dashboard/submit-resource')}
-              className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200"
+              className="bg-slate-900 text-white hover:bg-slate-800"
             >
               Submit First Resource
             </Button>
@@ -360,7 +361,7 @@ const PublicResources = () => {
             
             <Card
               key={resource.id}
-              className="group hover:shadow-xl transition-all duration-200 cursor-pointer border border-gray-100 hover:border-indigo-200"
+              className="group hover:shadow-xl transition-all duration-200 cursor-pointer border border-slate-200 hover:border-teal-200 rounded-[1.75rem] bg-white"
               onClick={() => handleResourceClick(resource)}
               
             >
@@ -368,17 +369,17 @@ const PublicResources = () => {
 
                 {/* Card Header */}
                 <div className="flex items-start justify-between">
-                  <div className="p-2 bg-indigo-50 rounded-lg text-2xl">
+                  <div className="p-2 bg-teal-50 rounded-2xl text-2xl">
                     {resource.platform === 'PDF' ? '📄' : '🔗'}
                   </div>
-                  <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-medium">
+                  <span className="bg-emerald-100 text-emerald-700 text-xs px-2 py-1 rounded-full font-medium">
                     Verified
                   </span>
                 </div>
 
                 {/* Title & Platform */}
                 <div>
-                  <h3 className="font-bold text-gray-900 truncate text-lg" title={resource.filename}>
+                  <h3 className="font-bold text-slate-950 truncate text-lg" title={resource.filename}>
                     {resource.filename}
                   </h3>
                   {/* <p className="text-xs text-gray-500 mt-1">
@@ -388,14 +389,14 @@ const PublicResources = () => {
 
                 {/* Description */}
                 <div className="flex-1">
-                  <p className="text-sm text-black line-clamp-3 leading-relaxed">
+                  <p className="text-sm text-slate-700 line-clamp-3 leading-relaxed">
                     {resource.description || 'No description provided.'}
                    
                   </p>
                 </div>
 
                 {/* Interaction Buttons */}
-                <div className="flex justify-between items-center pt-3 border-t border-gray-100">
+                <div className="flex justify-between items-center pt-3 border-t border-slate-100">
                   <div className="flex gap-2">
                     <LikeButton resourceId={resource.id} initial={resource.likes} onCounts={(c) => updateResourceCounts(resource.id, c)} />
                     <DislikeButton resourceId={resource.id} initial={resource.dislikes} onCounts={(c) => updateResourceCounts(resource.id, c)} />
@@ -406,14 +407,14 @@ const PublicResources = () => {
                       handleReport(resource.id);
                     }}
                     disabled={interacting === resource.id}
-                    className="text-xs px-2 py-1 bg-gray-400 text-gray-700 hover:bg-gray-500 border border-gray-200"
+                    className="text-xs px-2 py-1 bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200"
                   >
                     🚨 Report
                   </Button>
                 </div>
 
                 {/* Hover Action Hint */}
-                <div className="text-indigo-600 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity text-right">
+                <div className="text-teal-700 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity text-right">
                   {((resource.platform && resource.platform.toLowerCase() === 'pdf') || (resource.type && resource.type.toLowerCase() === 'pdf')) ? 'View PDF' : 'Open Link'}
                 </div>
               </div>

@@ -110,11 +110,12 @@ const Register = () => {
     // Note: This component is assumed to be wrapped by AuthLayout
     <>
       <div className="text-center">
-        <h2 className="text-3xl font-extrabold text-gray-900">
-          Start Your AI Learning Journey
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-teal-600">Create account</p>
+        <h2 className="mt-2 text-3xl font-black tracking-tight text-slate-950">
+          Start your learning journey
         </h2>
-        <p className="mt-2 text-sm text-gray-600">
-          Create your free account in seconds.
+        <p className="mt-2 text-sm text-slate-600">
+          Create your free account in a few steps.
         </p>
       </div>
 
@@ -122,14 +123,14 @@ const Register = () => {
         
         {/* Error Display (Enhanced) */}
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg text-sm text-center font-medium shadow-sm">
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-2xl text-sm text-center font-medium shadow-sm">
             {error}
           </div>
         )}
         
         {/* Success Message Display (Enhanced) */}
         {message && (
-          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg text-sm text-center font-medium shadow-sm flex items-center justify-center">
+          <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-2xl text-sm text-center font-medium shadow-sm flex items-center justify-center">
             <CheckCircle className="w-5 h-5 mr-2" /> {message}
           </div>
         )}
@@ -156,12 +157,12 @@ const Register = () => {
             icon={Mail}
           />
           <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700">Gender</label>
+            <label className="block text-sm font-medium mb-1 text-slate-700">Gender</label>
             <select
               name="gender"
               value={formData.gender}
               onChange={(e) => setFormData({...formData, gender: e.target.value})}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 shadow-sm transition-all bg-white"
+              className="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-teal-500 focus:border-teal-500 shadow-sm transition-all bg-white"
             >
               <option value="">Select gender (optional)</option>
               <option value="male">Male</option>
@@ -195,15 +196,15 @@ const Register = () => {
             type="checkbox"
             name="terms"
             required
-            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+            className="h-4 w-4 text-teal-600 focus:ring-teal-500 border-slate-300 rounded"
           />
-          <div className="text-sm text-gray-600">
+          <div className="text-sm text-slate-600">
             I agree to the {' '}
-            <Link to="/terms" className="text-indigo-600 hover:text-indigo-800 font-medium">
+            <Link to="/terms" className="text-teal-700 hover:text-teal-800 font-medium">
               Terms of Service
             </Link> {' '}
             and {' '}
-            <Link to="/privacy" className="text-indigo-600 hover:text-indigo-800 font-medium">
+            <Link to="/privacy" className="text-teal-700 hover:text-teal-800 font-medium">
               Privacy Policy
             </Link>.
           </div></span>
@@ -215,7 +216,7 @@ const Register = () => {
           type="submit" 
           disabled={loading} 
           fullWidth 
-          className="bg-indigo-600 hover:bg-indigo-700 text-lg py-2 font-bold shadow-lg"
+          className="bg-slate-900 hover:bg-slate-800 text-lg py-2 font-bold shadow-lg shadow-slate-900/10"
         >
           {loading ? (
             <span className="flex items-center justify-center">
@@ -227,10 +228,10 @@ const Register = () => {
         {/* Separator */}
         <div className="relative my-1">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300"></div>
+            <div className="w-full border-t border-slate-200"></div>
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-gray-500">
+            <span className="px-2 bg-white text-slate-500">
               OR
             </span>
           </div>
@@ -243,9 +244,9 @@ const Register = () => {
 
         {/* Link to Login (Enhanced Typography) */}
         <div className=" text-center">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-slate-600">
             Already have an account? {' '}
-            <Link to="/login" className="font-semibold text-indigo-600 hover:text-indigo-800">
+            <Link to="/login" className="font-semibold text-teal-700 hover:text-teal-800">
               Sign in
             </Link>
           </p>
