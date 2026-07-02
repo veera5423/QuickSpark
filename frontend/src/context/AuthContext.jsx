@@ -4,8 +4,13 @@ import { authAPI } from '../api/authAPI';
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const tempUser={
+    "username": "testName",
+            "email": "testEmail",
+            "is_admin":true
+  }
+  const [user, setUser] = useState(tempUser);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {

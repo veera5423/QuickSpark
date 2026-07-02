@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Card from '../ui/Card';
+import Header from './Header';
+import Footer from './Footer';
 
 const posts = [
   {
@@ -40,7 +42,9 @@ const Blog = () => {
   };
 
   return (
+    <>
     <div className="max-w-6xl mx-auto p-6">
+      {/* <Header/> */}
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold">QuickSpark Blog</h1>
         <p className="text-gray-600 mt-2">Insights, tutorials, and product updates to help you learn smarter.</p>
@@ -62,6 +66,8 @@ const Blog = () => {
         ))}
       </div>
     </div>
+      <Footer/>
+      </>
   );
 };
 

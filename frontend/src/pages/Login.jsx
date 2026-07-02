@@ -64,7 +64,7 @@ const Login = () => {
     }
   };
 
-  // --- Email/Password Submission Handler (Unchanged Logic) ---
+  // --- Email/Password Submission Handler 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);

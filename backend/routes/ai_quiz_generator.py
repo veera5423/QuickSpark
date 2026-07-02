@@ -5,9 +5,9 @@ from datetime import datetime
 import json
 import logging
 
-from utils.rate_limit import check_and_increment_usage
+from utils.rate_limit import check_usage_limit, increment_usage
 from db.mongo_client import db
-from utils.gemini_helper import summarize_with_gemini
+from utils.gemini_helper import summarize_with_gemini, GeminiQuotaExceededError
 from utils.quiz_prompt import quiz_generation_prompt
 
 ai_quiz_bp = Blueprint("ai_quiz_generator", __name__)
@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 @jwt_required()
 def generate_quiz_from_text():
     """Generate MCQs from provided text with difficulty levels."""
+    print(f"[{datetime.now()}] Received request to /generate-quiz-text")
     try:
         current_user_id = get_jwt_identity()
     except Exception as e:
@@ -46,7 +47,7 @@ def generate_quiz_from_text():
     if not isinstance(num_questions, int) or num_questions < 1 or num_questions > 20:
         return jsonify({"message": "num_questions must be an integer between 1 and 20"}), 400
     
-    if not check_and_increment_usage(current_user_id):
+    if not check_usage_limit(current_user_id):
             return jsonify({
                 "message": "AI Chat limit exceeded. Upgrade to Premium for more usage.",
                 "answer": "AI Chat limit reached. Please upgrade your account to continue."
@@ -57,8 +58,13 @@ def generate_quiz_from_text():
 
     # 4️ Call Gemini API
     try:
-        quiz_json_text = summarize_with_gemini(prompt)
+        quiz_json_text = summarize_with_gemini(prompt, user_id=current_user_id, endpoint="quiz_generation")
         logger.info(f"Gemini API call successful for text-based quiz")
+        # Increment usage only on successful API call
+        increment_usage(current_user_id)
+    except GeminiQuotaExceededError as e:
+        logger.error(f"Gemini API quota exceeded: {e}")
+        return jsonify({"message": str(e)}), 429
     except Exception as e:
         logger.error(f"Gemini API error: {e}")
         return jsonify({"message": f"Gemini API error: {e}"}), 500
@@ -113,9 +119,10 @@ def generate_quiz_from_text():
 @jwt_required()
 def generate_quiz(resource_id):
     """Generate MCQs from summarized text of a resource with difficulty levels."""
+    print(f"[{datetime.now()}] Received request to /generate-quiz/{resource_id}")
     try:
         current_user_id = get_jwt_identity()
-        if not check_and_increment_usage(current_user_id):
+        if not check_usage_limit(current_user_id):
             return jsonify({
                 "message": "AI Chat limit exceeded. Upgrade to Premium for more usage.",
                 "answer": "AI Chat limit reached. Please upgrade your account to continue."
@@ -167,6 +174,8 @@ def generate_quiz(resource_id):
     try:
         quiz_json_text = summarize_with_gemini(prompt)
         logger.info(f"Gemini API call successful for resource {resource_id}")
+        # Increment usage only on successful API call
+        increment_usage(current_user_id)
     except Exception as e:
         logger.error(f"Gemini API error: {e}")
         return jsonify({"message": f"Gemini API error: {e}"}), 500

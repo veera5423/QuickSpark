@@ -154,7 +154,7 @@ const Hero = () => {
                         </p>
                         <Button
                             onClick={() => window.location.href = '/register'}
-                            className="px-8 sm:px-10 lg:px-12 py-3 sm:py-4 bg-indigo-600 text-white hover:bg-gray-100 text-lg sm:text-xl hover:text-indigo-700 font-bold shadow-2xl transition-transform duration-150 transform hover:-translate-y-0.5 cursor-pointer"
+                            className="px-8 sm:px-10 lg:px-12 py-3 sm:py-4 bg-indigo-600 text-white hover:bg-gray-100 text-lg sm:text-xl hover:text-gray-100 font-bold shadow-2xl transition-transform duration-150 transform hover:-translate-y-0.5 cursor-pointer"
                         >
                             Join QuickSpark AI
                         </Button>

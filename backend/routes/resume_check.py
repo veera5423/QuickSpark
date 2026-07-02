@@ -3,9 +3,9 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from PyPDF2 import PdfReader
 from io import BytesIO
 import json
-from utils.gemini_helper import summarize_with_gemini
+from utils.gemini_helper import summarize_with_gemini, GeminiQuotaExceededError
 
-from utils.rate_limit import check_and_increment_usage
+from utils.rate_limit import check_usage_limit, increment_usage
 from db.mongo_client import Config, users_collection
 from datetime import datetime
 
@@ -23,7 +23,7 @@ def resume_check():
     """
     try:
         current_user_id = get_jwt_identity()
-        if not check_and_increment_usage(current_user_id):
+        if not check_usage_limit(current_user_id):
             return jsonify({"message": "AI usage limit exceeded."}), 429
     except Exception as e:
         print(f"Auth/usage error: {e}")
@@ -93,7 +93,9 @@ def resume_check():
 
     try:
         # Use shared helper which returns the model text
-        text = summarize_with_gemini(prompt)
+        text = summarize_with_gemini(prompt, user_id=current_user_id, endpoint="resume_check")
+        # Increment usage only on successful API call
+        increment_usage(current_user_id)
         cleaned = text.strip()
 
         # Remove common fenced code blocks (```json ... ``` or ``` ... ```)
@@ -139,6 +141,9 @@ def resume_check():
                 "feedback": cleaned
             }
             return jsonify({"result": fallback}), 200
+    except GeminiQuotaExceededError as e:
+        print(f"Gemini API quota exceeded: {e}")
+        return jsonify({"message": str(e)}), 429
     except Exception as e:
         print(f"AI evaluation error: {e}")
         return jsonify({"message": f"AI error: {str(e)}"}), 500

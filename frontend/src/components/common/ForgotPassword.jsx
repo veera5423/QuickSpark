@@ -19,7 +19,7 @@ const ForgotPassword = () => {
 
     try {
       const response = await authAPI.forgotPassword({ email });
-      setMessage(response.data.message || 'Password reset link sent to your email.');
+      setMessage(response.data.message || 'Password reset link sent to your email. Please check your inbox and spam/junk folder.');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to send reset link. Please check the email address.');
     } finally {

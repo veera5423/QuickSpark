@@ -227,6 +227,7 @@ const CareerExplorer = () => {
           isOpen={showQuizModal}
           onClose={handleCloseQuiz}
           skill={selectedSkill}
+          submitQuizApi={quizAPI.submitQuiz}
         />
       )}
 

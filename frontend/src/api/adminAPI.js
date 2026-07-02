@@ -42,7 +42,7 @@ class AdminAPI {
   static async verifyResource(resourceId) {
     return resilientRequest({
       method: 'POST',
-      url: `/api/admin/resources/${resourceId}/verify`
+      url: `/api/public/admin/verify/${resourceId}`
     }, {
       maxRetries: 1,
       serviceName: 'Resource Verification'
@@ -121,6 +121,51 @@ class AdminAPI {
     }, {
       maxRetries: 1,
       serviceName: 'Admin Health Check'
+    });
+  }
+
+  // API Monitoring
+  static async getApiUsage(params = {}) {
+    const queryString = new URLSearchParams(params).toString();
+    return resilientRequest({
+      method: 'GET',
+      url: `/api/admin/api-usage${queryString ? `?${queryString}` : ''}`
+    }, {
+      maxRetries: 2,
+      serviceName: 'API Usage Monitoring',
+      fallbackData: { summary: {}, endpoint_stats: {}, user_stats: {}, logs: [] }
+    });
+  }
+
+  static async getApiLimits() {
+    return resilientRequest({
+      method: 'GET',
+      url: '/api/admin/api-limits'
+    }, {
+      maxRetries: 2,
+      serviceName: 'API Limits Management',
+      fallbackData: { user_limits: [], user_details: {}, default_limits: {} }
+    });
+  }
+
+  static async updateUserApiLimit(userId, limit) {
+    return resilientRequest({
+      method: 'POST',
+      url: `/api/admin/api-limits/${userId}`,
+      data: { limit }
+    }, {
+      maxRetries: 1,
+      serviceName: 'API Limit Update'
+    });
+  }
+
+  static async resetUserApiLimit(userId) {
+    return resilientRequest({
+      method: 'DELETE',
+      url: `/api/admin/api-limits/${userId}`
+    }, {
+      maxRetries: 1,
+      serviceName: 'API Limit Reset'
     });
   }
 }

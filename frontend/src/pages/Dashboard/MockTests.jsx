@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
@@ -19,6 +19,7 @@ const MockTests = () => {
     const [attempts, setAttempts] = useState([]);
     const [error, setError] = useState(null);
     const [limitExceeded, setLimitExceeded] = useState(false);
+    const requestInProgressRef = useRef(false);
 
     // Quiz Mode State
     const [quizMode, setQuizMode] = useState('resource'); // 'resource' or 'text'
@@ -49,13 +50,24 @@ const MockTests = () => {
     };
 
     const generateQuiz = async () => {
+        // Prevent duplicate requests using ref (works even with StrictMode)
+        if (requestInProgressRef.current || loading) {
+            console.log('Quiz generation already in progress, ignoring duplicate request');
+            return;
+        }
+        
+        console.log('Starting quiz generation...', { quizMode, selectedResource, textInputLength: textInput.trim().length });
+        requestInProgressRef.current = true;
+        
         setError(null);
         if (quizMode === 'resource' && !selectedResource) {
             setError("Please select a resource.");
+            requestInProgressRef.current = false;
             return;
         }
         if (quizMode === 'text' && textInput.trim().length < 50) {
             setError("Please enter at least 50 characters for a meaningful quiz.");
+            requestInProgressRef.current = false;
             return;
         }
         
@@ -65,13 +77,14 @@ const MockTests = () => {
             let response;
             
             if (quizMode === 'resource') {
+                console.log('Generating quiz from resource:', selectedResource);
                 response = await quizAPI.generateQuiz(selectedResource, difficulty, numQuestions);
             } else {
+                console.log('Generating quiz from text, length:', textInput.trim().length);
                 response = await quizAPI.generateQuizFromText(textInput.trim(), difficulty, numQuestions);
             }
             
-            
-
+            console.log('Quiz generated successfully, opening modal');
             setModalQuizData(response);
             setIsModalOpen(true);
             
@@ -86,6 +99,7 @@ const MockTests = () => {
             
          } finally {
             setLoading(false);
+            requestInProgressRef.current = false;
         }
     };
 
@@ -248,7 +262,11 @@ const MockTests = () => {
                     {/* Generate Button */}
                     <div className="md:col-span-4 flex justify-end">
                         <Button
-                            onClick={generateQuiz}
+                            onClick={(e) => {
+                                console.log('Button clicked', { loading, quizMode, selectedResource });
+                                e.preventDefault();
+                                generateQuiz();
+                            }}
                             disabled={loading || (quizMode === 'resource' && !selectedResource) || (quizMode === 'text' && textInput.trim().length < 50)}
                             className="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-8 text-lg font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                         >

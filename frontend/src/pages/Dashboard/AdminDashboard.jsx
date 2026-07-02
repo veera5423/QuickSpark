@@ -9,6 +9,7 @@ import {
   StatsFallback,
   ResourcesFallback,
   ProRequestsFallback,
+  ApiMonitoringFallback,
   ServiceLoading
 } from '../../components/ui/ServiceFallbacks';
 import { useCircuitBreaker } from '../../hooks/useCircuitBreaker';
@@ -23,6 +24,7 @@ const AdminDashboard = () => {
   const statsCircuit = useCircuitBreaker('Dashboard Statistics');
   const reportsCircuit = useCircuitBreaker('Reports System');
   const proRequestsCircuit = useCircuitBreaker('Pro Requests');
+  const apiMonitoringCircuit = useCircuitBreaker('API Monitoring');
 
   // State management
   const [stats, setStats] = useState(null);
@@ -35,13 +37,29 @@ const AdminDashboard = () => {
   const [processing, setProcessing] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // API Monitoring state
+  const [apiUsage, setApiUsage] = useState(null);
+  const [apiLimits, setApiLimits] = useState(null);
+  const [apiUsageFilters, setApiUsageFilters] = useState({
+    days: 7,
+    user_id: '',
+    endpoint: ''
+  });
+  const [apiUsagePagination, setApiUsagePagination] = useState({
+    loadedLogs: [],
+    hasMore: true,
+    loadingMore: false,
+    page: 1
+  });
+
   // Service status states
   const [serviceStatus, setServiceStatus] = useState({
     users: 'loading',
     resources: 'loading',
     stats: 'loading',
     reports: 'loading',
-    proRequests: 'loading'
+    proRequests: 'loading',
+    apiMonitoring: 'loading'
   });
 
   const loadUsers = useCallback(async () => {
@@ -134,6 +152,66 @@ const AdminDashboard = () => {
     }
   }, [proRequestsCircuit.execute]);
 
+  const loadApiUsage = useCallback(async (filters = apiUsageFilters, loadMore = false) => {
+    try {
+      if (!loadMore) {
+        setServiceStatus(prev => ({ ...prev, apiMonitoring: 'loading' }));
+        setApiUsagePagination(prev => ({ ...prev, loadedLogs: [], page: 1, hasMore: true }));
+      } else {
+        setApiUsagePagination(prev => ({ ...prev, loadingMore: true }));
+      }
+
+      const response = await apiMonitoringCircuit.execute(() => AdminAPI.getApiUsage({
+        ...filters,
+        page: loadMore ? apiUsagePagination.page + 1 : 1,
+        limit: 50
+      }));
+
+      if (response.success) {
+        const newData = response.data;
+        const newLogs = loadMore ? [...apiUsagePagination.loadedLogs, ...newData.logs] : newData.logs;
+
+        setApiUsage({
+          ...newData,
+          logs: newLogs
+        });
+
+        setApiUsagePagination(prev => ({
+          loadedLogs: newLogs,
+          hasMore: newData.pagination ? newData.pagination.page < newData.pagination.pages : false,
+          loadingMore: false,
+          page: loadMore ? prev.page + 1 : 1
+        }));
+
+        if (!loadMore) {
+          setServiceStatus(prev => ({ ...prev, apiMonitoring: 'success' }));
+        }
+      } else {
+        console.warn('API usage service failed:', response.message);
+        setServiceStatus(prev => ({ ...prev, apiMonitoring: 'error' }));
+        setApiUsagePagination(prev => ({ ...prev, loadingMore: false }));
+      }
+    } catch (error) {
+      console.error('API usage service error:', error);
+      setServiceStatus(prev => ({ ...prev, apiMonitoring: 'error' }));
+      setApiUsagePagination(prev => ({ ...prev, loadingMore: false }));
+    }
+  }, [apiMonitoringCircuit.execute, apiUsageFilters, apiUsagePagination.page, apiUsagePagination.loadedLogs]);
+
+  const loadApiLimits = useCallback(async () => {
+    try {
+      const response = await apiMonitoringCircuit.execute(() => AdminAPI.getApiLimits());
+
+      if (response.success) {
+        setApiLimits(response.data);
+      } else {
+        console.warn('API limits service failed:', response.message);
+      }
+    } catch (error) {
+      console.error('API limits service error:', error);
+    }
+  }, [apiMonitoringCircuit.execute]);
+
   const loadDashboardData = useCallback(async () => {
     try {
       // Load each service independently
@@ -154,6 +232,14 @@ const AdminDashboard = () => {
   useEffect(() => {
     loadDashboardData();
   }, [loadDashboardData]);
+
+  // Load API monitoring data when tab is selected
+  useEffect(() => {
+    if (activeTab === 'api-monitoring') {
+      loadApiUsage();
+      loadApiLimits();
+    }
+  }, [activeTab]);
 
   const handleResolveRequest = async (requestId, action) => {
     try {
@@ -235,6 +321,53 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error('Failed to delete resource:', error);
       setError('Failed to delete resource');
+    } finally {
+      setProcessing(null);
+    }
+  };
+
+  const handleApiUsageFilterChange = (filters) => {
+    setApiUsageFilters(filters);
+    loadApiUsage(filters);
+  };
+
+  const handleUpdateUserApiLimit = async (userId, limit) => {
+    try {
+      setProcessing(userId);
+      const response = await apiMonitoringCircuit.execute(() => AdminAPI.updateUserApiLimit(userId, limit));
+
+      if (response.success) {
+        // Reload API limits
+        loadApiLimits();
+        loadApiUsage();
+      } else {
+        console.error('Failed to update API limit:', response.message);
+        setError('Failed to update API limit');
+      }
+    } catch (error) {
+      console.error('Failed to update API limit:', error);
+      setError('Failed to update API limit');
+    } finally {
+      setProcessing(null);
+    }
+  };
+
+  const handleResetUserApiLimit = async (userId) => {
+    try {
+      setProcessing(userId);
+      const response = await apiMonitoringCircuit.execute(() => AdminAPI.resetUserApiLimit(userId));
+
+      if (response.success) {
+        // Reload API limits
+        loadApiLimits();
+        loadApiUsage();
+      } else {
+        console.error('Failed to reset API limit:', response.message);
+        setError('Failed to reset API limit');
+      }
+    } catch (error) {
+      console.error('Failed to reset API limit:', error);
+      setError('Failed to reset API limit');
     } finally {
       setProcessing(null);
     }
@@ -330,6 +463,16 @@ const AdminDashboard = () => {
           }`}
         >
           🚨 Reports ({reports.length})
+        </button>
+        <button
+          onClick={() => setActiveTab('api-monitoring')}
+          className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors ${
+            activeTab === 'api-monitoring'
+              ? 'bg-white text-indigo-600 shadow-sm'
+              : 'text-gray-600 hover:text-gray-800'
+          }`}
+        >
+          📊 API Monitoring
         </button>
       </div>
 
@@ -491,7 +634,7 @@ const AdminDashboard = () => {
 
       {/* --- USERS TAB --- */}
       {activeTab === 'users' && (
-        <ServiceErrorBoundary serviceName="User Management" fallback={<UserManagementFallback />}>
+        <ServiceErrorBoundary serviceName="User Management" fallback={<UserManagementFallback /> }>
           {serviceStatus.users === 'loading' && <ServiceLoading serviceName="User Management" />}
           {serviceStatus.users === 'error' && <UserManagementFallback />}
           {serviceStatus.users === 'success' && (
@@ -566,7 +709,7 @@ const AdminDashboard = () => {
       {activeTab === 'resources' && (
         <ServiceErrorBoundary serviceName="Resource Management" fallback={<ResourcesFallback />}>
           {serviceStatus.resources === 'loading' && <ServiceLoading serviceName="Resource Management" />}
-          {serviceStatus.resources === 'error' && <ResourceManagementFallback />}
+          {serviceStatus.resources === 'error' && <ResourcesFallback />}
           {serviceStatus.resources === 'success' && (
             <Card className="p-6">
               <h2 className="text-xl font-semibold mb-4">Resource Management</h2>
@@ -776,6 +919,275 @@ const AdminDashboard = () => {
             </Card>
           )}
         </ServiceErrorBoundary>
+      )}
+
+      {/* --- API MONITORING TAB --- */}
+      {activeTab === 'api-monitoring' && (
+        <div className="space-y-6">
+          {/* API Usage Statistics */}
+          <Card className="p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-semibold">API Usage Monitoring</h2>
+              <Button
+                onClick={() => {
+                  loadApiUsage();
+                  loadApiLimits();
+                }}
+                className="bg-indigo-600 text-white"
+              >
+                🔄 Refresh Data
+              </Button>
+            </div>
+
+            {/* Filters */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Time Range</label>
+                <select
+                  value={apiUsageFilters.days}
+                  onChange={(e) => handleApiUsageFilterChange({ ...apiUsageFilters, days: parseInt(e.target.value) })}
+                  className="w-full p-2 border border-gray-300 rounded-md"
+                >
+                  <option value={1}>Last 24 hours</option>
+                  <option value={7}>Last 7 days</option>
+                  <option value={30}>Last 30 days</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">User ID (optional)</label>
+                <input
+                  type="text"
+                  value={apiUsageFilters.user_id}
+                  onChange={(e) => handleApiUsageFilterChange({ ...apiUsageFilters, user_id: e.target.value })}
+                  placeholder="Filter by user ID"
+                  className="w-full p-2 border border-gray-300 rounded-md"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Endpoint (optional)</label>
+                <select
+                  value={apiUsageFilters.endpoint}
+                  onChange={(e) => handleApiUsageFilterChange({ ...apiUsageFilters, endpoint: e.target.value })}
+                  className="w-full p-2 border border-gray-300 rounded-md"
+                >
+                  <option value="">All endpoints</option>
+                  <option value="quiz_generation">Quiz Generation</option>
+                  <option value="resume_check">Resume Check</option>
+                  <option value="voice_interview_questions">Voice Interview Questions</option>
+                  <option value="voice_interview_evaluation">Voice Interview Evaluation</option>
+                </select>
+              </div>
+            </div>
+
+            {serviceStatus.apiMonitoring === 'loading' && <ServiceLoading serviceName="API Monitoring" />}
+            {serviceStatus.apiMonitoring === 'error' && (
+              <div className="text-center py-8 text-red-600">
+                Failed to load API usage data. Please try again.
+              </div>
+            )}
+            {serviceStatus.apiMonitoring === 'success' && apiUsage && (
+              <div className="space-y-6">
+                {/* Summary Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <div className="text-2xl font-bold text-blue-600">{apiUsage.summary?.total_calls || 0}</div>
+                    <div className="text-sm text-blue-800">Total API Calls</div>
+                  </div>
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <div className="text-2xl font-bold text-green-600">{apiUsage.summary?.successful_calls || 0}</div>
+                    <div className="text-sm text-green-800">Successful Calls</div>
+                  </div>
+                  <div className="bg-red-50 p-4 rounded-lg">
+                    <div className="text-2xl font-bold text-red-600">{apiUsage.summary?.failed_calls || 0}</div>
+                    <div className="text-sm text-red-800">Failed Calls</div>
+                  </div>
+                  <div className="bg-yellow-50 p-4 rounded-lg">
+                    <div className="text-2xl font-bold text-yellow-600">{apiUsage.summary?.success_rate?.toFixed(1) || 0}%</div>
+                    <div className="text-sm text-yellow-800">Success Rate</div>
+                  </div>
+                </div>
+
+                {/* Endpoint Statistics */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Endpoint Usage</h3>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm border">
+                      <thead>
+                        <tr className="bg-gray-50">
+                          <th className="p-3 text-left">Endpoint</th>
+                          <th className="p-3 text-center">Total</th>
+                          <th className="p-3 text-center">Success</th>
+                          <th className="p-3 text-center">Failed</th>
+                          <th className="p-3 text-center">Success Rate</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {Object.entries(apiUsage.endpoint_stats || {}).map(([endpoint, stats]) => (
+                          <tr key={endpoint} className="border-t">
+                            <td className="p-3 font-medium">{endpoint.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</td>
+                            <td className="p-3 text-center">{stats.total}</td>
+                            <td className="p-3 text-center text-green-600">{stats.success}</td>
+                            <td className="p-3 text-center text-red-600">{stats.failed}</td>
+                            <td className="p-3 text-center">{stats.total > 0 ? ((stats.success / stats.total) * 100).toFixed(1) : 0}%</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Recent API Calls */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Recent API Calls</h3>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm border">
+                      <thead>
+                        <tr className="bg-gray-50">
+                          <th className="p-3 text-left">Time</th>
+                          <th className="p-3 text-left">User</th>
+                          <th className="p-3 text-left">Endpoint</th>
+                          <th className="p-3 text-center">Status</th>
+                          <th className="p-3 text-left">Model</th>
+                          <th className="p-3 text-center">Tokens</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {apiUsage.logs?.map((log) => (
+                          <tr key={log._id} className="border-t">
+                            <td className="p-3">{new Date(log.timestamp).toLocaleString()}</td>
+                            <td className="p-3">
+                              {log.user_id === 'anonymous' ? 'Anonymous' : 
+                               apiUsage.user_details?.[log.user_id]?.email || log.user_id?.substring(0, 8) + '...'}
+                            </td>
+                            <td className="p-3">{log.endpoint?.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</td>
+                            <td className="p-3 text-center">
+                              <span className={`px-2 py-1 rounded text-xs ${log.success ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                {log.success ? 'Success' : 'Failed'}
+                              </span>
+                            </td>
+                            <td className="p-3">{log.model}</td>
+                            <td className="p-3 text-center">{log.tokens_used || 'N/A'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  
+                  {/* View More Button */}
+                  {apiUsagePagination.hasMore && (
+                    <div className="mt-4 text-center">
+                      <Button
+                        onClick={() => loadApiUsage(apiUsageFilters, true)}
+                        disabled={apiUsagePagination.loadingMore}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2"
+                      >
+                        {apiUsagePagination.loadingMore ? (
+                          <span className="flex items-center">
+                            <span className="animate-spin h-4 w-4 mr-2 border-b-2 border-white rounded-full"></span>
+                            Loading...
+                          </span>
+                        ) : (
+                          'View More'
+                        )}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </Card>
+
+          {/* API Limits Management */}
+          <Card className="p-6">
+            <h2 className="text-xl font-semibold mb-6">API Limits Management</h2>
+            
+            <div className="mb-4">
+              <p className="text-sm text-gray-600">
+                Default limits: Free tier - {apiLimits?.default_limits?.free_tier || 3} calls, Premium - {apiLimits?.default_limits?.premium || 6} calls
+              </p>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm border">
+                <thead>
+                  <tr className="bg-gray-50">
+                    <th className="p-3 text-left">User</th>
+                    <th className="p-3 text-center">Current Usage</th>
+                    <th className="p-3 text-center">Custom Limit</th>
+                    <th className="p-3 text-center">Status</th>
+                    <th className="p-3 text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {apiLimits?.user_limits?.map((limit) => {
+                    const userDetails = apiLimits.user_details?.[limit.user_id];
+                    const isPro = userDetails?.is_pro;
+                    const defaultLimit = isPro ? (apiLimits.default_limits?.premium || 6) : (apiLimits.default_limits?.free_tier || 3);
+                    const effectiveLimit = limit.custom_limit !== undefined ? limit.custom_limit : defaultLimit;
+                    const isAtLimit = limit.usage_count >= effectiveLimit;
+                    
+                    return (
+                      <tr key={limit.user_id} className="border-t">
+                        <td className="p-3">
+                          <div>
+                            <div className="font-medium">{userDetails?.name || 'Unknown'}</div>
+                            <div className="text-sm text-gray-500">{userDetails?.email || limit.user_id}</div>
+                            <div className="text-xs text-blue-600">{isPro ? 'Premium' : 'Free'}</div>
+                          </div>
+                        </td>
+                        <td className="p-3 text-center">
+                          <span className={isAtLimit ? 'text-red-600 font-bold' : ''}>
+                            {limit.usage_count}
+                          </span>
+                        </td>
+                        <td className="p-3 text-center">
+                          {limit.custom_limit !== undefined ? (
+                            <span className="font-medium text-blue-600">{limit.custom_limit}</span>
+                          ) : (
+                            <span className="text-gray-500">{defaultLimit} (default)</span>
+                          )}
+                        </td>
+                        <td className="p-3 text-center">
+                          <span className={`px-2 py-1 rounded text-xs ${
+                            isAtLimit ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                          }`}>
+                            {isAtLimit ? 'At Limit' : 'Active'}
+                          </span>
+                        </td>
+                        <td className="p-3 text-center space-x-2">
+                          <Button
+                            onClick={() => {
+                              const newLimit = prompt('Enter new API limit:', effectiveLimit);
+                              if (newLimit && !isNaN(newLimit)) {
+                                handleUpdateUserApiLimit(limit.user_id, parseInt(newLimit));
+                              }
+                            }}
+                            disabled={processing === limit.user_id}
+                            className="text-xs px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white"
+                          >
+                            Set Limit
+                          </Button>
+                          {limit.custom_limit !== undefined && (
+                            <Button
+                              onClick={() => handleResetUserApiLimit(limit.user_id)}
+                              disabled={processing === limit.user_id}
+                              className="text-xs px-2 py-1 bg-gray-600 hover:bg-gray-700 text-white"
+                            >
+                              Reset
+                            </Button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+              {(!apiLimits?.user_limits || apiLimits.user_limits.length === 0) && (
+                <div className="text-center text-gray-500 py-6">No user limits data available.</div>
+              )}
+            </div>
+          </Card>
+        </div>
       )}
     </div>
   );

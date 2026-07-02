@@ -148,6 +148,24 @@ export const ServiceOffline = ({ serviceName, lastUpdated }) => (
   </div>
 );
 
+// Fallback component for when API monitoring fails
+export const ApiMonitoringFallback = () => (
+  <div className="fallback-card" style={{
+    padding: '20px',
+    border: '2px dashed #e0e0e0',
+    borderRadius: '8px',
+    backgroundColor: '#fafafa',
+    textAlign: 'center',
+    margin: '10px 0'
+  }}>
+    <div style={{ fontSize: '32px', marginBottom: '10px' }}>📊</div>
+    <h4 style={{ color: '#666', margin: '0 0 10px 0' }}>API Monitoring Unavailable</h4>
+    <p style={{ color: '#999', fontSize: '14px', margin: '0' }}>
+      API usage monitoring is temporarily unavailable. Other admin features remain accessible.
+    </p>
+  </div>
+);
+
 // Success indicator component
 export const ServiceOnline = ({ serviceName }) => (
   <div className="online-indicator" style={{
