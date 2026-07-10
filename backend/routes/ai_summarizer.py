@@ -139,7 +139,7 @@ import uuid
 import psycopg2.extras
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-from utils.rate_limit import check_and_increment_usage
+from utils.rate_limit import check_usage_limit, increment_usage
 from db.mongo_client import supabase, resources_collection, Config, pg_conn, db
 from utils.gemini_helper import summarize_with_gemini
 
@@ -234,8 +234,8 @@ def upload_and_summarize():
     except Exception as e:
         return jsonify({"message": f"Authentication error: {str(e)}"}), 401
 
-    # Now check and increment usage for this authenticated user
-    if not check_and_increment_usage(current_user_id):
+    # Now check usage for this authenticated user
+    if not check_usage_limit(current_user_id):
         return jsonify({
             "message": "AI Chat limit exceeded. Upgrade to Premium for more usage.",
             "answer": "AI Chat limit reached. Please upgrade your account to continue."
@@ -358,6 +358,8 @@ def upload_and_summarize():
         summary = get_summary_from_gemini(summary_text_input) 
         
         print("Summary generated successfully")
+        # Increment usage only on successful API call
+        increment_usage(current_user_id)
     except Exception as e:
         resources_collection.update_one(
             {"_id": mongo_id}, {"$set": {"status": "summarization_failed"}}
@@ -404,7 +406,7 @@ def chat_with_resource():
     print("Endpoint reached: /chat-with-resource")
     try:
         current_user_id = get_jwt_identity()
-        if not check_and_increment_usage(current_user_id):
+        if not check_usage_limit(current_user_id):
             return jsonify({
                 "message": "AI Chat limit exceeded. Upgrade to Premium for more usage.",
                 "answer": "AI Chat limit reached. Please upgrade your account to continue."
@@ -477,6 +479,8 @@ def chat_with_resource():
         answer_text = summarize_with_gemini(prompt)
 
         print("Answer generated successfully.")
+        # Increment usage only on successful API call
+        increment_usage(current_user_id)
         return jsonify({"answer": answer_text}), 200
 
     except Exception as e:

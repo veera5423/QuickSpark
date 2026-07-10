@@ -42,8 +42,8 @@ const Card = ({
   const shadowClass = shadows[shadow] || shadows.md;
   const roundedClass = roundeds[rounded] || roundeds.lg;
 
-  const borderClass = border ? 'border border-gray-200' : '';
-  const hoverClass = hover ? 'hover:shadow-lg hover:-translate-y-1' : '';
+  const borderClass = border ? 'border border-slate-200' : '';
+  const hoverClass = hover ? 'hover:shadow-xl hover:-translate-y-1' : '';
 
   return (
     <div

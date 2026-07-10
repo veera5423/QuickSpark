@@ -1,4 +1,5 @@
 import React from 'react';
+import { twMerge } from 'tailwind-merge';
 
 const Button = ({
   children,
@@ -10,7 +11,7 @@ const Button = ({
   loading = false,
   ...props
 }) => {
-  const baseClasses = 'inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
+  const baseClasses = 'inline-flex items-center justify-center font-medium rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
 
   const sizes = {
     sm: 'px-3 py-1.5 text-sm',
@@ -20,9 +21,9 @@ const Button = ({
   };
 
   const variants = {
-    primary: 'bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500 shadow-md hover:shadow-lg transform hover:-translate-y-0.5',
-    secondary: 'bg-gray-200 text-gray-800 hover:bg-gray-300 focus:ring-gray-500',
-    outline: 'bg-white text-indigo-600 border border-indigo-400 hover:bg-indigo-50 focus:ring-indigo-500',
+    primary: 'bg-slate-900 text-white hover:bg-slate-800 focus:ring-slate-500 shadow-lg shadow-slate-900/10 transform hover:-translate-y-0.5',
+    secondary: 'bg-slate-100 text-slate-800 hover:bg-slate-200 focus:ring-slate-400',
+    outline: 'bg-white text-slate-900 border border-slate-300 hover:bg-slate-50 focus:ring-slate-400',
     danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
     success: 'bg-green-600 text-white hover:bg-green-700 focus:ring-green-500'
   };
@@ -34,7 +35,7 @@ const Button = ({
     <button
       onClick={onClick}
       disabled={disabled || loading}
-      className={`${baseClasses} ${sizeClass} ${variantClass} ${className}`}
+      className={twMerge(baseClasses, sizeClass, variantClass, className)}
       {...props}
     >
       {loading && (

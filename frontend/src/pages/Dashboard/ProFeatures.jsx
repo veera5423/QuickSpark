@@ -30,49 +30,62 @@ const ProFeatures = () => {
   ];
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
-          Unlock Your <span className="text-indigo-600">Pro Potential</span>
+    <div className="max-w-6xl mx-auto p-6 sm:p-8 space-y-8">
+      <div className="text-center max-w-3xl mx-auto">
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-teal-600">Premium features</p>
+        <h1 className="mt-2 text-4xl font-black tracking-tight text-slate-950">
+          Unlock your <span className="text-teal-600">Pro potential</span>
         </h1>
-        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-          Take your learning to the next level with premium AI-powered features designed for serious students and job seekers.
+        <p className="mt-4 text-lg text-slate-600">
+          Take your learning to the next level with premium tools for interviews, resumes, and focused practice.
         </p>
       </div>
 
-      {/* Pricing Card */}
-      <Card className="mb-8 text-center bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
-        <div className="p-8">
-          <div className="text-6xl mb-4">🚀</div>
-          <h2 className="text-3xl font-bold mb-2">Go Pro Today</h2>
-          <p className="text-indigo-100 mb-6">Join thousands of successful learners</p>
-          <div className="text-4xl font-bold mb-4"><strike>$9.99</strike><span className="text-lg font-normal">/month</span></div>
-          <Button
-            onClick={() => setShowProModal(true)}
-            className="bg-white text-indigo-600 hover:bg-gray-100 px-8 py-3 text-lg font-semibold" variant="secondary"
-          >
-            Upgrade to Pro
-          </Button>
+      <Card className="overflow-hidden rounded-[2rem] border border-slate-200 bg-slate-950 text-white shadow-[0_24px_80px_rgba(15,23,42,0.18)]">
+        <div className="grid gap-8 lg:grid-cols-[1fr_0.8fr] p-6 sm:p-8 lg:p-10 items-center">
+          <div>
+            <div className="inline-flex rounded-full bg-white/10 px-3 py-1 text-xs font-semibold tracking-[0.22em] text-slate-200">Limited time access</div>
+            <h2 className="mt-4 text-3xl font-black tracking-tight">Move faster with a cleaner Pro toolkit.</h2>
+            <p className="mt-4 text-slate-300 leading-7 max-w-2xl">
+              Voice interviews, resume feedback, and priority support without the old gradient-heavy promo card style.
+            </p>
+            <div className="mt-6 flex flex-wrap gap-3 text-sm text-slate-200">
+              <span className="rounded-full bg-white/5 px-3 py-1.5 border border-white/10">Interview practice</span>
+              <span className="rounded-full bg-white/5 px-3 py-1.5 border border-white/10">Resume review</span>
+              <span className="rounded-full bg-white/5 px-3 py-1.5 border border-white/10">Priority support</span>
+            </div>
+          </div>
+
+          <div className="rounded-[1.5rem] bg-white p-6 text-slate-950 shadow-2xl">
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-teal-700">Pro plan</p>
+            <div className="mt-3 flex items-end gap-2">
+              <span className="text-5xl font-black">$9.99</span>
+              <span className="pb-1 text-slate-500">/month</span>
+            </div>
+            <p className="mt-3 text-sm text-slate-600">Join a better structured workspace for serious learners.</p>
+            <Button onClick={() => setShowProModal(true)} className="mt-6 w-full bg-slate-900 hover:bg-slate-800 text-white px-8 py-3 text-lg font-semibold">
+              Upgrade to Pro
+            </Button>
+          </div>
         </div>
       </Card>
 
-      {/* Features Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {proFeatures.map((feature, index) => {
           const IconComponent = feature.icon;
           return (
-            <Card key={index} className="p-6 hover:shadow-lg transition-shadow">
+            <Card key={index} className="p-6 rounded-3xl border border-slate-200 hover:shadow-xl transition-shadow bg-white">
               <div className="text-center mb-4">
-                <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <IconComponent className="w-8 h-8 text-indigo-600" />
+                <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <IconComponent className="w-8 h-8 text-teal-700" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">{feature.title}</h3>
-                <p className="text-gray-600">{feature.description}</p>
+                <h3 className="text-xl font-bold text-slate-950 mb-2">{feature.title}</h3>
+                <p className="text-slate-600">{feature.description}</p>
               </div>
               <ul className="space-y-2">
                 {feature.benefits.map((benefit, idx) => (
-                  <li key={idx} className="flex items-center text-sm text-gray-600">
-                    <CheckCircle className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" />
+                  <li key={idx} className="flex items-center text-sm text-slate-600">
+                    <CheckCircle className="w-4 h-4 text-emerald-600 mr-2 flex-shrink-0" />
                     {benefit}
                   </li>
                 ))}
@@ -82,16 +95,15 @@ const ProFeatures = () => {
         })}
       </div>
 
-      {/* Call to Action */}
-      <Card className="text-center p-8 bg-gray-50">
-        <Sparkles className="w-12 h-12 text-indigo-600 mx-auto mb-4" />
-        <h3 className="text-2xl font-bold text-gray-900 mb-4">Ready to Level Up?</h3>
-        <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-          Don't let limitations hold you back. Join our Pro community and access the tools that will accelerate your career growth.
+      <Card className="text-center p-8 rounded-[2rem] border border-slate-200 bg-slate-50">
+        <Sparkles className="w-12 h-12 text-teal-600 mx-auto mb-4" />
+        <h3 className="text-2xl font-bold text-slate-950 mb-4">Ready to level up?</h3>
+        <p className="text-slate-600 mb-6 max-w-2xl mx-auto">
+          Join the Pro community and access the tools that accelerate your career growth.
         </p>
         <Button
           onClick={() => setShowProModal(true)}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 text-lg font-semibold"
+          className="bg-slate-900 hover:bg-slate-800 text-white px-8 py-3 text-lg font-semibold"
         >
           Get Started with Pro
         </Button>

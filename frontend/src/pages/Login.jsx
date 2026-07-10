@@ -64,7 +64,7 @@ const Login = () => {
     }
   };
 
-  // --- Email/Password Submission Handler (Unchanged Logic) ---
+  // --- Email/Password Submission Handler 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -85,11 +85,12 @@ const Login = () => {
     // Note: This component is assumed to be wrapped by AuthLayout for the centering and background.
     <>
       <div className="text-center">
-        <h2 className="text-3xl font-extrabold text-gray-900">
-          Welcome Back!
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-teal-600">Welcome back</p>
+        <h2 className="mt-2 text-3xl font-black tracking-tight text-slate-950">
+          Sign in to continue
         </h2>
-        <p className="mt-2 text-sm text-gray-600">
-          Sign in to access your learning dashboard.
+        <p className="mt-2 text-sm text-slate-600">
+          Access your learning dashboard and pick up where you left off.
         </p>
       </div>
 
@@ -97,7 +98,7 @@ const Login = () => {
         
         {/* Error Display (Enhanced) */}
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg text-sm text-center font-medium shadow-sm">
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-2xl text-sm text-center font-medium shadow-sm">
             {error}
           </div>
         )}
@@ -128,7 +129,7 @@ const Login = () => {
           type="submit" 
           disabled={loading} 
           fullWidth 
-          className="bg-indigo-600 hover:bg-indigo-700 text-lg py-2.5 font-bold shadow-lg"
+          className="bg-slate-900 hover:bg-slate-800 text-lg py-2.5 font-bold shadow-lg shadow-slate-900/10"
         >
           {loading ? (
             <span className="flex items-center justify-center">
@@ -140,10 +141,10 @@ const Login = () => {
         {/* Separator */}
         <div className="relative my-6">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300"></div>
+            <div className="w-full border-t border-slate-200"></div>
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-gray-500">
+            <span className="px-2 bg-white text-slate-500">
               OR
             </span>
           </div>
@@ -156,12 +157,12 @@ const Login = () => {
 
         {/* Links (Enhanced Typography) */}
         <div className="pt-2 space-y-2 text-center">
-          <Link to="/forgot-password" className="text-sm font-medium text-indigo-600 hover:text-indigo-800 block">
+          <Link to="/forgot-password" className="text-sm font-medium text-slate-700 hover:text-slate-950 block">
             Forgot your password?
           </Link>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-slate-600">
             Don't have an account? {' '}
-            <Link to="/register" className="font-semibold text-indigo-600 hover:text-indigo-800">
+            <Link to="/register" className="font-semibold text-teal-700 hover:text-teal-800">
               Create an account
             </Link>
           </p>

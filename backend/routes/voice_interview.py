@@ -1,23 +1,10 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-import google.generativeai as genai
-from config import Config
+from utils.gemini_helper import summarize_with_gemini, GeminiQuotaExceededError
+from utils.rate_limit import check_usage_limit, increment_usage
 import json
 
 voice_interview_bp = Blueprint('voice_interview', __name__)
-
-try:
-    # Configure the API key ONCE for the whole library
-    genai.configure(api_key=Config.GEMINI_API_KEY)
-    
-    # Model for Summarization
-    model = genai.GenerativeModel("gemini-2.5-flash")
-    print("✅  interview model initialized ('gemini-2.5-flash').")
-
-
-except Exception as e:
-    print(f"❌ Error initializing GenerativeModel: {e}")
-    model = None
 
 @voice_interview_bp.route('/generate_questions', methods=['POST'])
 @jwt_required()
@@ -41,18 +28,18 @@ Format: Number each question as:
 etc."""
 
     try:
-        if model is None:
-            # Fallback questions if no API key
-            fallback_questions = [
-                "Can you tell me about yourself and your background?",
-                "What interests you about this position?",
-                "Describe a challenging project you've worked on.",
-                "Where do you see yourself in 5 years?"
-            ]
-            return jsonify({"questions": fallback_questions[:num_questions]})
-            
-        response = model.generate_content(prompt)
-        text = response.text.strip()
+        current_user_id = get_jwt_identity()
+        if not check_usage_limit(current_user_id):
+            return jsonify({"message": "AI usage limit exceeded."}), 429
+    except Exception as e:
+        return jsonify({"message": f"Authentication error: {str(e)}"}), 401
+
+    try:
+        current_user_id = get_jwt_identity()
+        text = summarize_with_gemini(prompt, user_id=current_user_id, endpoint="voice_interview_questions")
+        # Increment usage only on successful API call
+        increment_usage(current_user_id)
+        text = text.strip()
         
         # Parse questions from numbered list
         questions = []
@@ -77,6 +64,8 @@ etc."""
             ][:num_questions]
         
         return jsonify({"questions": questions[:num_questions]})
+    except GeminiQuotaExceededError as e:
+        return jsonify({"message": str(e)}), 429
     except Exception as e:
         # Fallback questions if API fails
         fallback_questions = [
@@ -115,17 +104,18 @@ Overall Weaknesses: [brief description of main weaknesses across answers]
 Overall Improvements: [brief suggestions for improvement]"""
 
     try:
-        if model is None:
-            # Fallback feedback
-            return jsonify({
-                "overall_score": 7,
-                "strengths": "Clear and structured answers",
-                "weaknesses": "Could provide more specific examples",
-                "improvements": "Consider adding metrics and outcomes"
-            })
-            
-        response = model.generate_content(prompt)
-        text = response.text.strip()
+        current_user_id = get_jwt_identity()
+        if not check_usage_limit(current_user_id):
+            return jsonify({"message": "AI usage limit exceeded."}), 429
+    except Exception as e:
+        return jsonify({"message": f"Authentication error: {str(e)}"}), 401
+
+    try:
+        current_user_id = get_jwt_identity()
+        text = summarize_with_gemini(prompt, user_id=current_user_id, endpoint="voice_interview_evaluation")
+        # Increment usage only on successful API call
+        increment_usage(current_user_id)
+        text = text.strip()
         
         # Parse the structured response
         feedback = {
@@ -152,6 +142,8 @@ Overall Improvements: [brief suggestions for improvement]"""
                 feedback["improvements"] = line.split(':', 1)[1].strip()
         
         return jsonify(feedback)
+    except GeminiQuotaExceededError as e:
+        return jsonify({"message": str(e)}), 429
     except Exception as e:
         return jsonify({
             "overall_score": 5,

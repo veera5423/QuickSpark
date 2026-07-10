@@ -56,30 +56,31 @@ const ResumeChecker = () => {
     };
 
     return (
-        <div className="space-y-6 p-6">
-            <div className="text-center">
-                <h1 className="text-3xl font-bold">Resume Score & Feedback</h1>
-                <p className="text-gray-600 mt-2">Upload your resume (PDF). Optionally provide a job description to get relevance-based feedback.</p>
+        <div className="space-y-6 p-6 max-w-5xl mx-auto">
+            <div className="text-center max-w-3xl mx-auto">
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-teal-600">Resume analysis</p>
+                <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950">Resume Score & Feedback</h1>
+                <p className="text-slate-600 mt-2">Upload your resume as a PDF. Add a job description for role-specific feedback.</p>
             </div>
 
-            <Card className="max-w-3xl mx-auto p-6">
+            <Card className="max-w-3xl mx-auto p-6 rounded-[2rem] border border-slate-200 shadow-sm">
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded">{error}</div>}
+                    {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded-2xl">{error}</div>}
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Resume (PDF)</label>
-                        <input ref={fileInputRef} type="file" accept=".pdf" onChange={handleFileChange} className="mt-2 bg-gray-200 cursor-pointer p-0.5 pl-1.5" />
-                        {file && <p className="text-sm text-gray-500 mt-1">Selected: {file.name}</p>}
+                        <label className="block text-sm font-medium text-slate-700">Resume (PDF)</label>
+                        <input ref={fileInputRef} type="file" accept=".pdf" onChange={handleFileChange} className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 file:mr-4 file:rounded-full file:border-0 file:bg-slate-900 file:px-4 file:py-2 file:text-white hover:file:bg-slate-800 cursor-pointer" />
+                        {file && <p className="text-sm text-slate-500 mt-1">Selected: {file.name}</p>}
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Job Description (optional)</label>
-                        <textarea value={jobDesc} onChange={(e) => setJobDesc(e.target.value)} rows={5} className="w-full mt-2 p-2 border rounded" placeholder="Paste job description or role summary here" />
+                        <label className="block text-sm font-medium text-slate-700">Job Description (optional)</label>
+                        <textarea value={jobDesc} onChange={(e) => setJobDesc(e.target.value)} rows={5} className="w-full mt-2 p-3 border border-slate-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500" placeholder="Paste job description or role summary here" />
                     </div>
 
                     <div className="flex gap-2 justify-end">
                         <Button variant="secondary" onClick={() => navigate('/dashboard')}>Cancel</Button>
-                        <Button type="submit" disabled={loading} className="bg-gradient-to-r from-indigo-600 to-pink-600 text-white cursor-pointer hover:shadow-lg">
+                        <Button type="submit" disabled={loading} className="bg-slate-900 text-white cursor-pointer hover:bg-slate-800 hover:shadow-lg">
                             {loading ? 'Analyzing...' : 'Get Score & Feedback'}
                         </Button>
                     </div>
@@ -87,12 +88,12 @@ const ResumeChecker = () => {
                 {/* Usage Limit Exceeded Popup */}
                 {limitExceeded && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                        <div className="bg-white p-6 rounded-lg shadow-lg max-w-md">
-                            <h3 className="text-lg font-bold mb-4 text-red-600">Usage Limit Exceeded</h3>
-                            <p className="mb-4 text-gray-700">You have reached your quiz generation limit. Upgrade to premium for more quizzes.To Get Upgrade add five Public Resources </p>
+                        <div className="bg-white p-6 rounded-[2rem] shadow-lg max-w-md border border-slate-200">
+                            <h3 className="text-lg font-bold mb-4 text-rose-600">Usage Limit Exceeded</h3>
+                            <p className="mb-4 text-slate-700">You have reached your quiz generation limit. Upgrade to premium for more quizzes. To get upgrade access, add five public resources.</p>
                             <button
                                 onClick={() => setLimitExceeded(false)}
-                                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded font-semibold"
+                                className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-full font-semibold"
                             >
                                 OK
                             </button>
@@ -103,8 +104,8 @@ const ResumeChecker = () => {
                 {/* Display the Results */}
                 {result && (
                     <div className="mt-6">
-                        <h3 className="text-xl font-semibold">Result</h3>
-                        <div className="mt-3 p-4 bg-gray-50 rounded">
+                        <h3 className="text-xl font-semibold text-slate-950">Result</h3>
+                        <div className="mt-3 p-4 bg-slate-50 rounded-2xl border border-slate-200">
                             <p><strong>Score:</strong> {result.score ?? 'N/A'}</p>
                             {result.strengths && (
                                 <div className="mt-2">

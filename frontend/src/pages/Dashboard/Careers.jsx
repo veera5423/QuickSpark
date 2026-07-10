@@ -132,16 +132,16 @@ const Careers = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="text-xl font-semibold text-blue-600">Analyzing career readiness...</div>
+        <div className="text-xl font-semibold text-teal-700">Analyzing career readiness...</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="text-center p-8 bg-red-50 border border-red-300 rounded-lg">
+      <div className="text-center p-8 bg-red-50 border border-red-200 rounded-2xl">
         <p className="text-xl text-red-600 mb-4">{error}</p>
-        <Button onClick={loadAttempts} className="mt-4 bg-red-500 hover:bg-red-700">
+        <Button onClick={loadAttempts} className="mt-4 bg-slate-900 hover:bg-slate-800 text-white">
           Try Again
         </Button>
       </div>
@@ -162,37 +162,38 @@ const Careers = () => {
   };
 
   const MetricCard = ({ icon, title, value, unit, colorClass, trend }) => (
-    <div className="p-5 bg-white rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition duration-300 transform hover:-translate-y-0.5">
+    <div className="p-5 bg-white rounded-2xl shadow-lg border border-slate-200 hover:shadow-xl transition duration-300 transform hover:-translate-y-0.5">
       <div className="text-xl mb-1">{icon}</div>
       <div className={`text-4xl font-extrabold ${colorClass} flex items-center`}>
         {trend && (
-          <span className={`mr-2 ${trend === 'up' ? 'text-green-500' : trend === 'down' ? 'text-red-500' : 'text-gray-500'}`}>
+          <span className={`mr-2 ${trend === 'up' ? 'text-emerald-600' : trend === 'down' ? 'text-rose-600' : 'text-slate-500'}`}>
             {getImprovementIcon(value)}
           </span>
         )}
         {Math.abs(value)}
         <span className="text-xl ml-1 font-medium">{unit}</span>
       </div>
-      <div className="text-sm font-medium text-gray-500 mt-1 uppercase tracking-wider">{title}</div>
+      <div className="text-sm font-medium text-slate-500 mt-1 uppercase tracking-wider">{title}</div>
     </div>
   );
 
   return (
     <div className="space-y-10 max-w-7xl mx-auto p-4 sm:p-6">
-      <h1 className="text-4xl font-extrabold text-gray-800 border-b pb-3">
-        Career Insights 🎯
-      </h1>
+      <div className="text-center max-w-3xl mx-auto">
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-teal-600">Career insights</p>
+        <h1 className="mt-2 text-4xl font-black tracking-tight text-slate-950">Career Insights 🎯</h1>
+      </div>
 
       {attempts.length === 0 ? (
-        <Card>
+        <Card className="rounded-[2rem] border border-slate-200 shadow-sm">
           {/* Card content remains similar but with updated styling for more impact */}
-          <div className="text-center py-16 bg-gray-50 rounded-lg">
+          <div className="text-center py-16 bg-slate-50 rounded-[2rem]">
             <div className="text-7xl mb-6 animate-pulse">🌟</div>
-            <h3 className="text-2xl font-bold mb-3 text-gray-800">No Career Data Yet</h3>
-            <p className="text-gray-600 mb-8 max-w-md mx-auto">
+            <h3 className="text-2xl font-bold mb-3 text-slate-950">No Career Data Yet</h3>
+            <p className="text-slate-600 mb-8 max-w-md mx-auto">
               Complete your first mock tests or quizzes to unlock personalized career insights and recommendations.
             </p>
-            <Button onClick={() => window.location.href = '/dashboard/mock-tests'} className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg">
+            <Button onClick={() => window.location.href = '/dashboard/mock-tests'} className="bg-slate-900 hover:bg-slate-800 text-white shadow-lg">
               Start Building Your Profile
             </Button>
           </div>
@@ -200,8 +201,8 @@ const Careers = () => {
       ) : (
         <>
           {/* Career Readiness Score - Enhanced Metrics */}
-          <Card>
-            <h2 className="text-2xl font-bold mb-6 border-b pb-2 text-gray-700">Performance Snapshot</h2>
+          <Card className="rounded-[2rem] border border-slate-200 shadow-sm">
+            <h2 className="text-2xl font-bold mb-6 border-b border-slate-200 pb-2 text-slate-950">Performance Snapshot</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               <MetricCard
                 icon="⭐"
@@ -216,7 +217,7 @@ const Careers = () => {
                 title="Recent Average"
                 value={analysis.recentAverage}
                 unit="%"
-                colorClass="text-blue-600"
+                colorClass="text-teal-700"
               />
 
               <MetricCard
@@ -224,7 +225,7 @@ const Careers = () => {
                 title="Improvement Trend"
                 value={analysis.improvement}
                 unit="%"
-                colorClass={analysis.improvement > 0 ? 'text-green-600' : 'text-red-600'}
+                colorClass={analysis.improvement > 0 ? 'text-emerald-700' : 'text-rose-600'}
                 trend={analysis.improvement > 0 ? 'up' : analysis.improvement < 0 ? 'down' : 'flat'}
               />
 
@@ -233,28 +234,28 @@ const Careers = () => {
                 title="Consistency"
                 value={analysis.consistency}
                 unit="%"
-                colorClass="text-purple-600"
+                colorClass="text-slate-900"
               />
             </div>
           </Card>
 
           {/* Career Recommendations - Enhanced Look */}
-          <Card>
-            <h2 className="text-2xl font-bold mb-6 border-b pb-2 text-gray-700">Recommended Career Paths</h2>
+          <Card className="rounded-[2rem] border border-slate-200 shadow-sm">
+            <h2 className="text-2xl font-bold mb-6 border-b border-slate-200 pb-2 text-slate-950">Recommended Career Paths</h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {recommendations.map((rec, index) => (
-                <div key={index} className="p-5 bg-white rounded-xl shadow-lg border border-gray-200 flex items-start space-x-4">
+                <div key={index} className="p-5 bg-white rounded-2xl shadow-lg border border-slate-200 flex items-start space-x-4">
                   <div className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center text-2xl font-bold 
-                    ${rec.color === 'green' ? 'bg-green-100 text-green-600' :
-                      rec.color === 'blue' ? 'bg-blue-100 text-blue-600' :
-                      rec.color === 'yellow' ? 'bg-yellow-100 text-yellow-600' :
-                      'bg-orange-100 text-orange-600'}
+                    ${rec.color === 'green' ? 'bg-emerald-100 text-emerald-700' :
+                      rec.color === 'blue' ? 'bg-teal-100 text-teal-700' :
+                      rec.color === 'yellow' ? 'bg-amber-100 text-amber-700' :
+                      'bg-slate-100 text-slate-700'}
                   `}>
                     {rec.icon}
                   </div>
                   <div>
-                    <h3 className="font-extrabold text-lg text-gray-900">{rec.title}</h3>
-                    <p className="text-sm mt-0.5 text-gray-600">{rec.description}</p>
+                    <h3 className="font-extrabold text-lg text-slate-950">{rec.title}</h3>
+                    <p className="text-sm mt-0.5 text-slate-600">{rec.description}</p>
                   </div>
                 </div>
               ))}
@@ -262,26 +263,26 @@ const Careers = () => {
           </Card>
 
           {/* Skill Development Plan - Roadmap Look */}
-          <Card>
-            <h2 className="text-2xl font-bold mb-6 border-b pb-2 text-gray-700">Skill Development Roadmap</h2>
+          <Card className="rounded-[2rem] border border-slate-200 shadow-sm">
+            <h2 className="text-2xl font-bold mb-6 border-b border-slate-200 pb-2 text-slate-950">Skill Development Roadmap</h2>
             <div className="relative space-y-8 pl-10">
               {/* Vertical timeline line */}
-              <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200"></div>
+              <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-slate-200"></div>
 
               {[
                 { step: 1, title: "Continue Regular Practice", description: "Maintain consistent quiz attempts to build and reinforce knowledge.", color: "blue", icon: "🗓️" },
                 { step: 2, title: "Challenge Yourself", description: "Gradually increase difficulty levels and tackle new topics as your scores improve.", color: "green", icon: "⛰️" },
-                { step: 3, title: "Track Weak Areas", description: "Review incorrect answers and focus study time on improving specific weak topics.", color: "purple", icon: "🔍" },
+                { step: 3, title: "Track Weak Areas", description: "Review incorrect answers and focus study time on improving specific weak topics.", color: "slate", icon: "🔍" },
                 { step: 4, title: "Apply Knowledge", description: "Connect quiz topics to real-world applications and practical coding scenarios.", color: "orange", icon: "💡" },
               ].map(({ step, title, description, color, icon }) => (
                 <div key={step} className="flex items-start">
                   {/* Timeline Bullet */}
-                  <div className={`absolute left-0 w-9 h-9 ${color === 'blue' ? 'bg-blue-600' : color === 'green' ? 'bg-green-600' : color === 'purple' ? 'bg-purple-600' : 'bg-orange-600'} rounded-full flex items-center justify-center text-white font-semibold shadow-md`}>
+                  <div className={`absolute left-0 w-9 h-9 ${color === 'blue' ? 'bg-teal-600' : color === 'green' ? 'bg-emerald-600' : 'bg-slate-600'} rounded-full flex items-center justify-center text-white font-semibold shadow-md`}>
                     {icon}
                   </div>
                   <div className="ml-6 pt-1">
-                    <h3 className="font-bold text-lg text-gray-800">{title}</h3>
-                    <p className="text-gray-600 mt-1">{description}</p>
+                    <h3 className="font-bold text-lg text-slate-950">{title}</h3>
+                    <p className="text-slate-600 mt-1">{description}</p>
                   </div>
                 </div>
               ))}
@@ -289,12 +290,12 @@ const Careers = () => {
           </Card>
 
           {/* Next Steps - Enhanced Buttons */}
-          <Card>
-            <h2 className="text-2xl font-bold mb-4 text-gray-700">Your Next Action</h2>
+          <Card className="rounded-[2rem] border border-slate-200 shadow-sm">
+            <h2 className="text-2xl font-bold mb-4 text-slate-950">Your Next Action</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Button
                 onClick={() => window.location.href = '/dashboard/mock-tests'}
-                className="h-20 flex flex-col items-center justify-center text-center bg-blue-500 hover:bg-blue-600 transition duration-150 transform hover:scale-[1.02]"
+                className="h-20 flex flex-col items-center justify-center text-center bg-slate-900 hover:bg-slate-800 text-white transition duration-150 transform hover:scale-[1.02]"
               >
                 <span className="text-xl font-bold">📝 Take Another Quiz</span>
                 <span className="text-sm opacity-90 mt-1">Challenge yourself and refine your skills</span>
@@ -302,7 +303,7 @@ const Careers = () => {
 
               <Button
                 onClick={() => window.location.href = '/dashboard/skills'}
-                className="h-20 flex flex-col items-center justify-center text-center bg-gray-400 text-gray-800 hover:bg-gray-700 transition duration-150 transform hover:scale-[1.02]"
+                className="h-20 flex flex-col items-center justify-center text-center bg-slate-100 text-slate-800 hover:bg-slate-200 transition duration-150 transform hover:scale-[1.02]"
               >
                 <span className="text-xl font-bold">📊 View Detailed Progress</span>
                 <span className="text-sm opacity-90 mt-1">Analyze your performance trends and weak areas</span>

@@ -271,16 +271,17 @@ const VoiceInterview = () => {
     return <RequestProModal onClose={() => navigate('/dashboard')} />;
   }
 
-  return (
-    <div className="max-w-4xl mx-auto p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">AI Voice Interview</h1>
-        <p className="text-gray-600">Practice interviews with voice interaction</p>
+    return (
+    <div className="max-w-4xl mx-auto p-6 space-y-6">
+      <div className="text-center">
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-teal-600">Interview practice</p>
+        <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950">AI Voice Interview</h1>
+        <p className="text-slate-600 mt-2">Practice interviews with voice interaction and cleaner feedback flow.</p>
       </div>
 
       {/* Error and Success Messages */}
       {error && (
-        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md flex items-center">
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-2xl flex items-center">
           <AlertCircle className="w-5 h-5 text-red-500 mr-2" />
           <span className="text-red-700">{error}</span>
           <button 
@@ -293,15 +294,15 @@ const VoiceInterview = () => {
       )}
 
       {successMessage && (
-        <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-md flex items-center">
+        <div className="mb-4 p-4 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center">
           <CheckCircle className="w-5 h-5 text-green-500 mr-2" />
           <span className="text-green-700">{successMessage}</span>
         </div>
       )}
 
       {!isInterviewActive ? (
-        <Card className="p-6">
-          <h2 className="text-xl font-semibold mb-4">Customize Your Interview</h2>
+        <Card className="p-6 rounded-[2rem] border border-slate-200 shadow-sm">
+          <h2 className="text-xl font-semibold mb-4 text-slate-950">Customize Your Interview</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <Input
               label="Job Title"
@@ -317,25 +318,25 @@ const VoiceInterview = () => {
             />
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-slate-700 mb-2">
               Job Description
             </label>
             <textarea
               value={jobDescription}
               onChange={(e) => setJobDescription(e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full p-3 border border-slate-300 rounded-2xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
               rows={4}
               placeholder="Describe the job requirements and responsibilities..."
             />
           </div>
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-slate-700 mb-2">
               Interview Duration
             </label>
             <select
               value={timeMinutes}
               onChange={(e) => setTimeMinutes(Number(e.target.value))}
-              className="p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="p-3 border border-slate-300 rounded-2xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
             >
               <option value={5}>5 minutes</option>
               <option value={7}>7 minutes</option>
@@ -359,25 +360,25 @@ const VoiceInterview = () => {
         </Card>
       ) : (
         <div className="space-y-6">
-          <Card className="p-6">
+          <Card className="p-6 rounded-[2rem] border border-slate-200 shadow-sm">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold">
                 Question {currentQuestionIndex + 1} of {questions.length}
               </h2>
               <div className="flex items-center space-x-4">
                 {isSpeaking && (
-                  <div className="flex items-center text-blue-600">
+                  <div className="flex items-center text-teal-700">
                     <Loader2 className="w-4 h-4 mr-1 animate-spin" />
                     <span className="text-sm">Speaking...</span>
                   </div>
                 )}
                 {isListening && (
-                  <div className="flex items-center text-red-600">
+                  <div className="flex items-center text-rose-600">
                     <Mic className="w-4 h-4 mr-1 animate-pulse" />
                     <span className="text-sm">Listening...</span>
                   </div>
                 )}
-                <div className="text-lg font-mono text-red-600">
+                <div className="text-lg font-mono text-slate-900">
                   Time: {formatTime(timeLeft)}
                 </div>
               </div>
@@ -386,13 +387,13 @@ const VoiceInterview = () => {
 
             {/* Progress Bar */}
             <div className="mb-4">
-              <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="w-full bg-slate-200 rounded-full h-2">
                 <div 
-                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                  className="bg-teal-600 h-2 rounded-full transition-all duration-300"
                   style={{ width: `${((currentQuestionIndex + 1) / questions.length) * 100}%` }}
                 ></div>
               </div>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-sm text-slate-600 mt-1">
                 Progress: {currentQuestionIndex + 1} of {questions.length} questions
               </p>
             </div>

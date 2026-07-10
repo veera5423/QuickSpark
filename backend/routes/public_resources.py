@@ -108,7 +108,12 @@ def submit_public_link():
 # -----------------------------------------------------------------
 # 2. ADMIN ACTIONS (Verification & Notification) - /api/public/admin/verify/<id>
 # -----------------------------------------------------------------
-@public_resources_bp.route("/admin/verify/<resource_id>", methods=["POST"])
+@public_resources_bp.route("/admin/verify/<resource_id>", methods=["OPTIONS"])
+def verify_resource_options(resource_id):
+    return jsonify({}), 200
+
+
+@public_resources_bp.route("/admin/verify/<resource_id>", methods=["POST"], provide_automatic_options=False)
 @jwt_required()
 def verify_resource(resource_id):
     """

@@ -278,6 +278,242 @@ def get_resource_reports():
     except Exception as e:
         return jsonify({"message": f"Error fetching reports: {str(e)}"}), 500
 
+# -----------------------------------------------------------------
+# 6. 📊 API MONITORING (New Section)
+# -----------------------------------------------------------------
+
+@admin_bp.route("/api-usage", methods=["GET"])
+@jwt_required()
+@admin_required
+def get_api_usage():
+    """
+    Get API usage statistics and logs for monitoring.
+    Query parameters:
+    - days: Number of days to look back (default: 7)
+    - user_id: Filter by specific user
+    - endpoint: Filter by endpoint
+    - page: Page number for pagination (default: 1)
+    - limit: Number of logs per page (default: 50, max: 100)
+    """
+    try:
+        from datetime import datetime, timedelta
+
+        days = int(request.args.get('days', 7))
+        user_id_filter = request.args.get('user_id')
+        endpoint_filter = request.args.get('endpoint')
+        page = int(request.args.get('page', 1))
+        limit = min(int(request.args.get('limit', 50)), 100)  # Max 100 per page
+
+        # Calculate date range
+        start_date = datetime.utcnow() - timedelta(days=days)
+
+        # Build query
+        query = {"timestamp": {"$gte": start_date}}
+        if user_id_filter:
+            try:
+                query["user_id"] = ObjectId(user_id_filter)
+            except errors.InvalidId:
+                return jsonify({"message": "Invalid user_id format"}), 400
+        if endpoint_filter:
+            query["endpoint"] = endpoint_filter
+
+        # Get total count for pagination info
+        total_logs = db.api_usage.count_documents(query)
+
+        # Calculate skip for pagination
+        skip = (page - 1) * limit
+
+        # Get usage logs with pagination
+        usage_logs = list(db.api_usage.find(query).sort("timestamp", -1).skip(skip).limit(limit))
+
+        # Convert ObjectIds to strings for JSON serialization
+        for log in usage_logs:
+            log["_id"] = str(log["_id"])
+            if log.get("user_id"):
+                log["user_id"] = str(log["user_id"])
+            log["timestamp"] = log["timestamp"].isoformat()
+
+        # Get summary statistics (only for current page's data for performance)
+        total_calls = len(usage_logs)
+        successful_calls = len([log for log in usage_logs if log.get("success", True)])
+        failed_calls = total_calls - successful_calls
+
+        # Group by endpoint (for current page)
+        endpoint_stats = {}
+        for log in usage_logs:
+            endpoint = log.get("endpoint", "unknown")
+            if endpoint not in endpoint_stats:
+                endpoint_stats[endpoint] = {"total": 0, "success": 0, "failed": 0}
+            endpoint_stats[endpoint]["total"] += 1
+            if log.get("success", True):
+                endpoint_stats[endpoint]["success"] += 1
+            else:
+                endpoint_stats[endpoint]["failed"] += 1
+
+        # Group by user (for current page)
+        user_stats = {}
+        for log in usage_logs:
+            user_id = str(log.get("user_id")) if log.get("user_id") else "anonymous"
+            if user_id not in user_stats:
+                user_stats[user_id] = {"total": 0, "success": 0, "failed": 0}
+            user_stats[user_id]["total"] += 1
+            if log.get("success", True):
+                user_stats[user_id]["success"] += 1
+            else:
+                user_stats[user_id]["failed"] += 1
+
+        # Get user details for user stats
+        user_details = {}
+        for user_id in user_stats.keys():
+            if user_id != "anonymous":
+                try:
+                    user = users_collection.find_one({"_id": ObjectId(user_id)}, {"email": 1, "name": 1})
+                    if user:
+                        user_details[user_id] = {
+                            "email": user.get("email", "N/A"),
+                            "name": user.get("name", "N/A")
+                        }
+                except:
+                    pass
+
+        return jsonify({
+            "summary": {
+                "total_calls": total_calls,
+                "successful_calls": successful_calls,
+                "failed_calls": failed_calls,
+                "success_rate": (successful_calls / total_calls * 100) if total_calls > 0 else 0
+            },
+            "endpoint_stats": endpoint_stats,
+            "user_stats": user_stats,
+            "user_details": user_details,
+            "logs": usage_logs,
+            "pagination": {
+                "page": page,
+                "limit": limit,
+                "total": total_logs,
+                "pages": (total_logs + limit - 1) // limit  # Ceiling division
+            }
+        }), 200
+
+    except Exception as e:
+        print(f"API usage fetch error: {e}")
+        return jsonify({"message": "Failed to fetch API usage data"}), 500
+
+@admin_bp.route("/api-limits", methods=["GET"])
+@jwt_required()
+@admin_required
+def get_api_limits():
+    """
+    Get current API limits configuration.
+    """
+    try:
+        # Get all user limits
+        user_limits = list(db.user_limits.find({}))
+
+        # Convert ObjectIds to strings
+        for limit in user_limits:
+            limit["_id"] = str(limit["_id"])
+            limit["user_id"] = str(limit["user_id"])
+
+        # Get user details
+        user_details = {}
+        for limit in user_limits:
+            try:
+                user = users_collection.find_one({"_id": ObjectId(limit["user_id"])}, {"email": 1, "name": 1, "is_pro_member": 1})
+                if user:
+                    user_details[limit["user_id"]] = {
+                        "email": user.get("email", "N/A"),
+                        "name": user.get("name", "N/A"),
+                        "is_pro": user.get("is_pro_member", False)
+                    }
+            except:
+                pass
+
+        return jsonify({
+            "user_limits": user_limits,
+            "user_details": user_details,
+            "default_limits": {
+                "free_tier": 3,
+                "premium": 6
+            }
+        }), 200
+
+    except Exception as e:
+        print(f"API limits fetch error: {e}")
+        return jsonify({"message": "Failed to fetch API limits"}), 500
+
+@admin_bp.route("/api-limits/<user_id>", methods=["POST"])
+@jwt_required()
+@admin_required
+def update_user_api_limit(user_id):
+    """
+    Update a user's API limit.
+    """
+    try:
+        data = request.get_json()
+        new_limit = data.get("limit")
+
+        if new_limit is None or not isinstance(new_limit, int) or new_limit < 0:
+            return jsonify({"message": "Invalid limit value"}), 400
+
+        # Validate user_id
+        try:
+            user_obj_id = ObjectId(user_id)
+        except errors.InvalidId:
+            return jsonify({"message": "Invalid user ID"}), 400
+
+        # Update or create limit record
+        result = db.user_limits.find_one_and_update(
+            {"user_id": user_obj_id},
+            {"$set": {"usage_count": 0, "custom_limit": new_limit}},
+            upsert=True,
+            return_document=ReturnDocument.AFTER
+        )
+
+        return jsonify({
+            "message": "API limit updated successfully",
+            "user_id": user_id,
+            "new_limit": new_limit
+        }), 200
+
+    except Exception as e:
+        print(f"API limit update error: {e}")
+        return jsonify({"message": "Failed to update API limit"}), 500
+
+@admin_bp.route("/api-limits/<user_id>", methods=["DELETE"])
+@jwt_required()
+@admin_required
+def reset_user_api_limit(user_id):
+    """
+    Reset a user's API limit to default.
+    """
+    try:
+        # Validate user_id
+        try:
+            user_obj_id = ObjectId(user_id)
+        except errors.InvalidId:
+            return jsonify({"message": "Invalid user ID"}), 400
+
+        # Remove custom limit
+        result = db.user_limits.find_one_and_update(
+            {"user_id": user_obj_id},
+            {"$unset": {"custom_limit": 1}},
+            return_document=ReturnDocument.AFTER
+        )
+
+        return jsonify({
+            "message": "API limit reset to default",
+            "user_id": user_id
+        }), 200
+
+    except Exception as e:
+        print(f"API limit reset error: {e}")
+        return jsonify({"message": "Failed to reset API limit"}), 500
+
+# -----------------------------------------------------------------
+# 7. 📋 REPORTS (Existing Section)
+# -----------------------------------------------------------------
+
 # OPTIONS handler for GET reports (no auth required for preflight)
 @admin_bp.route("/reports", methods=["OPTIONS"])
 def get_reports_options():

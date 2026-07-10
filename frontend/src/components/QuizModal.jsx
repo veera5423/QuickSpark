@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Button from './ui/Button';
 import { quizAPI } from '../api/quizAPI';
 import { Loader2, CheckCircle, XCircle, ChevronRight } from 'lucide-react';
@@ -18,10 +18,12 @@ const QuizModal = ({
   const [state, setState] = useState('LOADING'); // LOADING, QUIZ, RESULT
   const [quizData, setQuizData] = useState(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const requestInProgressRef = useRef(false);
   const [answers, setAnswers] = useState([]);
   const [selectedOption, setSelectedOption] = useState('');
   const [result, setResult] = useState(null);
   const [internalLoading, setInternalLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   // Use external state if provided (for 'all' mode), otherwise use internal state
   const effectiveAnswers = externalAnswers || answers;
@@ -39,7 +41,10 @@ const QuizModal = ({
     if (mode === 'all' && externalQuizData) {
       setQuizData(externalQuizData);
       setState('QUIZ');
-    } else if (isOpen && skill && mode === 'step') {
+    } else if (isOpen && skill && mode === 'step' && state === 'LOADING' && !quizData && !requestInProgressRef.current) {
+      // Only generate quiz if we haven't already started and don't have data
+      console.log('QuizModal: Starting quiz generation for skill:', skill.skill_name);
+      requestInProgressRef.current = true;
       setState('LOADING');
       setQuizData(null);
       setCurrentQuestionIndex(0);
@@ -50,16 +55,32 @@ const QuizModal = ({
       // Generate quiz for single skill (step mode)
       quizAPI.generateQuizFromText(skill.skill_name, 'medium', 5, skill._id)
         .then(response => {
+          console.log('QuizModal: Quiz generated successfully');
           setQuizData(response);
           setState('QUIZ');
+          setError(null);
+          requestInProgressRef.current = false;
         })
         .catch(error => {
-          console.error('Error generating quiz:', error);
-          // Fallback on error
-          onClose();
+          console.error('QuizModal: Error generating quiz:', error);
+          requestInProgressRef.current = false;
+          if (error.response?.status === 429) {
+            setError('AI quota exceeded. Please try again later or upgrade your plan.');
+            setState('ERROR');
+          } else {
+            // Fallback on other errors
+            onClose();
+          }
         });
     }
   }, [isOpen, skill, mode, externalQuizData]);
+
+  // Reset request ref when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      requestInProgressRef.current = false;
+    }
+  }, [isOpen]);
 
   // Warn user before closing the window if in the middle of a quiz
     useEffect(() => {
@@ -301,6 +322,22 @@ const QuizModal = ({
         <div className="text-center p-12 bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4">
           <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-indigo-600 mx-auto"></div>
           <p className="mt-6 text-xl font-semibold text-gray-700">Generating personalized assessment...</p>
+        </div>
+      );
+    }
+
+    if (state === 'ERROR' && mode === 'step') {
+      return (
+        <div className="text-center p-12 bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4">
+          <div className="text-red-500 mb-4 text-6xl">⚠️</div>
+          <h2 className="text-2xl font-bold text-red-600 mb-4">Assessment Generation Failed</h2>
+          <p className="text-gray-700 mb-6">{error || 'An error occurred while generating your assessment.'}</p>
+          <Button
+            onClick={onClose}
+            className="bg-red-600 text-white hover:bg-red-700"
+          >
+            Close
+          </Button>
         </div>
       );
     }
