@@ -20,6 +20,7 @@ db = client["QuickSpark"]  # MongoDB auto-creates this when used
 resources_collection = db["resources"]  # Collection for storing resources
 links_collection = db["links"] #  For storing external URLs and metadata
 resource_interactions_collection = db["resource_interactions"]
+rooms_collection = db["rooms"]
 users_collection = db["users"]  # Collection for user data
 try:
     db.command("ping")

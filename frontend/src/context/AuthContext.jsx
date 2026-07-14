@@ -5,12 +5,12 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(true);
-  const tempUser={
-    "username": "testName",
-            "email": "testEmail",
-            "is_admin":true
-  }
-  const [user, setUser] = useState(tempUser);
+  // const tempUser={
+  //   "username": "testName",
+  //           "email": "testEmail",
+  //           "is_admin":true
+  // }
+  const [user, setUser] = useState(null);// tempUser
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {

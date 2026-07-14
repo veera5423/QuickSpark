@@ -18,6 +18,8 @@ import VerifyEmail from "./components/common/VerifyEmail";
 import Home from "./pages/Dashboard/Home";
 import Resources from "./pages/Dashboard/Resources";
 import ResourceChat from "./pages/Dashboard/ResourceChat";
+import Rooms from "./pages/Dashboard/Rooms";
+import RoomWorkspace from "./pages/Dashboard/RoomWorkspace";
 import AISummarizer from "./pages/Dashboard/AISummarizer";
 import MockTests from "./pages/Dashboard/MockTests";
 import Skills from "./pages/Dashboard/Skills";
@@ -187,6 +189,26 @@ const AppRouter = () => {
               element={
                 <ProtectedRoute>
                   <ResourceChat />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/rooms"
+              element={
+                <ProtectedRoute>
+                  <DashboardLayout>
+                    <Rooms />
+                  </DashboardLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/rooms/:roomId"
+              element={
+                <ProtectedRoute>
+                  <DashboardLayout>
+                    <RoomWorkspace />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
