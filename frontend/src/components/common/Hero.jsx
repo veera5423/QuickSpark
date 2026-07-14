@@ -18,7 +18,7 @@ const Hero = () => {
         { icon: Bot, title: 'AI Summarization', description: 'Upload documents and get clear summaries instantly.', accent: 'bg-teal-50 text-teal-700' },
         { icon: Zap, title: 'Smart Mock Tests', description: 'Turn study material into focused tests with practical feedback.', accent: 'bg-amber-50 text-amber-700' },
         { icon: Layers, title: 'Skill Tracking', description: 'See where you are strong and where to improve without clutter.', accent: 'bg-slate-100 text-slate-700' },
-        { icon: FileText, title: 'Resume Checker', description: 'Review your resume against job descriptions with a sharper lens.', accent: 'bg-emerald-50 text-emerald-700' },
+        { icon: FileText, title: 'Resume Analyser', description: 'Review your resume against job descriptions with a sharper lens.', accent: 'bg-emerald-50 text-emerald-700' },
         { icon: Mic, title: 'Voice Interview', description: 'Practice responses out loud and review your interview rhythm.', accent: 'bg-cyan-50 text-cyan-700' },
         { icon: Users, title: 'Public Resources', description: 'Access a community library that feels organized, not noisy.', accent: 'bg-orange-50 text-orange-700' },
     ];

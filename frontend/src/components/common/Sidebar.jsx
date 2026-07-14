@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import RequestProModal from './RequestProModal';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, FileText, Bot, Layers, TrendingUp, Briefcase, Zap, Menu, X, Library, Mic, Shield, Sparkles, LogOut as LogOutIcon } from 'lucide-react';
+import { Home, FileText, Bot, Layers, TrendingUp, Briefcase, Zap, Menu, X, Library, Mic, Shield, Sparkles, LogOut as LogOutIcon, Users } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useLayout } from '../../context/LayoutContext';
 
@@ -27,6 +27,7 @@ const Sidebar = () => {
         const baseItems = [
             { name: 'Dashboard', path: '/dashboard', icon: Home },
             { name: 'My Resources', path: '/dashboard/resources', icon: FileText },
+            { name: 'Study Rooms', path: '/dashboard/rooms', icon: Users },
             { name: 'Public Library', path: '/dashboard/public-resources', icon: Library },
             { name: 'AI Summarizer', path: '/dashboard/ai-summarizer', icon: Bot },
         ];

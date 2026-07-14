@@ -2,6 +2,7 @@ import React from 'react';
 import Card from '../ui/Card';
 import Header from './Header';
 import Footer from './Footer';
+import DeveloperProfile from './DeveloperProfile';
 
 const AboutUs = () => {
   return (
@@ -31,6 +32,19 @@ const AboutUs = () => {
           </ul>
         </Card>
 
+        <DeveloperProfile
+          name="Veeranjaneyulu.Vipparla"
+          role="Developer"
+          tagline="Building useful products with clean code."
+          avatarSrc="veera_t2.png"
+          githubUrl="https://github.com/veera5423"
+          linkedinUrl="https://www.linkedin.com/in/veeranjaneyulu-v/"
+          websiteUrl="https://veeranjaneyulu.dev"
+          email="vipparlaveeranjaneyulu@gmail.com"
+        />
+
+
+
         <Card className="p-6 rounded-[2rem] border border-slate-200 shadow-sm">
           <h2 className="text-2xl font-semibold mb-3">Team & Values</h2>
           <p className="text-slate-700 leading-relaxed">
@@ -45,3 +59,4 @@ const AboutUs = () => {
 };
 
 export default AboutUs;
+
