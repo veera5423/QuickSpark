@@ -16,16 +16,17 @@ from routes.voice_interview import voice_interview_bp
 from routes.rooms import rooms_bp
 from flask_mail import Mail
 
-
 mail = Mail()
 
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
     CORS(app, origins=["http://localhost:5173",Config.FRONTEND], supports_credentials=True, allow_headers=["*"])
+
     jwt.init_app(app)
     mail.init_app(app)
 
+    # Register blueprints
     app.register_blueprint(auth_bp, url_prefix="/auth")
     app.register_blueprint(ai_summarizer_bp, url_prefix="/api/summarizer")
     app.register_blueprint(resume_check_bp, url_prefix="/api/resume")
@@ -40,8 +41,15 @@ def create_app():
     app.register_blueprint(rooms_bp, url_prefix='/api/rooms')
     # ps=generate_password_hash("adminpassword")
 
-    # print(f"Admin password hash: {ps}")
     
+    CORS(
+        app,
+        origins=[Config.FRONTEND],
+        supports_credentials=True,
+        allow_headers="*",
+        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+    )
+
     @app.route("/")
     def home():
         return {"message": "Flask API Running 🚀"}
