@@ -41,7 +41,6 @@ from config import Config
 # =====================================================
 def send_email_sendgrid(to_email: str, subject: str, html_content: str):
     # Keep the existing function name because routes already call send_email_sendgrid()
-    # Set a hard upper bound for all network operations.
     socket.setdefaulttimeout(15)
 
     msg = MIMEMultipart("alternative")
@@ -51,17 +50,43 @@ def send_email_sendgrid(to_email: str, subject: str, html_content: str):
 
     msg.attach(MIMEText(html_content, "html"))
 
+    server = None
     try:
         # timeout= controls initial connect; socket.setdefaulttimeout controls subsequent ops.
-        with smtplib.SMTP("smtp.gmail.com", 587, timeout=15) as server:
-            server.ehlo()
-            server.starttls()
+        server = smtplib.SMTP("smtp.gmail.com", 587, timeout=15)
+        server.set_debuglevel(0)
 
-            server.login(Config.EMAIL_HOST, Config.EMAIL_PASSWORD)
-            server.send_message(msg)
+        server.ehlo()
+        server.starttls()
+        server.ehlo()
+
+        server.login(Config.EMAIL_HOST, Config.EMAIL_PASSWORD)
+        server.send_message(msg)
 
         return {"message": "Email sent successfully"}
 
     except Exception as e:
+        # Log detailed failure info for production debugging.
+        # (print goes to your host logs)
+        print("[MAIL][SMTP] failed")
+        print("[MAIL][SMTP] to_email=", to_email)
+        print("[MAIL][SMTP] subject=", subject)
+        print("[MAIL][SMTP] EMAIL_HOST set?", bool(Config.EMAIL_HOST))
+        print("[MAIL][SMTP] EMAIL_PASSWORD set?", bool(Config.EMAIL_PASSWORD))
+        if server is not None:
+            try:
+                print("[MAIL][SMTP] smtp.noop()=")
+                server.noop()
+            except Exception:
+                pass
+        print("[MAIL][SMTP] error=", repr(e))
         raise Exception(f"Failed to send email: {str(e)}")
+
+    finally:
+        if server is not None:
+            try:
+                server.quit()
+            except Exception:
+                pass
+
 
