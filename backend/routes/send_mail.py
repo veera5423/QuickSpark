@@ -216,10 +216,12 @@ def send_email():
     try:
         result = sendgrid_helper.send_email_sendgrid(to_email, subject, html_message)
         return jsonify(result), 200
-    
     except Exception as e:
-        print(f"Email sending failed: {e}")
-        return jsonify({"message": f"Failed to send email: {str(e)}"}), 500
+        # Return detailed error to help diagnose production failures.
+        # Also keep the server-side log.
+        err = f"Failed to send email: {repr(e)}"
+        print(err)
+        return jsonify({"message": err}), 500
 
 @send_mail_bp.route("/submit-feedback", methods=["POST"])
 def submit_feedback():
