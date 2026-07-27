@@ -11,11 +11,13 @@ class Config:
 
     # EMAIL_HOST = os.getenv("EMAIL_USER")
     # EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
-    BREVO_SMTP_SERVER = "smtp-relay.brevo.com"
-    BREVO_SMTP_PORT = 587
-    BREVO_SMTP_USERNAME = os.getenv("BREVO_SMTP_LOGIN")  # SMTP login
-    BREVO_SMTP_PASSWORD = os.getenv("BREVO_SMTP_KEY")           # SMTP key
+    # BREVO_SMTP_SERVER = "smtp-relay.brevo.com"
+    # BREVO_SMTP_PORT = 587
+    # BREVO_SMTP_USERNAME = os.getenv("BREVO_SMTP_LOGIN")  # SMTP login
+    # BREVO_SMTP_PASSWORD = os.getenv("BREVO_SMTP_KEY")           # SMTP key
     BREVO_SENDER = os.getenv("BREVO_SENDER", "")  # Sender email address
+    BREVO_API_KEY = os.getenv("BREVO_API_KEY", "")  # Brevo API key
+    
 
     GOOGLE_REDIRECT_URI=os.getenv("GOOGLE_REDIRECT_URI")
     GOOGLE_CLIENT_ID=os.getenv("GOOGLE_CLIENT_ID")

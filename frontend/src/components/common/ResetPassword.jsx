@@ -143,13 +143,13 @@ const ResetPassword = () => {
   return (
     <div className="space-y-5">
       <div className="text-center">
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-indigo-400">Secure account recovery</p>
-        <h2 className="mt-2 text-3xl font-black tracking-tight text-white">Create a fresh password</h2>
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-teal-400">Secure account recovery</p>
+        <h2 className="mt-2 text-3xl font-black tracking-tight text-slate-600">Create a fresh password</h2>
         <p className="mt-2 text-sm text-gray-400">Your reset link is valid. Set a new password to continue.</p>
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
-        <div className="bg-gradient-to-r from-indigo-600 to-slate-900 px-6 py-5 text-white sm:px-8">
+        <div className="bg-gradient-to-r from-teal-300 to-slate-900 px-6 py-5 text-white sm:px-8">
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 ring-1 ring-white/15 backdrop-blur">
               <Sparkles className="h-5 w-5 text-amber-300" />
@@ -218,7 +218,7 @@ const ResetPassword = () => {
               type="submit"
               disabled={loading || !tokenValid}
               fullWidth
-              className="h-12 w-full bg-indigo-600 text-base font-semibold shadow-lg shadow-indigo-600/20 hover:bg-indigo-700"
+              className="h-12 w-full bg-slate-800 text-base font-semibold shadow-lg shadow-indigo-600/20 hover:bg-slate-700 cursor-pointer transition-colors duration-150"
             >
               {loading ? (
                 <span className="flex items-center justify-center">
@@ -233,7 +233,7 @@ const ResetPassword = () => {
               <Link to="/forgot-password" className="inline-flex items-center gap-1.5 font-semibold text-slate-500 hover:text-slate-900">
                 <ArrowLeft className="h-4 w-4" /> Request new link
               </Link>
-              <Link to="/login" className="font-semibold text-indigo-600 hover:text-indigo-800">
+              <Link to="/login" className="font-semibold text-teal-600 hover:text-teal-800">
                 Back to sign in
               </Link>
             </div>
