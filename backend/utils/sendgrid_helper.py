@@ -47,7 +47,7 @@ def send_email_sendgrid(to_email: str, subject: str, html_content: str):
 
     payload = {
         "sender": {
-            "name": "Flight Finder",   # Change to your app name
+            "name": "QuickSpark",   # Change to your app name
             "email": SENDER
         },
         "to": [
