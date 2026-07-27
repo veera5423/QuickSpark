@@ -72,7 +72,7 @@ const ForgotPassword = () => {
           type="submit" 
           disabled={loading} 
           fullWidth 
-          className="bg-indigo-600 hover:bg-indigo-700 text-lg py-2.5 font-bold shadow-lg"
+          className="bg-slate-800 hover:bg-slate-700 text-lg py-2.5 font-bold shadow-lg"
         >
           {loading ? (
             <span className="flex items-center justify-center">
@@ -85,7 +85,7 @@ const ForgotPassword = () => {
         <div className="pt-2 text-center">
           <Link 
             to="/login" 
-            className="text-sm font-semibold text-indigo-600 hover:text-indigo-800 flex items-center justify-center"
+            className="text-sm font-semibold text-teal-700 hover:text-teal-800 flex items-center justify-center"
           >
             <ChevronLeft className="w-4 h-4 mr-1"/> Back to sign in
           </Link>

@@ -28,46 +28,58 @@
 
 
 
-import smtplib
-
+import requests
 from config import Config
-from email.message import EmailMessage
 
-SMTP_SERVER = "smtp-relay.brevo.com"
-SMTP_PORT = 587
-SMTP_USERNAME = Config.BREVO_SMTP_USERNAME
-SMTP_PASSWORD = Config.BREVO_SMTP_PASSWORD
+BREVO_API_URL = "https://api.brevo.com/v3/smtp/email"
+BREVO_API_KEY = Config.BREVO_API_KEY
 SENDER = Config.BREVO_SENDER
 
 
 def send_email_sendgrid(to_email: str, subject: str, html_content: str):
-    """
-    Function name kept unchanged so existing code continues to work.
-    Internally it sends emails using Brevo SMTP instead of SendGrid.
-    
-    """
+   
 
-    message = EmailMessage()
-    message["From"] = SENDER
-    message["To"] = to_email
-    message["Subject"] = subject
-    message.set_content(html_content, subtype="html", charset="utf-8")
+    headers = {
+        "accept": "application/json",
+        "api-key": BREVO_API_KEY,
+        "content-type": "application/json",
+    }
 
-    
-    
-
+    payload = {
+        "sender": {
+            "name": "Flight Finder",   # Change to your app name
+            "email": SENDER
+        },
+        "to": [
+            {
+                "email": to_email
+            }
+        ],
+        "subject": subject,
+        "htmlContent": html_content
+    }
 
     try:
-        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
-            server.starttls()
-            server.login(SMTP_USERNAME, SMTP_PASSWORD)
-            server.send_message(message)
-            
-        return {"message": "Email sent successfully"}
+        response = requests.post(
+            BREVO_API_URL,
+            json=payload,
+            headers=headers,
+            timeout=30
+        )
+
+        response.raise_for_status()
+
+        return {
+            "message": "Email sent successfully"
+        }
+
+    except requests.exceptions.HTTPError:
+        raise Exception(
+            f"Brevo API Error ({response.status_code}): {response.text}"
+        )
 
     except Exception as e:
-        raise Exception(f"Failed to send email: {str(e)}")
-
+        raise Exception(f"Failed to send email: {e}")
 
 
 
