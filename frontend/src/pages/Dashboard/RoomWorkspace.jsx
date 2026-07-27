@@ -126,6 +126,7 @@ const RoomWorkspace = () => {
     const data = await getRoom(roomId);
     setRoom(data);
   };
+  // console.log('Room data:', room);
 
   const folders = room?.folders || [];
   const rootFolders = useMemo(() => folders.filter((folder) => !folder.parentFolderId), [folders]);
@@ -169,7 +170,8 @@ const RoomWorkspace = () => {
         title: resourceForm.title.trim(),
         kind: resourceForm.kind,
         url: resourceForm.kind === 'link' ? resourceForm.url.trim() : '',
-        fileName: resourceForm.kind === 'pdf' ? resourceForm.title.trim() : '',
+        fileName: resourceForm.kind === 'pdf' ? resourceForm.fileName : '',
+        file: resourceForm.kind === 'pdf' ? resourceForm.file : null,
         notes: resourceForm.notes.trim(),
       });
       await refreshRoom();
@@ -512,6 +514,27 @@ const RoomWorkspace = () => {
                 </select>
               </div>
 
+              {resourceForm.kind === 'pdf' && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">PDF file</label>
+                  <input
+                    type="file"
+                    id="file"
+                    accept=".pdf"
+                    onChange={(event) => {
+                      const file = event.target.files?.[0] || null;
+                      setResourceForm((current) => ({
+                        ...current,
+                        file,
+                        fileName: file ? file.name : '',
+                      }));
+                    }}
+                    className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-slate-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 file:mr-4 file:rounded-lg file:border-0 file:bg-teal-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-teal-700 hover:file:bg-teal-100"
+                  />
+                  <p className="text-xs text-slate-500 mt-1">Maximum file size: 10MB. Only PDF files are accepted.</p>
+                </div>
+              )}
+
               {resourceForm.kind === 'link' && (
                 <Input
                   label="URL"
@@ -587,6 +610,14 @@ const RoomWorkspace = () => {
                           Open link
                         </a>
                       )}
+
+                      {resource.kind === 'pdf' && resource.fileName && (
+                        console.log('Resource URL:', resource.resource_url)||(
+                        <a href={resource.resource_url} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-teal-700 hover:text-teal-800">
+                          <BookOpen className="h-4 w-4 cursor-pointer" />
+                          Open PDF
+                        </a>
+                    )  )}  
                     </div>
                   ))}
 

@@ -1,12 +1,16 @@
 from datetime import datetime, timedelta
+from io import BytesIO
 from uuid import uuid4
 
+from PyPDF2 import PdfReader
 from bson import ObjectId, errors
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
+from werkzeug.utils import secure_filename
+
 from config import Config
-from db.mongo_client import db, rooms_collection, users_collection
+from db.mongo_client import db, rooms_collection, users_collection, supabase
 from models.user import UserModel
 from utils.sendgrid_helper import send_email_sendgrid
 
@@ -190,7 +194,26 @@ def list_rooms():
         ]
     }
 
-    rooms = list(rooms_collection.find(query).sort("updated_at", -1))
+    rooms = list(rooms_collection.find(query).sort
+    ("updated_at", -1))
+#    # print resource details
+#     print("Rooms found:", len(rooms))
+#     for room in rooms:
+#         print("Room ID:", room.get("room_id"))
+#         print("Room Name:", room.get("name"))
+#         print("Room Subject:", room.get("subject"))
+#         print("Room Description:", room.get("description"))
+#         print("Room Visibility:", room.get("visibility"))
+#         print("Room Owner ID:", room.get("owner_id"))
+#         print("Room Members:", room.get("members"))
+#         print("Room Folders:", room.get("folders"))
+#         resources = []
+#         for folder in room.get("folders", []):
+#             resources.extend(folder.get("resources", []))
+
+#         print("Room Resources:", resources)
+
+
     return jsonify({"rooms": [_room_response(room) for room in rooms]}), 200
 
 
@@ -299,14 +322,13 @@ def create_folder(room_id):
 @rooms_bp.route("/<room_id>/resources", methods=["POST"])
 @jwt_required()
 def add_resource(room_id):
-    data = request.get_json() or {}
-    folder_id = (data.get("folder_id") or "").strip()
-    title = (data.get("title") or "").strip()
-    kind = (data.get("kind") or "pdf").strip().lower()
-    url = (data.get("url") or "").strip()
-    file_name = (data.get("file_name") or "").strip()
-    file_size_label = (data.get("file_size_label") or "").strip()
-    notes = (data.get("notes") or "").strip()
+    folder_id = (request.form.get("folder_id") or "").strip()
+    title = (request.form.get("title") or "").strip()
+    kind = (request.form.get("kind") or "pdf").strip().lower()
+    url = (request.form.get("url") or "").strip()
+    filename = (request.form.get("fileName") or "").strip()
+    notes = (request.form.get("notes") or "").strip()
+    file = request.files.get("file") if "file" in request.files else None
 
     if not folder_id or not title:
         return jsonify({"message": "Folder and title are required."}), 400
@@ -317,6 +339,9 @@ def add_resource(room_id):
     if kind == "link" and not url:
         return jsonify({"message": "A URL is required for link resources."}), 400
 
+    if kind == "pdf" and not file:
+        return jsonify({"message": "A PDF file is required for PDF resources."}), 400
+
     current_user_id = get_jwt_identity()
     room = _find_room(room_id)
     if not room:
@@ -325,13 +350,53 @@ def add_resource(room_id):
     if not _ensure_access(room, current_user_id):
         return jsonify({"message": "You do not have access to this room."}), 403
 
+    # Default values for non-PDF resources
+    file_name = ""
+    file_size = 0
+    page_count = 0
+    resource_uuid = ""
+    supabase_storage_path = ""
+    room_resource_url = ""
+
+    # Handle PDF file upload
+    if kind == "pdf" and file:
+        file_name = secure_filename(filename or file.filename or "document.pdf")
+        file_bytes = file.read()
+        file_size = len(file_bytes)
+
+        # Upload the file to Supabase storage
+        resource_uuid = str(uuid4())
+        supabase_storage_path = f"rooms/{resource_uuid}/{file_name}"
+
+        supabase.storage.from_(Config.SUPABASE_BUCKET).upload(
+            path=supabase_storage_path,
+            file=file_bytes,
+            file_options={"content-type": "application/pdf"},
+        )
+
+        room_resource_url = supabase.storage.from_(Config.SUPABASE_BUCKET).get_public_url(
+            supabase_storage_path
+        )
+
+        # Extract page count from PDF
+        try:
+            pdf_reader_for_pages = PdfReader(BytesIO(file_bytes))
+            page_count = len(pdf_reader_for_pages.pages)
+        except Exception:
+            page_count = 0
+
     resource_doc = {
         "resource_id": _new_id(),
         "title": title,
         "kind": kind,
         "url": url,
         "file_name": file_name,
-        "file_size_label": file_size_label,
+        "file_size_label": "",
+        "file_size_bytes": file_size,
+        "page_count": page_count,
+        "resource_url": room_resource_url,
+        "resource_uuid": resource_uuid,
+        "supabase_storage_path": supabase_storage_path,
         "notes": notes,
         "added_by": ObjectId(current_user_id),
         "added_at": _now(),

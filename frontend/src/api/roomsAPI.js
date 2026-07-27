@@ -22,6 +22,7 @@ const normalizeResource = (resource) => {
     id: resource.resource_id || resource.id || resource._id,
     title: resource.title || "",
     kind: resource.kind || "pdf",
+    resource_url: resource.resource_url || resource.resourceUrl || "",
     url: resource.url || "",
     fileName: resource.file_name || resource.fileName || "",
     fileSizeLabel: resource.file_size_label || resource.fileSizeLabel || "",
@@ -172,17 +173,31 @@ export const createFolder = async (roomId, { name, description = "", parentFolde
 };
 
 export const addResource = async (roomId, folderId, resource) => {
-  const payload = {
-    folder_id: folderId,
-    title: resource.title,
-    kind: resource.kind,
-    url: resource.kind === "link" ? resource.url : undefined,
-    file_name: resource.kind === "pdf" ? resource.fileName : undefined,
-    file_size_label: resource.kind === "pdf" ? resource.fileSizeLabel : undefined,
-    notes: resource.notes,
-  };
+  if (resource.kind === "pdf" && resource.file) {
+    // Use FormData for PDF file uploads
+    const formData = new FormData();
+    formData.append("folder_id", folderId);
+    formData.append("title", resource.title);
+    formData.append("kind", "pdf");
+    formData.append("fileName", resource.fileName || resource.file.name);
+    formData.append("notes", resource.notes || "");
+    formData.append("file", resource.file);
 
-  await axiosClient.post(`/api/rooms/${roomId}/resources`, payload);
+    await axiosClient.post(`/api/rooms/${roomId}/resources`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  } else {
+    // Use JSON for link resources
+    const payload = {
+      folder_id: folderId,
+      title: resource.title,
+      kind: resource.kind,
+      url: resource.kind === "link" ? resource.url : undefined,
+      notes: resource.notes,
+    };
+
+    await axiosClient.post(`/api/rooms/${roomId}/resources`, payload);
+  }
   return true;
 };
 
