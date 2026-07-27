@@ -117,8 +117,8 @@ const SubmitResource = () => {
           onClick={() => setActiveTab('link')}
           className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors ${
             activeTab === 'link'
-              ? 'bg-white text-indigo-600 shadow-sm'
-              : 'text-gray-600 hover:text-gray-800'
+              ? 'bg-white text-slate-700 shadow-sm'
+              : 'text-teal-600 hover:text-teal-800'
           }`}
         >
           🔗 Submit Link
@@ -127,8 +127,8 @@ const SubmitResource = () => {
           onClick={() => setActiveTab('pdf')}
           className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors ${
             activeTab === 'pdf'
-              ? 'bg-white text-indigo-600 shadow-sm'
-              : 'text-gray-600 hover:text-gray-800'
+              ? 'bg-white text-slate-700 shadow-sm'
+              : 'text-teal-600 hover:text-teal-800'
           }`}
         >
           📄 Upload PDF
@@ -164,7 +164,7 @@ const SubmitResource = () => {
             <Button
               type="submit"
               disabled={submitting}
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
+              className="w-full bg-slate-700 hover:bg-slate-800 text-white"
             >
               {submitting ? 'Submitting...' : 'Submit Link for Verification'}
             </Button>
@@ -208,7 +208,7 @@ const SubmitResource = () => {
             <Button
               type="submit"
               disabled={submitting || !file}
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
+              className="w-full bg-slate-700 hover:bg-slate-800 text-white"
             >
               {submitting ? 'Uploading...' : 'Upload PDF for Verification'}
             </Button>

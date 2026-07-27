@@ -6,7 +6,7 @@ const AuthLayout = ({ children }) => {
     <div className="min-h-screen flex flex-col items-center justify-center bg-[radial-gradient(circle_at_top,_#f8fafc_0%,_#ecfeff_38%,_#f8fafc_100%)] p-4 sm:p-8">
       
       {/* Logo/Brand */}
-      <div className="mb-8 text-center">
+      <div className="mb-7 text-center">
         <span className="flex items-center justify-center space-x-2 text-3xl font-extrabold text-slate-900">
           <Zap className="w-8 h-8 text-amber-500" />
           <span>QuickSpark AI</span>

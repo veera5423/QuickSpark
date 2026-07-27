@@ -263,7 +263,7 @@ const Skills = () => {
               <div className="mt-6 text-center">
                 <Button
                   onClick={() => setShowAllAttempts(!showAllAttempts)}
-                  className={`bg-indigo-400 text-gray-700 hover:bg-indigo-700 border border-gray-300 cursor-pointer px-4 py-2 text-sm font-semibold transition-colors`}
+                  className={`bg-slate-600 text-white hover:bg-slate-800 border border-gray-300 cursor-pointer px-4 py-2 text-sm font-semibold transition-colors`}
                 >
                   {showAllAttempts ? 'Show Less Attempts (3)' : `View All ${attempts.length} Attempts`}
                 </Button>

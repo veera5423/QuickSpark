@@ -5,7 +5,7 @@ import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card'; // Card is assumed to be part of the layout wrapper
 import { authAPI } from '../api/authAPI';
-import { Lock, Mail, Loader2 } from 'lucide-react';
+import { Lock, Mail, Loader2, Info } from 'lucide-react';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -28,10 +28,12 @@ const Login = () => {
       window.google.accounts.id.renderButton(
         document.getElementById("googleBtn"),
         { 
-          theme: "filled_blue", // Use a filled theme for better visibility
+          theme: "outline", // Use a filled theme for better visibility
           size: "large",
           width: "100%", // Ensure the button spans the full width
-          text: "signin_with" 
+          text: "signin_with" ,
+          type:"standard"
+          
         }
       );
     }
@@ -94,7 +96,23 @@ const Login = () => {
         </p>
       </div>
 
-      <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+      {/* Backend Wake-up Notice */}
+      <div className="mt-2 flex items-start gap-3 bg-cyan-50 border border-cyan-200/70 rounded-2xl px-4 py-2 shadow-sm animate-[pulse_3s_ease-in-out_infinite]">
+        <div className="flex-shrink-0 mt-0.5">
+          <Info className="w-4 h-4 text-cyan-600" />
+        </div>
+        <div className="text-xs sm:text-sm leading-relaxed text-cyan-800">
+          <span className="font-semibold">Heads up!</span> The backend is hosted on Render's free tier — it may take{' '}
+          <span className="font-semibold underline decoration-cyan-400/50">a few seconds</span> to wake up after inactivity.
+          Feel free to{' '}
+          <Link to="/" className="font-semibold text-cyan-700 hover:text-cyan-800 underline decoration-cyan-400/50">
+            explore other features
+          </Link>{' '}
+          while you wait!
+        </div>
+      </div>
+
+      <form className="mt-4 space-y-6" onSubmit={handleSubmit}>
         
         {/* Error Display (Enhanced) */}
         {error && (
@@ -129,7 +147,7 @@ const Login = () => {
           type="submit" 
           disabled={loading} 
           fullWidth 
-          className="bg-slate-900 hover:bg-slate-800 text-lg py-2.5 font-bold shadow-lg shadow-slate-900/10"
+          className="bg-slate-900 hover:bg-slate-800 text-lg py-2.5 font-bold shadow-lg shadow-slate-900/10 -mb-1"
         >
           {loading ? (
             <span className="flex items-center justify-center">
@@ -139,7 +157,7 @@ const Login = () => {
         </Button>
 
         {/* Separator */}
-        <div className="relative my-6">
+        <div className="relative my-5">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-slate-200"></div>
           </div>
@@ -151,12 +169,12 @@ const Login = () => {
         </div>
         
         {/* Google OAuth Button */}
-        <div id="googleBtn" className="mt-4">
+        <div id="googleBtn" className="mt-4" >
           {/* Google button will render here, styled to fit the full width */}
         </div>
 
         {/* Links (Enhanced Typography) */}
-        <div className="pt-2 space-y-2 text-center">
+        <div className=" space-y-2 text-center">
           <Link to="/forgot-password" className="text-sm font-medium text-slate-700 hover:text-slate-950 block">
             Forgot your password?
           </Link>
