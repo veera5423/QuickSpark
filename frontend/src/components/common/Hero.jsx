@@ -20,6 +20,7 @@ const Hero = () => {
         { icon: Layers, title: 'Skill Tracking', description: 'See where you are strong and where to improve without clutter.', accent: 'bg-slate-100 text-slate-700' },
         { icon: FileText, title: 'Resume Analyser', description: 'Review your resume against job descriptions with a sharper lens.', accent: 'bg-emerald-50 text-emerald-700' },
         { icon: Mic, title: 'Voice Interview', description: 'Practice responses out loud and review your interview rhythm.', accent: 'bg-cyan-50 text-cyan-700' },
+        { icon: Map, title: 'Study Rooms', description: 'Create private study spaces, organize folders by subject, share invites, and collaborate.', accent: 'bg-violet-50 text-violet-700' },
         { icon: Users, title: 'Public Resources', description: 'Access a community library that feels organized, not noisy.', accent: 'bg-orange-50 text-orange-700' },
     ];
 
@@ -128,9 +129,9 @@ const Hero = () => {
 
                 <section className="text-center pt-8 sm:pt-12 lg:pt-16 pb-8 sm:pb-12">
                     <Card className="p-6 sm:p-8 lg:p-10 bg-slate-950 text-white shadow-2xl rounded-[2rem]">
-                        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black mb-3 sm:mb-4">Ready to switch to a cleaner study experience?</h2>
-                        <p className="text-base sm:text-lg lg:text-xl text-slate-300 mb-6 sm:mb-8 max-w-2xl mx-auto">
-                            Create your account and use the product without the usual purple-heavy AI look.
+                        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black mb-3 sm:mb-4 text-black">Ready to switch to a cleaner study experience?</h2>
+                        <p className="text-base sm:text-lg lg:text-xl text-slate-400 mb-6 sm:mb-8 max-w-2xl mx-auto">
+                            Create your account and use the product.
                         </p>
                         <Button onClick={() => window.location.href = '/register'} className="px-8 sm:px-10 lg:px-12 py-3 sm:py-4 bg-teal-500 text-slate-950 hover:bg-teal-400 text-lg sm:text-xl font-bold shadow-2xl transition-transform duration-150 transform hover:-translate-y-0.5 cursor-pointer">
                             Join QuickSpark AI

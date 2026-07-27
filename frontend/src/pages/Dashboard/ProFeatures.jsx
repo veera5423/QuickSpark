@@ -44,23 +44,26 @@ const ProFeatures = () => {
       <Card className="overflow-hidden rounded-[2rem] border border-slate-200 bg-slate-950 text-white shadow-[0_24px_80px_rgba(15,23,42,0.18)]">
         <div className="grid gap-8 lg:grid-cols-[1fr_0.8fr] p-6 sm:p-8 lg:p-10 items-center">
           <div>
-            <div className="inline-flex rounded-full bg-white/10 px-3 py-1 text-xs font-semibold tracking-[0.22em] text-slate-200">Limited time access</div>
-            <h2 className="mt-4 text-3xl font-black tracking-tight">Move faster with a cleaner Pro toolkit.</h2>
-            <p className="mt-4 text-slate-300 leading-7 max-w-2xl">
+            <div className="inline-flex rounded-full bg-white/10 px-3 py-1 text-xs font-semibold tracking-[0.22em] text-slate-200 text-teal-700">Limited time access</div>
+            <h2 className="mt-4 text-3xl font-black tracking-tight text-black">Move faster with a cleaner Pro toolkit.</h2>
+            <p className="mt-4 text-slate-600 leading-7 max-w-2xl">
               Voice interviews, resume feedback, and priority support without the old gradient-heavy promo card style.
             </p>
-            <div className="mt-6 flex flex-wrap gap-3 text-sm text-slate-200">
-              <span className="rounded-full bg-white/5 px-3 py-1.5 border border-white/10">Interview practice</span>
-              <span className="rounded-full bg-white/5 px-3 py-1.5 border border-white/10">Resume review</span>
-              <span className="rounded-full bg-white/5 px-3 py-1.5 border border-white/10">Priority support</span>
+            <div className="mt-6 flex flex-wrap gap-3 text-sm text-teal-600">
+              <span className="rounded-full bg-black/10 px-3 py-1.5 border border-white/10">Interview practice</span>
+              <span className="rounded-full bg-black/10 px-3 py-1.5 border border-white/10">Resume review</span>
+              <span className="rounded-full bg-black/10 px-3 py-1.5 border border-white/10">Priority support</span>
             </div>
           </div>
 
           <div className="rounded-[1.5rem] bg-white p-6 text-slate-950 shadow-2xl">
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-teal-700">Pro plan</p>
-            <div className="mt-3 flex items-end gap-2">
-              <span className="text-5xl font-black">$9.99</span>
-              <span className="pb-1 text-slate-500">/month</span>
+            <div className="mt-3 flex flex-col items-center leading-none">
+              <span className="text-5xl font-black">$0.00</span>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-4xl font-black line-through text-slate-800">$9.99</span>
+                <span className="text-slate-500 text-lg">/month</span>
+              </div>
             </div>
             <p className="mt-3 text-sm text-slate-600">Join a better structured workspace for serious learners.</p>
             <Button onClick={() => setShowProModal(true)} className="mt-6 w-full bg-slate-900 hover:bg-slate-800 text-white px-8 py-3 text-lg font-semibold">

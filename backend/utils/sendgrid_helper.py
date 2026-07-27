@@ -27,66 +27,119 @@
 #         raise Exception(f"Failed to send email: {str(e)}")
 
 
-import socket
+
 import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 
 from config import Config
+from email.message import EmailMessage
+
+SMTP_SERVER = "smtp-relay.brevo.com"
+SMTP_PORT = 587
+SMTP_USERNAME = Config.BREVO_SMTP_USERNAME
+SMTP_PASSWORD = Config.BREVO_SMTP_PASSWORD
+SENDER = Config.BREVO_SENDER
 
 
-# =====================================================
-# Gmail SMTP implementation
-# (SMTP, but with conservative timeouts so production doesn't hang)
-# =====================================================
 def send_email_sendgrid(to_email: str, subject: str, html_content: str):
-    # Keep the existing function name because routes already call send_email_sendgrid()
-    socket.setdefaulttimeout(15)
+    """
+    Function name kept unchanged so existing code continues to work.
+    Internally it sends emails using Brevo SMTP instead of SendGrid.
+    
+    """
 
-    msg = MIMEMultipart("alternative")
-    msg["From"] = Config.EMAIL_HOST
-    msg["To"] = to_email
-    msg["Subject"] = subject
+    message = EmailMessage()
+    message["From"] = SENDER
+    message["To"] = to_email
+    message["Subject"] = subject
+    message.set_content(html_content, subtype="html", charset="utf-8")
 
-    msg.attach(MIMEText(html_content, "html"))
+    
+    
 
-    server = None
+
     try:
-        # timeout= controls initial connect; socket.setdefaulttimeout controls subsequent ops.
-        server = smtplib.SMTP("smtp.gmail.com", 587, timeout=15)
-        server.set_debuglevel(0)
-
-        server.ehlo()
-        server.starttls()
-        server.ehlo()
-
-        server.login(Config.EMAIL_HOST, Config.EMAIL_PASSWORD)
-        server.send_message(msg)
-
+        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+            server.starttls()
+            server.login(SMTP_USERNAME, SMTP_PASSWORD)
+            server.send_message(message)
+            
         return {"message": "Email sent successfully"}
 
     except Exception as e:
-        # Log detailed failure info for production debugging.
-        # (print goes to your host logs)
-        print("[MAIL][SMTP] failed")
-        print("[MAIL][SMTP] to_email=", to_email)
-        print("[MAIL][SMTP] subject=", subject)
-        print("[MAIL][SMTP] EMAIL_HOST set?", bool(Config.EMAIL_HOST))
-        print("[MAIL][SMTP] EMAIL_PASSWORD set?", bool(Config.EMAIL_PASSWORD))
-        if server is not None:
-            try:
-                print("[MAIL][SMTP] smtp.noop()=")
-                server.noop()
-            except Exception:
-                pass
-        print("[MAIL][SMTP] error=", repr(e))
         raise Exception(f"Failed to send email: {str(e)}")
 
-    finally:
-        if server is not None:
-            try:
-                server.quit()
-            except Exception:
-                pass
+
+
+
+
+
+
+
+
+
+
+
+
+# import socket
+# import smtplib
+# from email.mime.multipart import MIMEMultipart
+# from email.mime.text import MIMEText
+
+# from config import Config
+
+
+# # =====================================================
+# # Gmail SMTP implementation
+# # (SMTP, but with conservative timeouts so production doesn't hang)
+# # =====================================================
+# def send_email_sendgrid(to_email: str, subject: str, html_content: str):
+#     # Keep the existing function name because routes already call send_email_sendgrid()
+#     socket.setdefaulttimeout(15)
+
+#     msg = MIMEMultipart("alternative")
+#     msg["From"] = Config.EMAIL_HOST
+#     msg["To"] = to_email
+#     msg["Subject"] = subject
+
+#     msg.attach(MIMEText(html_content, "html"))
+
+#     server = None
+#     try:
+#         # timeout= controls initial connect; socket.setdefaulttimeout controls subsequent ops.
+#         server = smtplib.SMTP("smtp.gmail.com", 587, timeout=15)
+#         server.set_debuglevel(0)
+
+#         server.ehlo()
+#         server.starttls()
+#         server.ehlo()
+
+#         server.login(Config.EMAIL_HOST, Config.EMAIL_PASSWORD)
+#         server.send_message(msg)
+
+#         return {"message": "Email sent successfully"}
+
+#     except Exception as e:
+#         # Log detailed failure info for production debugging.
+#         # (print goes to your host logs)
+#         print("[MAIL][SMTP] failed")
+#         print("[MAIL][SMTP] to_email=", to_email)
+#         print("[MAIL][SMTP] subject=", subject)
+#         print("[MAIL][SMTP] EMAIL_HOST set?", bool(Config.EMAIL_HOST))
+#         print("[MAIL][SMTP] EMAIL_PASSWORD set?", bool(Config.EMAIL_PASSWORD))
+#         if server is not None:
+#             try:
+#                 print("[MAIL][SMTP] smtp.noop()=")
+#                 server.noop()
+#             except Exception:
+#                 pass
+#         print("[MAIL][SMTP] error=", repr(e))
+#         raise Exception(f"Failed to send email: {str(e)}")
+
+#     finally:
+#         if server is not None:
+#             try:
+#                 server.quit()
+#             except Exception:
+#                 pass
 
 
