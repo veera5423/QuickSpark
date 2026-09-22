@@ -3,6 +3,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from bson import ObjectId, errors
 from datetime import datetime
 from functools import wraps
+from pymongo import ReturnDocument
 
 # Import necessary collections
 # NOTE: Assuming you have 'db.users' and 'db.resources' available via import
